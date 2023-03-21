@@ -1989,7 +1989,7 @@ pm3d_reset_after_error()
 /*
  * Ethan Merritt Sep 2021
  * When two pm3d surfaces intersect, the intersection line is jagged because
- * a decision is forced for each quadrangle it runs through.  One of the two 
+ * a decision is forced for each quadrangle it runs through.  One of the two
  * surfaces is treated as the "top" for the purpose of assigning a drawing
  * order, and the entire tile is drawn, occluding part of the other one.
  * This code implements a smoother treatment. Instead of picking one tile or
