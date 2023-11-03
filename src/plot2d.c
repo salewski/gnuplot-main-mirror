@@ -263,25 +263,34 @@ plotrequest()
 	}
     }
 
-    /* If we are called from a mouse zoom operation we should ignore	*/
-    /* any range limits because otherwise the zoom won't zoom.		*/
+    /* If we are called from a mouse zoom operation we should ignore
+     * any range limits because otherwise the zoom won't zoom.
+     */
     if (inside_zoom()) {
-	while (equals(c_token,"["))
-	    parse_skip_range();
+	while (equals(c_token,"[") && (parse_skip_range() == TRUE))
+	    /* consume multiple range specifiers */
+	    ;
     }
 
-    /* Range limits for the entire plot are optional but must be given	*/
-    /* in a fixed order. The keyword 'sample' terminates range parsing.	*/
-    if (parametric || polar) {
+    /* Axis range limits for the entire plot are optional but must be given
+     * in the fixed order x y x2 y2.
+     * A sampling range [var=start:end:increment] terminates parsing of axis
+     * range limits.  The keyword 'sample' also terminates range parsing.
+     */
+    if (parametric || polar)
 	dummy_token = parse_range(T_AXIS);
-	parse_range(FIRST_X_AXIS);
-    } else {
+    else
 	dummy_token = parse_range(FIRST_X_AXIS);
-    }
-    parse_range(FIRST_Y_AXIS);
-    parse_range(SECOND_X_AXIS);
-    parse_range(SECOND_Y_AXIS);
-    if (equals(c_token,"sample") && equals(c_token+1,"["))
+#define SAMPLING_RANGE -2
+    if (dummy_token == SAMPLING_RANGE)
+	dummy_token = 0;
+    else if ((parse_range(FIRST_Y_AXIS) != SAMPLING_RANGE)
+         &&  (parse_range(SECOND_X_AXIS) != SAMPLING_RANGE)
+         &&  (parse_range(SECOND_Y_AXIS) != SAMPLING_RANGE))
+		; /* Nothing to do */
+#undef SAMPLING_RANGE
+    /* FIXME: would like to deprecate the "sample" keyword altogether */
+    if (equals(c_token,"sample"))
 	c_token++;
 
     /* Clear out any tick labels read from data files in previous plot */
