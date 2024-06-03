@@ -12185,6 +12185,7 @@ Ffigure_colornames
       set contourfill ztics           # slice at each z axis major tick
       set contourfill cbtics          # slice at each cb axis major tick
       set contourfill {palette | firstlinetype N}
+      set contourfill defined [zmin1:zmax1] color1, [zmin2:zmax2] color2, ...
 
  The default is `set contourfill auto 5 palette`, which splits the current
  z range into five equal slices (6 bounding planes) and colors each slice
@@ -12203,6 +12204,9 @@ Ffigure_colornames
       set contourfill firstlinetype 101
  `set contourfill palette` restores palette coloring.
 
+ You may alternatively provide a list of ranges on z together with a named
+ color or hexadecimal RGB color value for each range:
+      set contourfill defined [-10:-1] "blue", [-1:1] 0Xeeffee, [1:10] "red"
 D contourfill 3
 
 3 dashtype

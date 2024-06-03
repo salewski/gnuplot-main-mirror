@@ -2120,7 +2120,15 @@ save_contourfill(FILE *fp)
 	fprintf(fp, "ztics\n");
     else if (contourfill.mode == CFILL_CBTICS)
 	fprintf(fp, "cbtics\n");
-    if (contourfill.firstlinetype > 0)
+    else if (contourfill.mode == CFILL_LIST) {
+	fprintf(fp, "defined ");
+	for (int i = 0; i < contourfill.nslices; i++) {
+	    fprintf(fp, "[%.2g:%.2g] \"0x%06x\"",
+			contourfill.slices[i].zlow, contourfill.slices[i].zhigh,
+			contourfill.slices[i].color.rgbcolor);
+	    fprintf(fp, (i == contourfill.nslices-1) ? "\n" : ", ");
+	}
+    } else if (contourfill.firstlinetype > 0)
 	fprintf(fp, "set contourfill firstlinetype %d\n", contourfill.firstlinetype);
     else
 	fprintf(fp, "set contourfill palette\n");
