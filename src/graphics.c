@@ -3747,8 +3747,11 @@ plot_boxplot(struct curve_points *plot, TBOOLEAN only_autoscale)
 	outliers:
 	if (boxplot_opts.outliers) {
 	    int i,j,x,y;
-	    int p_width = term->h_tic * plot->lp_properties.p_size;
-	    int p_height = term->v_tic * plot->lp_properties.p_size;
+	    int p_width = abs(term->h_tic * plot->lp_properties.p_size);
+	    int p_height = abs(term->v_tic * plot->lp_properties.p_size)/2;
+
+	    if (jitter.spread > 0)
+		p_width *= jitter.spread;
 
 	    for (i = 0; i < subset_count; i++) {
 
@@ -3769,9 +3772,13 @@ plot_boxplot(struct curve_points *plot, TBOOLEAN only_autoscale)
 		||  y > plot_bounds.ytop - p_height)
 			continue;
 
-		/* Separate any duplicate outliers */
-		for (j=1; (i >= j) && (subset_points[i].y == subset_points[i-j].y); j++)
+		/* Separate (jitter) any outliers with overlapping y coordinate */
+		for (j=1; (i >= j); j++) {
+		    int yj = map_y(subset_points[i-j].y);
+		    if (abs(yj - y) > p_height)
+			break;
 		    x += p_width * ((j & 1) == 0 ? -j : j);;
+		}
 
 		(term->point) (x, y, plot->lp_properties.p_type);
 	    }
