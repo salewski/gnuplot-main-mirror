@@ -434,10 +434,6 @@ main(int argc_orig, char **argv)
 	}
     }
 
-#ifdef VMS
-    vms_init_screen();
-#endif /* VMS */
-
     if (!SETJMP(command_line_env, 1)) {
 	/* first time */
 	interrupt_setup();
@@ -562,22 +558,6 @@ main(int argc_orig, char **argv)
 	inside_plot_command = FALSE;
 
 	SET_CURSOR_ARROW;
-
-#ifdef VMS
-	/* after catching interrupt */
-	/* VAX stuffs up stdout on SIGINT while writing to stdout,
-	   so reopen stdout. */
-	if (gpoutfile == stdout) {
-	    if ((stdout = freopen("SYS$OUTPUT", "w", stdout)) == NULL) {
-		/* couldn't reopen it so try opening it instead */
-		if ((stdout = fopen("SYS$OUTPUT", "w")) == NULL) {
-		    /* don't use int_error here - causes infinite loop! */
-		    fputs("Error opening SYS$OUTPUT as stdout\n", stderr);
-		}
-	    }
-	    gpoutfile = stdout;
-	}
-#endif /* VMS */
 
 	/* Why a goto?  Because we exited the loop below via int_error */
 	/* using LONGJMP.  The compiler was not expecting this, and    */

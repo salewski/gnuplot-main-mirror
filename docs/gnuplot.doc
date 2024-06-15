@@ -12332,7 +12332,7 @@ D dashtypes 2
  The command `set datafile commentschars` specifies what characters can be used
  in a data file to begin comment lines. If the first non-blank character on a
  line is one of these characters then the rest of the data line is ignored.
- Default value of the string is "#!" on VMS and "#" otherwise.
+ Default value of the string is "#".
 
  Syntax:
        set datafile commentschars {"<string>"}

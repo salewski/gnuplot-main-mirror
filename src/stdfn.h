@@ -150,10 +150,6 @@ extern char *sys_errlist[];
 # include <sys/types.h>
 #endif
 
-#ifdef VMS
-# include "vms.h"
-#endif
-
 #ifdef HAVE_SYS_STAT_H
 # include <sys/stat.h>
 
@@ -534,7 +530,6 @@ void gp_rewinddir(GPDIR *);
  * may or may not end with a "directory separation" character.
  * Path must not be NULL, but can be empty
  */
-#ifndef VMS
 #define PATH_CONCAT(path,file) \
  { char *p = path; \
    p += strlen(path); \
@@ -544,9 +539,6 @@ void gp_rewinddir(GPDIR *);
    } \
    strcat (path, file); \
  }
-#else
-#define PATH_CONCAT(path,file) strcat(path,file)
-#endif /* VMS */
 
 #ifndef inrange
 # define inrange(z,min,max) \
