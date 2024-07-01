@@ -641,10 +641,12 @@ D epi_data 1
  Current equivalent
        set dgrid3d qnorm foo # (example only; qnorm is not the only option)
 
- Deprecated in version 5.0, removed in 6.0
+ Deprecated in version 5.0, not present in 6.0 unless built with configuration
+ optione --enable-backward-compatibility
        set style increment user
  Current equivalent
        use "set linetype" to redefine a convenient range of linetypes
+       explicit use of "linestyle N" or "linestyle variable"
 
  Deprecated in version 5.0, removed in 6.0
        set clabel
@@ -3759,13 +3761,17 @@ Ffigure_newsyntax
       plot 0 lt bgnd
 4 linecolor variable
 ?linecolor variable
+?linestyle variable
 ?lc variable
+?ls variable
 ?textcolor variable
 ?tc variable
 ?variable linecolor
  `lc variable` tells the program to use the value read from one column of the
  input data as a linetype index, and use the color belonging to that linetype.
  This requires a corresponding additional column in the `using` specifier.
+ `ls variable` does the same except the value read from the input data stream
+ is interpreted as the index of a linestyle rather than a linetype.
  Text colors can be set similarly using `tc variable`.
 
  Examples:
@@ -15814,8 +15820,10 @@ Ffigure_polar_grid
  linetypes.  `set style increment userstyles` changed this to step through
  successive user-defined line styles instead.
 
- DEPRECATED.  Instead use `set linetype` to redefine a convenient range of
- linetypes for the program to use.  See `set linetype`.
+ DEPRECATED.  This command is present in gnuplot version 6.0 only if your
+ copy was built with configuration option --enable-backward-compatibility.
+ Instead use `set linetype` to redefine a convenient range of linetypes
+ for the program to use.  See `set linetype`.
 4 set style line
 ?commands set style line
 ?commands unset style line
