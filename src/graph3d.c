@@ -4347,7 +4347,6 @@ plot3d_contourfill(struct surface_points *plot)
 	if (zmax < slice[level].zlow && zmax < slice[level].zhigh)
 	    continue;
 	plot->zclip_index = level;
-	plot->fill_properties.border_color = slice[level].color;
 	pm3d_draw_one(plot);
     }
 }
