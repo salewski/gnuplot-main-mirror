@@ -1,14 +1,16 @@
 <html><head><title>Demos for gnuplot version 6.0</title>
 
-<meta charset="UTF-8"> 
-<link text="text/css" href="gnuplot_demo.css" rel="stylesheet"></head><body>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link text="text/css" href="gnuplot_demo.css" rel="stylesheet"></head>
 
+<body>
 
 <h2 align=center>Demos for gnuplot version 6.0 (pngcairo terminal)<br>
     See also the demo output for the
     <a href="../demo_svg_6.0/">SVG</a> and
     <a href="../demo_canvas_6.0/">canvas</a> terminals.
 </h2>
+<p>٭ new in version 6</p>
 
 <table border="0" width="100%">
 <tbody><tr valign="top">
@@ -21,7 +23,8 @@
     <li><a href="fillbetween.html">fill&nbsp;between&nbsp;curves</a></li>
     <li><a href="candlesticks.html">candlesticks</a></li>
     <li><a href="errorbars.html">error bars</a></li>
-    <li><a href="steps.html">step functions</a></li>
+    <li><a href="steps.html">simple step functions</a></li>
+    <li>٭<a href="hsteps.html">hsteps</a></li>
     <li><a href="multiaxis.html">multiple axis scales</a></li>
     <li><a href="using.html">mixing styles</a></li>
     <li><a href="pointsize.html">variable size points</a></li>
@@ -32,7 +35,7 @@
     <li><a href="circles.html">circles</a></li>
     <li><a href="boxplot.html">boxplots</a></li>
     <li><a href="rugplot.html">rug plot</a></li>
-    <li><a href="sectors.html">sectors</a></li>
+    <li>٭<a href="sectors.html">sectors</a></li>
     <li><a href="jitter.html">jitter (bee&nbsp;swarm)</a></li>
     <li><a href="spiderplot.html">spider plot</a></li>
     <li><a href="cities.html">text</a></li>
@@ -52,8 +55,8 @@
     <ul>
     <li><a href="smooth_splines.html">cubic and Bezier splines</a></li>
     <li><a href="monotonic_spline.html">monotonic csplines</a></li>
-    <li><a href="smooth_path.html">along-path splines</a></li>
-    <li><a href="sharpen.html">"sharpen" filter</a></li>
+    <li>٭<a href="smooth_path.html">along-path splines</a></li>
+    <li>٭<a href="sharpen.html">"sharpen" filter</a></li>
     <li><a href="spline.html">explicit B-splines</a></li>
     <li><a href="airfoil.html">explicit Bezier splines</a></li>
     <li><a href="fit.html">Levenberg-Marquardt</a></li>
@@ -64,7 +67,7 @@
     <li><a href="varcolor.html">data-dependent coloring</a></li>
     <li><a href="rgb_variable.html">RGB coloring</a></li>
     <li><a href="rgba_lines.html">RGB + alpha channel</a></li>
-    <li><a href="named_palettes.html">named palettes</a></li>
+    <li>٭<a href="named_palettes.html">named palettes</a></li>
     <li><a href="pm3dcolors.html">pm3d colors</a></li>
     <li><a href="pm3dgamma.html">pm3d gamma</a></li>
     </ul>
@@ -87,12 +90,12 @@
     <li><a href="surface2.html">surfaces 2</a></li>
     <li><a href="contours.html">contours</a></li>
     <li><a href="custom_contours.html">custom contour lines</a></li>
-    <li><a href="contourfill.html">filled contours</a></li>
+    <li>٭<a href="contourfill.html">filled contours</a></li>
     <li><a href="singulr.html">singularities</a></li>
     <li><a href="hidden.html">hidden surfaces</a></li>
     <li><a href="pm3d.html">pm3d coloring</a></li>
     <li><a href="hidden2.html">pm3d hidden surfaces</a></li>
-    <li><a href="pm3d_clip.html">pm3d clipping</a></li>
+    <li>٭<a href="pm3d_clip.html">pm3d clipping</a></li>
     <li><a href="projection.html">2D projection of 3D surface</a></li>
     <li><a href="zerror.html">shaded error region</a></li>
     <li><a href="azimuth.html">azimuth</a></li>
@@ -100,6 +103,7 @@
     <li><a href="armillary.html">circle and polygon 3D objects</a></li>
     <li><a href="polygons.html">pm3d polygons</a></li>
     <li><a href="pm3d_lighting.html">lighting model</a></li>
+    <li>٭<a href="spotlight.html">configurable spotlight</a></li>
     <li><a href="hidden_compare.html">hidden3d vs. pm3d</a></li>
     </ul>
 
@@ -110,21 +114,21 @@
     <li><a href="isosurface.html">3D isosurface</a></li>
     </ul>
 
-    <h4 align=left>Animation (new!)</h4>
+    <h4 align=left>Animation</h4>
     <ul align=left>
-    <li><a href="animation.html">Embedded webp animation</a></li>
+    <li>٭<a href="animation.html">Embedded webp animation</a></li>
     </ul>
 
     <h4 align=left>Watchpoints</h4>
     <ul align=left>
-    <li><a href="watchpoints.html">Watchpoints</a></li>
+    <li>٭<a href="watchpoints.html">Watchpoints</a></li>
     </ul>
 
-    <h4 align=left>Hulls and Masks (new!)</h4>
+    <h4 align=left>Hulls and Masks</h4>
     <ul align=left>
-    <li><a href="convex_hull.html">convex hulls</a></li>
-    <li><a href="mask_pm3d.html">masked pm3d surface</a></li>
-    <li><a href="chi_shapes.html">concave hulls (χ-shapes)</a></li>
+    <li>٭<a href="convex_hull.html">convex hulls</a></li>
+    <li>٭<a href="mask_pm3d.html">masked pm3d surface</a></li>
+    <li>٭<a href="chi_shapes.html">concave hulls (χ-shapes)</a></li>
     </ul>
 
     <h4>Coordinate and<br> axis transforms</h4>
@@ -161,13 +165,13 @@
     <li><a href="heatmaps.html">Derived from a regular grid</a></li>
     <li><a href="heatmap_points.html">Derived from scattered points</a></li>
     <li><a href="heatmap_4D.html">4D data (3D surface + value)</a></li>
-    <li><a href="polargrid.html">Polar coordinate maps</a></li>
+    <li>٭<a href="polargrid.html">Polar coordinate maps</a></li>
     </ul>
 
     <h4>Histograms</h4>
     <ul>
     <li><a href="histograms.html">clustering options</a></li>
-    <li><a href="histogram_colors.html">user-assigned colors</a></li>
+    <li>٭<a href="histogram_colors.html">user-assigned colors</a></li>
     <li><a href="histerror.html">histogram + errorbars</a></li>
     <li><a href="boxclusters.html">make-your-own with boxes</a>
     <li><a href="bins.html">automatic binning</a></li>
@@ -191,8 +195,10 @@
     <li><a href="solar_path.html">solar path diagram</a></li>
     <li><a href="map_projection.html">map projections</a></li>
     <li><a href="violinplot.html">violin plot</a></li>
-    <li><a href="windrose.html">wind rose</a></li>
-    <li><a href="iris.html">overlapping categories</a></li>
+    <li>٭<a href="windrose.html">wind rose</a></li>
+    <li>٭<a href="iris.html">overlapping categories</a></li>
+    <li>٭<a href="logic_timing.html">logic timing diagram</a></li>
+    <li>٭<a href="rank_sequence.html">sequential ranking</a></li>
     </ul>
 
     <h4>Text options</h4>
@@ -242,20 +248,20 @@
 	    </a>
 	    <ul align=left>
 	    <li><a href="complex_trig.html">complex trig functions</a></li>
-	    <li><a href="cerf.html">complex error function</a></li>
-	    <li><a href="lnGamma.html">complex lnGamma</a></li>
+	    <li>٭<a href="cerf.html">complex error function</a></li>
+	    <li>٭<a href="lnGamma.html">complex lnGamma</a></li>
 	    <li><a href="elliptic.html">elliptic integrals</a></li>
-	    <li><a href="expint.html">exponential integral</a></li>
-	    <li><a href="ibeta.html">Incomplete Beta integral</a></li>
-	    <li><a href="igamma.html">Incomplete Gamma function P(a,z)</a></li>
-	    <li><a href="uigamma.html">Incomplete Gamma function Q(a,z)</a></li>
-	    <li><a href="BesselK.html">Bessel functions </a></li>
-	    <li><a href="complex_airy.html">Airy functions</a></li>
-	    <li><a href="Dawson.html">Dawson's integral</a></li>
-	    <li><a href="Fresnel.html">Fresnel integral</a></li>
-	    <li><a href="lambert.html">Lambert function</a></li>
-	    <li><a href="zeta.html">Riemann zeta function</a></li>
-	    <li><a href="synchrotron.html">Synchrotron function</a></li>
+	    <li>٭<a href="expint.html">exponential integral</a></li>
+	    <li>٭<a href="ibeta.html">Incomplete Beta integral</a></li>
+	    <li>٭<a href="igamma.html">Incomplete Gamma function P(a,z)</a></li>
+	    <li>٭<a href="uigamma.html">Incomplete Gamma function Q(a,z)</a></li>
+	    <li>٭<a href="BesselK.html">Bessel functions </a></li>
+	    <li>٭<a href="complex_airy.html">Airy functions</a></li>
+	    <li>٭<a href="Dawson.html">Dawson's integral</a></li>
+	    <li>٭<a href="Fresnel.html">Fresnel integral</a></li>
+	    <li>٭<a href="lambert.html">Lambert function</a></li>
+	    <li>٭<a href="zeta.html">Riemann zeta function</a></li>
+	    <li>٭<a href="synchrotron.html">Synchrotron function</a></li>
 	    </ul>
 	</td>
 	</tr>
@@ -290,7 +296,7 @@
 <tbody><tr valign="top">
 
     <td>
-    <i>This page generated September 2023</i>
+    <i>This page generated July 2024</i>
     </td>
 
     <td>
