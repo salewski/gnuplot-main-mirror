@@ -735,10 +735,6 @@ get_data(struct curve_points *current_plot)
 		current_plot->points[i].type = UNDEFINED;
 		i++;
 	    }
-	    if (current_plot->plot_style == TABLESTYLE) {
-		j = df_no_use_specs;
-		break;
-	    }
 	    continue;
 
 	case DF_FIRST_BLANK:
@@ -786,7 +782,21 @@ get_data(struct curve_points *current_plot)
 	    break;	/* Not continue!! */
 	}
 
-	/* We now know that j > 0, i.e. there is some data on this input line */
+	/* We now know that j > 0, i.e. there is some data on this input line.
+	 * However it is still possible that the user wants to skip this line
+	 * because it fails to satisfy the "plot .. if (<expr>)" condition.
+	 * FIXME: This treats filtered points as if they were missing;
+	 *        alternatively we could keep them but mark as undefined.
+	 */
+	if (current_plot->if_filter_at) {
+	    struct value keep;
+	    evaluate_inside_using = TRUE;
+	    evaluate_at(current_plot->if_filter_at, &keep);
+	    evaluate_inside_using = FALSE;
+	    if (undefined || isnan(real(&keep)) || real(&keep) == 0)
+		continue;
+	}
+
 	ngood++;
 
 	/* "plot ... with table" bypasses all the column interpretation */
@@ -2750,18 +2760,6 @@ eval_plots()
 		    continue;
 		}
 
-		if (this_plot->plot_style == TABLESTYLE) {
-		    if (equals(c_token,"if")) {
-			if (this_plot->if_filter_at) {
-			    duplication = TRUE;
-			    break;
-			}
-			c_token++;
-			this_plot->if_filter_at = perm_at();
-			continue;
-		    }
-		}
-
 		/* pick up line/point specs and other style-specific keywords
 		 * - point spec allowed if style uses points, ie style&2 != 0
 		 * - keywords for lt and pt are optional
@@ -2946,6 +2944,19 @@ eval_plots()
 		    continue;
 		}
 #endif
+
+		/* EXPERIMENTAL filter plot ... if (<expression>) */
+		if (equals(c_token,"if")) {
+		    if (this_plot->plot_type != DATA)
+			int_error(c_token, "'if' restriction not possible here");
+		    if (this_plot->if_filter_at) {
+			duplication = TRUE;
+			break;
+		    }
+		    c_token++;
+		    this_plot->if_filter_at = perm_at();
+		    continue;
+		}
 
 		break; /* unknown option */
 
