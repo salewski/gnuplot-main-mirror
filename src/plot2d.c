@@ -201,6 +201,7 @@ cp_free(struct curve_points *cp)
 	    free_labels(cp->labels);
 	cp->labels = NULL;
 	free_at(cp->plot_function.at);
+	free_at(cp->if_filter_at);
 	free_watchlist(cp->watchlist);
 	cp->watchlist = NULL;
 
@@ -790,7 +791,7 @@ get_data(struct curve_points *current_plot)
 
 	/* "plot ... with table" bypasses all the column interpretation */
 	if (current_plot->plot_style == TABLESTYLE) {
-	    tabulate_one_line(v, df_strings, j);
+	    tabulate_one_line(current_plot, v, df_strings, j);
 	    continue;
 	}
 
@@ -2405,10 +2406,6 @@ eval_plots()
 		this_plot->plot_filter = FILTER_NONE;
 		this_plot->filledcurves_options = filledcurves_opts_data;
 
-		/* Only relevant to "with table" */
-		free_at(table_filter_at);
-		table_filter_at = NULL;
-
 		/* Mechanism for deferred evaluation of plot title */
 		free_at(df_plot_title_at);
 
@@ -2755,12 +2752,12 @@ eval_plots()
 
 		if (this_plot->plot_style == TABLESTYLE) {
 		    if (equals(c_token,"if")) {
-			if (table_filter_at) {
+			if (this_plot->if_filter_at) {
 			    duplication = TRUE;
 			    break;
 			}
 			c_token++;
-			table_filter_at = perm_at();
+			this_plot->if_filter_at = perm_at();
 			continue;
 		    }
 		}

@@ -64,6 +64,9 @@ typedef struct curve_points {
     struct udvt_entry *sample_var;	/* used by '+' if plot has private sampling range */
     struct udvt_entry *sample_var2;	/* used by '++'if plot has private sampling range */
     struct udft_entry plot_function;	/* action table and dummy variables for function plot */
+    enum PLOT_FILTER plot_filter;	/* which filter was specified? */
+    enum PLOT_SMOOTH plot_smooth;	/* which "smooth" method to be used? */
+    struct at_type *if_filter_at;   	/* plot ... if (<expression>) */
 
     /* 2D and 3D plot structure fields overlay only to this point */
     filledcurves_opts filledcurves_options;
@@ -73,8 +76,6 @@ typedef struct curve_points {
     int ellipseaxes_units;              /* Only used if plot_style == ELLIPSES */    
     struct histogram_style *histogram;	/* Only used if plot_style == HISTOGRAM */
     int histogram_sequence;	/* Ordering of this dataset within the histogram */
-    enum PLOT_FILTER plot_filter; /* which filter was specified? */
-    enum PLOT_SMOOTH plot_smooth; /* which "smooth" method to be used? */
     double smooth_parameter;	/* e.g. optional bandwidth for smooth kdensity */
     double smooth_period;	/* e.g. 2pi for a circular function */
     int boxplot_factors;	/* Only used if plot_style == BOXPLOT */
