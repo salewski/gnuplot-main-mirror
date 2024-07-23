@@ -204,6 +204,10 @@ print "******************** file sharpen.dem ********************"
 load "sharpen.dem"
 reset
 
+print "******************** file if_filter.dem ********************"
+load "if_filter.dem"
+reset
+
 print "******************** binary data ********************"
 load "binary.dem"
 load "binary_polygon.dem"
