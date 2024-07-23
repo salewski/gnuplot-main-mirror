@@ -1649,10 +1649,6 @@ record()
 		    do_raise = tmp_do_raise;
 		if (UNSET != tmp_persist)
 		    persist = tmp_persist;
-/* Version 5 - always enabled
-		if (UNSET != tmp_dashed)
-		    dashedlines = tmp_dashed;
- */
 		if (UNSET != tmp_ctrlq)
 		    ctrlq = tmp_ctrlq;
 		if (UNSET != tmp_replot_on_resize)
@@ -5676,12 +5672,6 @@ pr_dashes()
 {
     int n, j, l, ok;
     char option[20], *v;
-
-/*  Version 5 - always enabled
-    if (pr_GetR(db, ".dashed")) {
-	dashedlines = (!strncasecmp(value.addr, "on", 2) || !strncasecmp(value.addr, "true", 4));
-    }
- */
 
     for (n = 0; n < Ndashes; n++) {
 	strcpy(option, ".");
