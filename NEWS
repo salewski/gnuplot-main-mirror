@@ -1,3 +1,22 @@
+Changes in 6.0.2
+================
+* NEW	 backport plot style "with hsteps"
+* NEW	 general binary keyword option "blank=NaN"
+	 - faciliates binary input to plot styles sensitive to blank lines
+* NEW	 polygons in splot can use pm3d coloring
+	 - facilitates use of triangular tessellated 3D pm3d surfaces
+* CHANGE backport reimplementation of local variables
+	 - faster function block evaluation, better-defined scope
+* CHANGE backport revised parsing of array constants
+	 - allows iteration over array elements
+* CHANGE apply jitter to the horizontal spread of boxplot outliers
+* FIX	 backport reworked generation of logscale axis tic marks        Bug 2372 2717
+* FIX	 Do not save extraneous commands to $GPVAL_LAST_MULTIPLOT	Bug 2714
+* FIX	 svg: modify gnuplot_svg.js to work in local standalone mode	Bug 2715
+* FIX	 "set table": honor "nosurface" keyword in splot
+* FIX	 "set table": honor "set format z" when z is printed from plot
+* FIX	 better contouring near the edge of a z-clipped surface
+
 Changes in 6.0.1
 ================
 * CHANGE Use of data source '-' inside a multiplot is an error;
@@ -18,6 +37,7 @@ Changes in 6.0.1
 * FIX	 mp: configure --with-metapost failed to include mp terminal
 * FIX	 qt wxt x11: "set term" from a script causes next pause to fail	Bug 2703
 * FIX	 tikz: fix use of palettes with a fixed number of colors	Bug 2706
+
 
 ================================================================================
 Version 6.0

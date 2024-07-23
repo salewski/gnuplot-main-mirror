@@ -1,14 +1,52 @@
-		Gnuplot Version 6.0.1 Release Notes
+		Gnuplot Version 6.0.2 Release Notes
 		===================================
 
-Version 6 introduced extensions to the gnuplot command language,
-support for new output protocols, and additional plotting styles.
-Backward compatibility is given high priority in gnuplot development,
-so users should find no significant changes required for techniques or
-code that written for gnuplot version 5.
+Gnuplot 6.0.2 is an incremental release for stable version 6.0.
+In addition to the usual minor bug fixes in an incremental release it
+contains several new features from the development version of gnuplot
+that didn't quite make it into the initial version 6 release.
 
-Patchlevel release 6.0.1 repairs several bugs found in the initial release
-of version 6, most notably related to error handling by the wxt terminal.
+NEW (backported from development version)
+-----------------------------------------
+
+- plot style "with hsteps" enables a variety of new plot types
+  For examples, see
+	* https://gnuplot.info/demo_6.0/hsteps.html
+	* https://gnuplot.info/demo_6.0/logic_timing.html
+	* https://gnuplot.info/demo_6.0/rank_sequence.html
+
+- General binary keyword option "blank=NaN" faciliates using binary input
+  for plot styles sensitive to blank lines in a text input data stream
+
+- Polygons in a 3D plot (splot command) can use pm3d coloring and lighting.
+  This facilitates construction of surfaces with triangular tesselation.
+
+- Iteration over array elements
+
+<pre>
+	array A = [1, 2, 15, 37]
+	do for [a in A] { print "f(%d) = %g", a, f(a) }
+</pre>
+
+CHANGES
+-------
+
+- Local variables are reimplemented to provide a better-defined scope
+  and faster evaluation of function blocks
+- Existing plot styles steps, histeps, fsteps, and fillsteps are
+  reimplemented to use the new hsteps code.
+- "set jitter" can be used to jitter outliers in a boxplot
+
+FIXES
+-----
+
+- reworked generation of logscale axis tic marks                 Bug 2372 2717
+- Do not save extraneous commands to $GPVAL_LAST_MULTIPLOT       Bug 2714
+- svg: modify gnuplot_svg.js to work in local standalone mode    Bug 2715
+- "set table": honor "nosurface" keyword in splot
+- "set table": honor "set format z" when z is printed from plot
+- better contouring near the edge of a z-clipped surface
+
 
 Gnuplot development is tracked in a git repository on SourceForge.
 You can generate a complete history of changes using "git log"
@@ -19,7 +57,8 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  18-May-2024
+Release Notes date:  23-July-2024
+
 
 			Changes in 6.0.1
 			================
