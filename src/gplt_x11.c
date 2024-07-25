@@ -6702,6 +6702,10 @@ mouse_to_axis(int mouse_coord, axis_scale_t *axis)
     if (axis->term_scale == 0.0)
 	return 0.;
 
+    /* nonlinear axis is flagged by logbase < 0 */
+    if (axis->logbase < 0)
+	return NAN;
+
     axis_coord = ((double)(mouse_coord - axis->term_lower)) / axis->term_scale + axis->min;
     if (axis->logbase > 0.0)
 	axis_coord = exp(axis_coord * axis->logbase);
