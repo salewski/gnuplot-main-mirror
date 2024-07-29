@@ -1,3 +1,22 @@
+
+Changes in 6.0.3
+=================
+* NEW	 backport "contourfill {at base} {fs {no}border}"
+* NEW	 backport "save changes <filename>"
+         This variant saves only the differences between the current
+         state and the state at the start of the session.
+* NEW    backport "plot <data> ... if (filter_condition)"
+         Input lines that satisfy the if condition are processed as usual.
+         Lines that fail are essentially ignored.
+* CHANGE 3D polygon objects can have per-object fill border properties.
+	 The restriction that all 3D polygons share a single set of
+	 properties from "set pm3d" remains true for "splot with polygons".
+* CHANGE improved multiplot mousing and replot back-ported from version 6.1
+* CHANGE wxt: remove --with-wx-multithreaded configuration option
+* FIX	 Support for combined hidden3d + pm3d depthorder back-ported from 6.1
+	 This allows placing contours on a depth-sorted pm3d surface	Bug 2762
+* FIX	 "with yerrorbars" error bar span should not affect OUTRANGE	Bug 2749
+
 Changes in 6.0.2
 ================
 * NEW	 backport plot style "with hsteps"
