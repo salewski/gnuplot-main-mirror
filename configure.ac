@@ -1024,7 +1024,7 @@ AC_ARG_ENABLE(function-blocks,dnl
                [ Define to support defining a function as a here document])
    )
 
-Enable parsing of deprecated syntax
+dnl Enable parsing of deprecated syntax
 AC_ARG_ENABLE(backward-compatibility,dnl
 [  --enable-backward-compatibility       enable some deprecated syntax ],
   [if test "$enableval" = yes; then
