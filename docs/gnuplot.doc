@@ -621,9 +621,9 @@ D epi_data 1
 ## current line width.  Some other terminals already did this.
 #b Plot styles that draw error bars place a gap at the position of the data
 ## point.  The size of the gap is controlled by `set pointintervalbox`. 
-#b Multiplots can now be redrawn or rescaled (see `multiplots`).  Because of
-## this it is no longer possible to read in-line data from pseudofile '-'.
-## Use a data block instead.
+#b Multiplots can now be redrawn or rescaled (see `new multiplots`).
+## Because of this it is no longer possible to read in-line data from
+## pseudofile '-'.  Use a data block instead.
 #end
 
 3 Deprecated syntax
@@ -3345,7 +3345,7 @@ C ... and restart the table:
  array are not limited to a single type of variable.  Arrays must be created
  explicitly before being referenced. The size of an array cannot be changed
  after creation.  Array elements are initially undefined unless they are
- provided in the array declaragion.
+ provided in the array declaration.
  In most places an array element can be used instead of a named user variable.
 
  The cardinality (number of elements) of array A is given by the expression |A|.
@@ -5136,6 +5136,9 @@ Ffigure_dots
 ?with ellipses
 ?ellipses
 Ffigure_ellipses
+ Syntax:
+      plot <data> with ellipses {units [xx|xy|yy]}
+
  The `ellipses` style plots an ellipse at each data point.  This style is
  only relevant for 2D plotting.  Each ellipse is described in terms of its
  center, major and minor diameters, and the angle between its major diameter
@@ -10178,7 +10181,7 @@ Ffigure_smooth_path
  EXPERIMENTAL (details may change in a subsequent gnuplot version):
  If the previously drawn plot was part of a multiplot, the `replot` command
  is now automatically treated as `remultiplot`.  Several caveats apply.
- See `new multiplots`, `remultiplot`, `set mouse multiplot`.
+ See `new multiplots`, `remultiplot`.
 
 2 reread
 ?commands reread
