@@ -1193,7 +1193,6 @@ do_3dplot(
 	    /* First draw the graph plot itself */
 	    if (!key_pass && this_plot->plot_type != KEYENTRY && this_plot->plot_type != VOXELDATA)
 	    switch (this_plot->plot_style) {
-	    case FILLEDCURVES:	/* same, but maybe we could dummy up ZERRORFILL? */
 	    case IMPULSES:
 		if (!hidden3d)
 		    plot3d_impulses(this_plot);
@@ -1244,6 +1243,7 @@ do_3dplot(
 		break;
 
 	    case ZERRORFILL:
+	    case FILLEDCURVES:
 		if (term->filled_polygon)
 		    plot3d_zerrorfill(this_plot);
 		term_apply_lp_properties(&(this_plot->lp_properties));
@@ -1357,7 +1357,6 @@ do_3dplot(
 		term_apply_lp_properties(&this_plot->lp_properties);
 
 		switch (this_plot->plot_style) {
-		case FILLEDCURVES:
 		case IMPULSES:
 		    if (!(hidden3d && draw_this_surface))
 			key_sample_line(xl, yl);
@@ -1436,6 +1435,7 @@ do_3dplot(
 		    break;
 
 		case ZERRORFILL:
+		case FILLEDCURVES:
 		    /* zerrorfill colors are weird (as in "backwards") */
 		    apply_pm3dcolor(&this_plot->lp_properties.pm3d_color);
 		    key_sample_fill(xl, yl, this_plot);
