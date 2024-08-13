@@ -2200,8 +2200,8 @@ f_value(union argument *arg)
 	    result = p->udv_value;
 	    if (p->udv_value.type == NOTDEFINED)
 		p = NULL;
-	    else
-		clone_string_value(&result);
+	    else if (result.type == STRING)
+		result.v.string_val = gp_strdup(result.v.string_val);
 	    break;
 	}
 	p = p->next_udv;

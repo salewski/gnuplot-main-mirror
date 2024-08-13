@@ -892,7 +892,11 @@ void
 local_array_command( int depth )
 {
     int nsize = 0;	/* Size of array when we leave */
+    int est_size = 0;	/* Estimated size */
+    TBOOLEAN empty_array = FALSE;
     struct udvt_entry *array;
+    struct value *A;
+    int i;
 
     /* Create or recycle a udv containing an array with the requested name */
     if (!isletter(++c_token))
@@ -902,7 +906,23 @@ local_array_command( int depth )
     else
 	array = add_udv(c_token++);
 
-    if (equals(c_token, "=") && !equals(c_token+1, "[")) {
+    if (equals(c_token, "[")) {
+	c_token++;
+	nsize = int_expression();
+	if (!equals(c_token++,"]"))
+	    int_error(c_token-1, "expecting array[size>0]");
+    } else if (equals(c_token, "=") && equals(c_token+1, "[")) {
+	if (equals(c_token+2,"]"))
+	    empty_array = TRUE;
+	/* Estimate size of array by counting commas in the initializer */
+	for ( i = c_token+2; i < num_tokens; i++) {
+	    if (equals(i,",") || equals(i,"]"))
+		est_size++;
+	    if (equals(i,"]"))
+		break;
+	}
+	nsize = est_size;
+    } else if (equals(c_token, "=")) {
 	/* array A = <expression> */
 	struct value a;
 	int save_token = ++c_token;
@@ -916,25 +936,52 @@ local_array_command( int depth )
 	return;
     }
 
-    if (equals(c_token, "[")) {
-	c_token++;
-	nsize = int_expression();
-	if (!equals(c_token++,"]"))
-	    int_error(c_token-1, "expecting array[<size>]");
-    }
-
-    init_array(array, nsize);
+    if (nsize > 0)
+	init_array(array, nsize);
+    else
+	int_error(c_token-1, "expecting array[size>0]");
 
     /* Element zero can also hold an indicator that this is a colormap */
+    A = array->udv_value.v.value_array;
     if (equals(c_token, "colormap")) {
 	c_token++;
-	array->udv_value.v.value_array[0].type = COLORMAP_ARRAY;
+	if (nsize >= 2)	/* Need at least 2 entries to calculate range */
+	    A[0].type = COLORMAP_ARRAY;
     }
 
     /* Initializer syntax:   array A[10] = [x,y,z,,"foo",] */
     if (equals(c_token, "=") && equals(c_token+1, "[")) {
+	int initializers = 0;
+	c_token += 2;
+	for (i = 1; i <= nsize; i++) {
+	    if (equals(c_token, "]"))
+		break;
+	    if (equals(c_token, ",")) {
+		initializers++;
+		c_token++;
+		continue;
+	    }
+	    const_express(&A[i]);
+	    if (A[i].type == ARRAY) {
+		if (A[i].v.value_array[0].type == TEMP_ARRAY)
+		    gpfree_array(&(A[i]));
+		A[i].type = NOTDEFINED;
+		int_error(c_token, "Cannot nest arrays");
+	    }
+	    initializers++;
+	    if (equals(c_token, "]"))
+		break;
+	    if (equals(c_token, ","))
+		c_token++;
+	    else
+		int_error(c_token, "expecting Array[size] = [x,y,...]");
+	}
 	c_token++;
-	parse_array_constant(&(array->udv_value));
+	/* If the size is determined by the number of initializers */
+	if (empty_array)
+	    A[0].v.int_val = 0;
+	else if (A[0].v.int_val == 0)
+	    A[0].v.int_val = initializers;
     }
 
     return;
