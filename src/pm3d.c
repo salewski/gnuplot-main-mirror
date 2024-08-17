@@ -1751,6 +1751,15 @@ filled_polygon(struct surface_points *from_plot, int index, gpdPoint *corners, i
 	if (bordercolor->type == TC_LT && bordercolor->lt == LT_NODRAW)
 	    return;
 	apply_pm3dcolor(bordercolor);
+    } else if (!from_plot) {
+	/* This is an object rather than a plot component.
+	 * Object border properties have been smuggled in via corners 1 and 2.
+	 * See graphics.c:do_polygon()
+	 */
+	if ((int)(corners[2].c) == LT_NODRAW)
+	    return;
+	term->linewidth(corners[3].c);
+	set_rgbcolor_const( (unsigned int)(corners[2].c) );
     } else {
 	if (pm3d.border.l_type == LT_NODRAW)
 	    return;
