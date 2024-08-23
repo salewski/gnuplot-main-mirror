@@ -538,7 +538,7 @@ D epi_data 1
 #b `set isotropic` adjusts the axis scaling in both 2D and 3D plots such that
 ## the x, y, and z axes all have the same scale.
 #b Change: Text rotation angle is not limited to integral degrees.
-#b Special (non-numerical) linetypes `lt nodraw`, `lt black`, `lt bgnd`
+#b Special (non-numerical) linetypes `lt nodraw`, `lt black`, `lt background`
 ## See `special_linetypes`.
 #b Data-driven color assignments in histogram plots. See `histograms colors`.
 #b The position of the key box can be manually tweaked by specifying an
@@ -3807,7 +3807,7 @@ Ffigure_newsyntax
 
  `palette` and `palette z` both map the z coordinate of the plot element being
  colored onto the current palette.  If z is outside cbrange it is by default
- mapped to palette fraction 0 or palette franction 1.  If the option
+ mapped to palette fraction 0 or palette fraction 1.  If the option
  `set pm3d noclipcb` is set, then quadrangles in a pm3d plot whose z values
  are out of range will not be drawn at all.
 
@@ -3909,8 +3909,8 @@ Ffigure_newsyntax
 
  `lt black` specifies a solid black line.
 
- `lt bgnd` specifies a solid line with the background color of the current
- terminal. See `background`.
+ `lt background` or `lt bgnd` specifies a solid line with the background color
+ of the current terminal. See `background`.
 
  `lt nodraw` skips drawing the line altogether.  This is useful in conjunction
  with plot style `linespoints`.  It allows you to suppress the line component
@@ -5099,7 +5099,7 @@ Ffigure_contourfill
 
  This style can be combined with `set contours` to superimpose contour
  lines that bound the slices.  Care must be taken that the slice boundaries
- from `set contourfill` match the contour bounaries from `set cntrparam`.
+ from `set contourfill` match the contour boundaries from `set cntrparam`.
  
       # slice boundaries determined by ztics
       # coloring set by palette mapping the slice midpoint z value
@@ -6117,7 +6117,7 @@ Ffigure_points
 ?variable
 ?pointtype variable
 ?pointsize variable
- Plot styles that contain a point symbol optionally accept addtional data
+ Plot styles that contain a point symbol optionally accept additional data
  columns in the `using` specifier to control the appearance of that point.
  This is indicated by modifying the keywords `pointtype`, `pointsize`, or
  `linecolor` in the plot command with the additional keyword `variable`
@@ -10140,7 +10140,7 @@ Ffigure_smooth_path
  multiplot.  See `new multiplots`.
 
  EXPERIMENTAL: `remultiplot` is invoked implicitly from `replot` if the
- immediately preceeding plot command was part of a completed multiplot.
+ immediately preceding plot command was part of a completed multiplot.
  `remultiplot` is also invoked by hot keys and  mouse operations pan/zoom etc.
  while a multiplot is displayed.
 
@@ -15835,7 +15835,7 @@ Ffigure_polar_grid
  If you want no median line, set this to 0.
 
  If the using specification for a boxplot contains a fourth column, the values
- in that column will be interpreted as the discrete leveles of a factor
+ in that column will be interpreted as the discrete levels of a factor
  variable.  In this case more than one boxplots may be drawn, as many as the
  number of levels of the factor variable.  These boxplots will be drawn next to
  each other, the distance between them is 1.0 by default (in x-axis units).
@@ -16140,7 +16140,7 @@ Ffigure_polar_grid
 
  Examples:
      set style rectangle back fc rgb "white" fs solid 1.0 border lt -1
-     set style rectangle fc linsestyle 3 fs pattern 2 noborder
+     set style rectangle fc linestyle 3 fs pattern 2 noborder
 
  The default values correspond to solid fill with the background color and a
  black border.
