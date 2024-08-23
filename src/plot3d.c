@@ -2264,6 +2264,8 @@ eval_3dplots()
 		    this_plot->lp_properties.pm3d_color = fillcolor;
 		} else if (this_plot->plot_style == BOXES) {
 		    this_plot->lp_properties.pm3d_color = fillcolor;
+		} else if (this_plot->plot_style == CIRCLES) {
+		    this_plot->lp_properties.pm3d_color = fillcolor;
 		} else {
 		    this_plot->fill_properties.border_color = fillcolor;
 		}
