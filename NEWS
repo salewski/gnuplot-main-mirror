@@ -7,8 +7,6 @@ Changes in 6.0.2
 	 - facilitates use of triangular tessellated 3D pm3d surfaces
 * CHANGE backport reimplementation of local variables
 	 - faster function block evaluation, better-defined scope
-* CHANGE backport revised parsing of array constants
-	 - allows iteration over array elements
 * CHANGE apply jitter to the horizontal spread of boxplot outliers
 * FIX	 backport reworked generation of logscale axis tic marks        Bug 2372 2717
 * FIX	 Do not save extraneous commands to $GPVAL_LAST_MULTIPLOT	Bug 2714

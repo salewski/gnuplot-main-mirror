@@ -21,13 +21,6 @@ NEW (backported from development version)
 - Polygons in a 3D plot (splot command) can use pm3d coloring and lighting.
   This facilitates construction of surfaces with triangular tesselation.
 
-- Iteration over array elements
-
-<pre>
-	array A = [1, 2, 15, 37]
-	do for [a in A] { print "f(%d) = %g", a, f(a) }
-</pre>
-
 CHANGES
 -------
 
@@ -57,7 +50,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  23-July-2024
+Release Notes date:  25-August-2024
 
 
 			Changes in 6.0.1
