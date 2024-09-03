@@ -4104,7 +4104,8 @@ int wxt_waitforinput(int options)
 }
 #else /* WXT_MONOTHREADED */
 /* Implements waitforinput used in wxt.trm
- * the terminal events are directly processed when they are received */
+ * the terminal events are directly processed when they are received
+ */
 int wxt_waitforinput(int options)
 {
 #ifdef _WIN32
@@ -4129,6 +4130,7 @@ int wxt_waitforinput(int options)
 		return getch();
 
 #else /* !_WIN32 */
+
 	/* Generic hybrid GUI & console message loop */
 	/* (used mainly on MacOSX - still single threaded) */
 	if (wxt_yield)
@@ -4174,9 +4176,9 @@ int wxt_waitforinput(int options)
 			usleep(50000);
 		else if (retval)
 			/* select indicated something to read on stdin */
-			return getchar();
+			read_and_return_character();
 	}
-	return getchar();
+	read_and_return_character();
 #endif
 }
 #endif /* WXT_MONOTHREADED || WXT_MULTITHREADED */

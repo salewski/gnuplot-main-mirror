@@ -932,7 +932,7 @@ X11_waitforinput(int options)
 	     */
             return 0;
         }
-        return getc(stdin);
+        read_and_return_character();
     }
 
     /* XXX:  if the input device it not a tty (e.g. /dev/null)
@@ -1039,7 +1039,7 @@ X11_waitforinput(int options)
 
     } while(blocking_loop_reading_ipc_back_fd || have_any_ipc_back_fd_data);
 
-    return getc(stdin);
+    read_and_return_character();
 
 #endif /* PIPE_IPC */
 }

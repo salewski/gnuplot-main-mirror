@@ -510,7 +510,6 @@ int
 history_find_all(char *cmd)
 {
     int found;
-    int ret;
     int number = 0; /* each entry found increases this */
 
     if (!*cmd)
@@ -520,8 +519,7 @@ history_find_all(char *cmd)
      * so we have to start at the beginning of the history list.
      */
 #if !defined(HAVE_LIBEDITLINE)
-    ret = history_set_pos(0);
-    if (ret == 0) {
+    if (history_set_pos(0) == 0) {
 	fprintf(stderr, "ERROR (history_find_all): could not rewind history\n");
 	return 0;
     }
