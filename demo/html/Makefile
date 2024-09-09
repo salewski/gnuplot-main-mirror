@@ -13,8 +13,9 @@ GNUPLOT_LIB = ..
 #	fontfile vector epslatex
 #
 html: airfoil.html animation.html approximate.html armillary.html array.html arrowstyle.html \
-      barchart_art.html binary.html bins.html bivariat.html boxplot.html boxclusters.html \
-      candlesticks.html chi_shapes.html circles.html cities.html columnhead.html contourfill.html \
+      barchart_art.html binary.html binary_polygon.html bins.html bivariat.html boxplot.html \
+      boxclusters.html candlesticks.html chi_shapes.html circles.html cities.html \
+      columnhead.html contourfill.html \
       contours.html convex_hull.html custom_contours.html controls.html custom_key.html \
       dashtypes.html datastrings.html dgrid3d.html discrete.html \
       electron.html ellipse.html enhanced_utf8.html epslatex.html errorbars.html \
