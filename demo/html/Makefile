@@ -14,7 +14,7 @@ GNUPLOT_LIB = ..
 #
 html: airfoil.html animation.html approximate.html armillary.html array.html arrowstyle.html \
       barchart_art.html binary.html binary_polygon.html bins.html bivariat.html boxplot.html \
-      boxclusters.html candlesticks.html chi_shapes.html circles.html cities.html \
+      boxclusters.html boxes3d.html candlesticks.html chi_shapes.html circles.html cities.html \
       columnhead.html contourfill.html \
       contours.html convex_hull.html custom_contours.html controls.html custom_key.html \
       dashtypes.html datastrings.html dgrid3d.html discrete.html \
@@ -37,8 +37,8 @@ html: airfoil.html animation.html approximate.html armillary.html array.html arr
       smooth_splines.html stats.html steps.html stringvar.html surface1.html surface2.html \
       azimuth.html transparent.html transparent_solids.html textbox.html tics.html \
       timedat.html ttics.html unicode.html using.html \
-      varcolor.html vector.html violinplot.html viridis.html \
-      walls.html windrose.html world.html zerror.html boxes3d.html voxel.html vplot.html \
+      varcolor.html vector.html violinplot.html viridis.html voxel.html vplot.html \
+      walls.html waterfallplot.html windrose.html world.html zerror.html \
       watchpoints.html isosurface.html
 
 index.html: index.save

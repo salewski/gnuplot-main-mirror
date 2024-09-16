@@ -41,7 +41,7 @@ html: airfoil.html approximate.html armillary.html array.html \
     azimuth.html projection.html \
     textbox.html transparent.html transparent_solids.html tics.html timedat.html \
     ttics.html unicode.html using.html varcolor.html vector.html violinplot.html \
-    walls.html world.html watchpoints.html windrose.html zerror.html
+    walls.html waterfallplot.html world.html watchpoints.html windrose.html zerror.html
 
 index.html: index.svg
 	cp index.svg index.html
