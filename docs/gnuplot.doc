@@ -5162,10 +5162,10 @@ Ffigure_dots
 ?style ellipses
 ?with ellipses
 ?ellipses
-Ffigure_ellipses
  Syntax:
       plot <data> with ellipses {units [xx|xy|yy]}
 
+Ffigure_ellipses
  The `ellipses` style plots an ellipse at each data point.  This style is
  only relevant for 2D plotting.  Each ellipse is described in terms of its
  center, major and minor diameters, and the angle between its major diameter
@@ -5214,6 +5214,7 @@ Ffigure_ellipses
 
  See also `set object ellipse`, `set style ellipse` and `fillstyle`.
 
+#TeX \newpage
 2 filledcurves
 ?plotting styles filledcurves
 ?style filledcurves
@@ -5352,6 +5353,8 @@ Ffigure_steps
  baseline.  Note that in moving from one data point to the next, both `steps`
  and `fillsteps` first trace the change in x coordinate and then the change
  in y coordinate.  See `steps`.
+    1 column:   y     # implicit x from line number (column 0)
+    2 columns:  x y
 2 fsteps
 ?plotting styles fsteps
 ?style fsteps
@@ -5369,6 +5372,8 @@ Ffigure_fsteps
 ^ <a href="http://www.gnuplot.info/demo/steps.html">
  steps demo.
 ^ </a>
+    1 column:   y     # implicit x from line number (column 0)
+    2 columns:  x y
 2 histeps
 ?plotting styles histeps
 ?style histeps
@@ -5389,6 +5394,8 @@ Ffigure_histeps
 ^ <a href="http://www.gnuplot.info/demo/steps.html">
  steps demo.
 ^ </a>
+    1 column:   y     # implicit x from line number (column 0)
+    2 columns:  x y
 
 #TeX \newpage
 2 heatmaps
@@ -6114,6 +6121,7 @@ Ffigure_parallel
  By default gnuplot will automatically determine the range and scale of the
  individual axes from the input data, but the usual `set axis range` commands
  can be used to customize this.  See `set paxis`.
+#TeX \newpage
 2 Polar plots
 =polar
 Ffigure_polar
@@ -6259,7 +6267,6 @@ Ffigure_polygons
 ?with rgbimage
  See `image`.
 
-#TeX \newpage
 2 sectors
 ?plotting styles sectors
 ?with sectors
@@ -6374,6 +6381,7 @@ Ffigure_spiderplot
       # Two polygons with 5 vertices
       plot for [i=1:5] 'A' using i, newspiderplot, for [j=1:5] 'B' using j
 
+#TeX \newpage
 2 steps
 ?plotting styles steps
 ?style steps
@@ -6391,6 +6399,8 @@ Ffigure_steps
 ^ <a href="http://www.gnuplot.info/demo/steps.html">
  steps demo.
 ^ </a>
+    1 column:   y     # implicit x from line number (column 0)
+    2 columns:  x y
 
 2 surface
 ?plotting styles surface
@@ -6451,7 +6461,6 @@ Ffigure_vectors
  See also the 2D plot style `with arrows` that is identical to `with vectors`
  except that each arrow is specified using x:y:length:angle.
 
-#TeX \newpage
 2 xerrorbars
 ?plotting styles xerrorbars
 ?style xerrorbars
@@ -6550,6 +6559,7 @@ Ffigure_xyerrorlines
  An additional input column (5th or 7th) may be used to provide variable color.
  This style does not permit variable point properties.
 
+#TeX \newpage
 2 yerrorbars
 ?plotting styles yerrorbars
 ?plotting styles errorbars
