@@ -21,9 +21,13 @@ Changes in 6.0.2
 * FIX	 x11: handle mousing of logscale axes in inactive plot window	Bug 2723
 * FIX	 qt: handle mousing of logscale axes in inactive plot window	Bug 2723
 * FIX	 wxt: handle mousing of logscale axes in inactive plot window	Bug 2723
+* FIX	 wxt: release per-thread font data before entering "persist"	Bug 2693
 * FIX	 "set tics scale" should not change other axis tick properties 	Bug 2724
 * FIX    fill properties can be given as part of "splot with circles"
 * FIX    some properties of the key title not shown by "show" or "save" Bug 2729
+* FIX	 points with variable color value NaN should not be drawn  	Bug 2737
+* FIX	 "set term tikz nostandalone" should suppress the latex wrapper	Bug 2740
+* FIX	 handle unusual case of intersecting pm3d surfaces             	Bug 2744
 
 Changes in 6.0.1
 ================

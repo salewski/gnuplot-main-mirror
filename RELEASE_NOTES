@@ -29,27 +29,27 @@ NEW (backported from development version)
   This change should in particular benefit users of Debian and MacOS
   binaries, which are typically linked against the editline library.
 
+- Polygons in a 3D plot ("splot ... with polygons") can use palette coloring
+  and pm3d lighting.
+
 - General binary keyword option "blank=NaN" facilitates using binary input
-  data for plot styles that depend on blank lines in a text input data
+  data for plot styles that would require blank lines in a text input data
   stream. See
 	* https://gnuplot.info/demo_6.0/binary_polygon.html
 
-- Polygons in a 3D plot ("splot ... with polygons") can use pm3d coloring
-  and lighting.  This facilitates rendering of surfaces constructed by
-  triangular tesselation.
-
-- "linestyle variable" is a valid color specifier in plot or splot commands.
-  The primary  distinction between this as "linecolor variable" is that
+- "linestyle variable" is accepted as a color specifier in plot commands.
+  The primary distinction between this as "linecolor variable" is that
   linestyle properties are cleared by the next "reset" command.
+  This allows definition of a temporary color sequence affected only one plot.
 
 CHANGES
 -------
 
 - Local variables are reimplemented to provide a better-defined scope
-  and faster evaluation of function blocks
+  and faster evaluation of function blocks.
 - Existing plot styles steps, histeps, fsteps, and fillsteps are
   reimplemented to use the new hsteps code.
-- "set jitter" can be used to jitter outliers in a boxplot
+- Boxplot outlier position (horizontal displacement) is controlled by "set jitter".
 - The content of $GPVAL_LAST_MULTIPLOT is appended to the output from "save"
   so that loading the saved file regenerates a full multiplot rather than
   only the final component.
@@ -60,11 +60,15 @@ FIXES
 - reworked generation of logscale axis tic marks                 (Bugs 2372 2717)
 - Do not save extraneous commands to $GPVAL_LAST_MULTIPLOT       (Bug 2714)
 - svg: modify gnuplot_svg.js to work in local standalone mode    (Bug 2715)
+- wxt: release per-thread font data before entering "persist"    (Bug 2693)
 - "set table": honor "nosurface" keyword in splot
 - "set table": honor "set format z" when z is printed from plot
 - better contouring near the edge of a z-clipped surface
 - handle mousing of logscale axes in inactive plot windows       (Bug 2723)
-- "set tics scale" should not change other axis tick properties  (Bug 2724)
+- "set tics scale" does not change other axis tick properties    (Bug 2724)
+- points with variable color value NaN should not be drawn       (Bug 2737)
+- "set term tikz nostandalone" should suppress the latex wrapper (Bug 2740)
+- handle unusual case of intersecting pm3d surfaces              (Bug 2744)
 
 Gnuplot development is tracked in a git repository on SourceForge.
 You can generate a complete history of changes using "git log"
@@ -75,7 +79,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  26-September-2024
+Release Notes date:  28 November 2024
 
 
 			Changes in 6.0.1
