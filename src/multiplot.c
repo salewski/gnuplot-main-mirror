@@ -61,6 +61,7 @@ static t_value multiplot_udv = {
 	.type = DATABLOCK,
 	.v.data_array = NULL
 };
+int multiplot_last_panel = 0;
 
 enum set_multiplot_id {
     S_MULTIPLOT_LAYOUT,
@@ -538,6 +539,9 @@ multiplot_end()
 	append_to_datablock(&multiplot_udv, strdup("unset multiplot"));
 	datablock->udv_value = multiplot_udv;
 	multiplot_udv.v.data_array = NULL;
+
+	/* Save panel number of last-drawn plot */
+	multiplot_last_panel = mp_layout.current_panel;
     }
     last_plot_was_multiplot = TRUE;
 }
