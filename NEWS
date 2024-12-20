@@ -28,6 +28,7 @@ Changes in 6.0.2
 * FIX	 points with variable color value NaN should not be drawn  	Bug 2737
 * FIX	 "set term tikz nostandalone" should suppress the latex wrapper	Bug 2740
 * FIX	 handle unusual case of intersecting pm3d surfaces             	Bug 2744
+* FIX	 prevent use-after-free if a function block has no "return"     Bug 2745
 
 Changes in 6.0.1
 ================

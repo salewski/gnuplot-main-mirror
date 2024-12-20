@@ -69,6 +69,19 @@ FIXES
 - points with variable color value NaN should not be drawn       (Bug 2737)
 - "set term tikz nostandalone" should suppress the latex wrapper (Bug 2740)
 - handle unusual case of intersecting pm3d surfaces              (Bug 2744)
+- prevent use-after-free if a function block has no "return"     (Bug 2745)
+
+KNOWN ISSUES
+------------
+
+- Support for replot and pan/zoom mouse operations in multiplot mode is still
+  incomplete. Expect further improvement in subsequent releases.
+- TeXLive2024 pdflatex does not like some of the UTF-8 characters in the user manual.
+  The distribution includes a pre-built copy of gnuplot.pdf but if you want
+  to rebuild it from the source in docs/gnuplot.doc please use lualatex instead.
+  You can either replace the definition PDFLATEX=pdflatex with PDFLATEX=lualatex
+  in the Makefile or provide this in the environment during configuration
+  $ PDFLATEX=lualatex ./configure
 
 Gnuplot development is tracked in a git repository on SourceForge.
 You can generate a complete history of changes using "git log"
@@ -79,7 +92,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  28 November 2024
+Release Notes date:  19 December 2024
 
 
 			Changes in 6.0.1
