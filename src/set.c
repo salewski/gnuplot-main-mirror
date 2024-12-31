@@ -3345,7 +3345,7 @@ set_output()
     char *testfile;
 
     c_token++;
-    if (multiplot)
+    if (in_multiplot)
 	int_error(c_token, "you can't change the output in multiplot mode");
 
     if (END_OF_COMMAND) {	/* no file specified */
@@ -4864,7 +4864,7 @@ set_terminal()
 {
     c_token++;
 
-    if (multiplot)
+    if (in_multiplot)
 	int_error(c_token, "You can't change the terminal in multiplot mode");
 
     if (END_OF_COMMAND) {

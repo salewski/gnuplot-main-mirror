@@ -1457,7 +1457,7 @@ X11_graphics()
     /* A cleaner solution would be to have gnuplot_x11 itself track 	*/
     /* whether the current window contains a multiplot, and not	send	*/
     /* replot requests if it does.					*/
-    if (multiplot) {
+    if (in_multiplot) {
 	fprintf(X11_ipc, "X %d %d %d %d %d\n",
 		do_raise, x11_persist, dashedlines, ctrlq, no);
 	fflush(X11_ipc);
@@ -2236,7 +2236,7 @@ X11_layer(t_termlayer syncpoint)
 	{
 	case TERM_LAYER_RESET:
 	case TERM_LAYER_RESET_PLOTNO:
-		if (multiplot)
+		if (in_multiplot)
 			break;
 	case TERM_LAYER_BEFORE_PLOT:
 	case TERM_LAYER_AFTER_PLOT:

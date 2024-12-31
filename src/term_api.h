@@ -434,7 +434,7 @@ extern char *PS_psdir;
 extern char *PS_fontpath;	/* just a directory name */
 
 extern TBOOLEAN monochrome;
-extern TBOOLEAN multiplot;
+extern int in_multiplot;
 extern int multiplot_count;
 
 /* 'set encoding' support: index of current encoding ... */
