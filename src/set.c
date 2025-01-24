@@ -3766,7 +3766,6 @@ set_pm3d()
 		pm3d.ftriangles = 0;
 		continue;
 	    case S_PM3D_HIDDEN:
-#ifdef BACKWARD_COMPATIBILITY
 	    /* deprecated pm3d "hidden3d" option, now used for borders */
 		if (isanumber(c_token+1)) {
 		    c_token++;
@@ -3774,7 +3773,6 @@ set_pm3d()
 		    c_token--;
 		    continue;
 		}
-#endif
 		/* fall through */
 	    case S_PM3D_BORDER: /* border {linespec} */
 		pm3d.border = default_pm3d_border;
