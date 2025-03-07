@@ -41,7 +41,7 @@ const char gnuplot_patchlevel[] = "3alpha";
 #ifdef DEVELOPMENT_VERSION
 #include "timestamp.h"
 #else
-const char gnuplot_date[] = "2025-02-05 ";
+const char gnuplot_date[] = "2025-03-31 ";
 #endif
 const char gnuplot_copyright[] = "Copyright (C) 1986-1993, 1998, 2004, 2007-2025";
 

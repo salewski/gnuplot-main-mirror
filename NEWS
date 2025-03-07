@@ -15,10 +15,12 @@ Changes in 6.0.3
 	 properties from "set pm3d" remains true for "splot with polygons".
 * CHANGE multiplot mousing and replot improvements back-ported from version 6.1
 * CHANGE wxt: remove --with-wx-multithreaded configuration option
+* CHANGE restrictions on watchpoint function target removed; any function is OK
 * FIX	 Support for combined hidden3d + pm3d depthorder back-ported from 6.1
 	 This allows placing contours on a depth-sorted pm3d surface	Bug 2762
 * FIX	 "with yerrorbars" error bar span should not affect OUTRANGE	Bug 2749
 * FIX	 qt: opaque key caused incorrect interactive toggling       	Bug 2761
+* FIX	 6.0.2 regression in "splot ... using 1:2:3:4 lc palette"	Bug 2784
 
 Changes in 6.0.2
 ================
