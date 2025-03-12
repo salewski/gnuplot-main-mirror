@@ -18,8 +18,9 @@
 #	 make install
 #
 # This makefile was tested with 
-#   MSYS, MinGW32 and Microsoft HTML Help 1.4 SDK.
-#   MSYS2, MinGW-w64
+#   MSYS, MinGW32
+#   MSYS2/MINGW64, MSYS2/CLANG64, MinGW-w64
+#   Microsoft HTML Help 1.4 SDK and the Free Pascal Help Compiler
 
 
 #
@@ -46,7 +47,7 @@ RELEASE=1
 
 # Set-up your compiler environment
 #
-# Define if you are using MSYS2/MinGW64 instead of MSYS/MinGW
+# Define if you are using MSYS2/MINGW64 instead of MSYS/MinGW
 #MINGW64=1
 # Define if you want a 32bit version (even using a 64bit compiler)
 #M32=1
@@ -231,12 +232,16 @@ ifdef MINGW64
 endif
 
 # To compile the .chm file you need the Microsoft HTML Help 1.4 SDK
-# It can be obtained here:
+# It used to be available here (broken link):
 # http://go.microsoft.com/fwlink/?LinkId=154968
 # We need to explicitly set the correct path here since we also need
 # adjust the include and library paths.
 HHWPATH = $(PROGRAMFILES32)/HTML\ Help\ Workshop/
 HHC = $(HHWPATH)hhc
+
+# Alternatively, you can install the free and open source Pascal compiler
+HHC = C:/FPC/3.2.2/bin/i386-win32/chmcmd.exe
+CHMEXTRA = -DFPC
 
 # Choose which resource compiler you want to use (GNU windres or MS rc):
 GNU_RC = 1
@@ -844,6 +849,7 @@ $(BUILDHELPFILE): doc2html.exe $(D)gnuplot.doc $(D)windows/wgnuplot.hhp $(D)wind
                   $(D)windows/wgnuplot.stp $(D)plotstyles.gnu $(CORETERM) $(TARGET)
 	./doc2html $(D)gnuplot.doc $(D)windows/
 	-./$(TARGET) -d -e "winhelp=1; cd '$(D)'" plotstyles.gnu
+	-$(CP) $(D)html/*.png $(D)windows/
 	-$(HHC) $(D)windows/wgnuplot.hhp
 
 $(HELPFILE): $(BUILDHELPFILE)
@@ -910,6 +916,7 @@ wgnuplot-ja.chm: $(JASRC) doc2html-ja.exe \
 	sed -i -e "s/Language=0x409 Englisch (USA)/Language=0x411 Japanisch (Japan)/" $(JADW)/wgnuplot.hhp
 	# Build help file
 	-./$(TARGET) -d -e "winhelp=1; cd '$(JAD)'" plotstyles.gnu
+	-$(CP) $(D)html/*.png $(JADW)
 	-$(HHC) $(JADW)wgnuplot.hhp
 	cp $(JADW)wgnuplot.chm $(HELPFILEJA)
 
@@ -917,12 +924,14 @@ doc2html.exe: $(CORETERM) $(D)windows/doc2html.c $(D)termdoc.c $(D)xref.c versio
 	$(LD) $(LDFLAGS) -o $@ -DWINDOWS_NO_GUI \
 	    -DVERSION_MAJOR='"$(MAINVERSION)"' -DPATCHLEVEL='"$(PATCHLEVEL)"' \
 	    $(CFLAGS_DOCS) -I. -I$(D:/=) -I$(T:/=) \
+	    $(CHMEXTRA) \
 	    $(D)windows/doc2html.c $(D)termdoc.c $(D)xref.c
 
 doc2html-ja.exe: $(JASRC) $(D)windows/doc2html.c $(D)termdoc.c $(D)xref.c version.o $(LUA_HELP)
 	$(LD) $(LDFLAGS) -o $@ -DWINDOWS_NO_GUI \
 	    -DVERSION_MAJOR='"$(MAINVERSION)"' -DPATCHLEVEL='"$(PATCHLEVEL)"' \
 	    -DJAPANESE_DOC $(CFLAGS_DOCS) -I. -I$(JAD) -I$(JA)/term \
+	    $(CHMEXTRA) \
 	    $(D)windows/doc2html.c $(D)termdoc.c $(D)xref.c
 
 doc2ms.exe: $(D)doc2ms.c $(D)termdoc.c $(D)xref.c version.o $(LUA_HELP)
