@@ -1,0 +1,41 @@
+GNUPLOT has been tested on a Pyramid 90x (ucb 4.2 and att V),
+a VAX 8200 (VMS 4.3), IBM PC's and AT's (MS-DOS 3.1, Microsoft C 4.0).
+The code is written with portability in mind, and it passes lint!
+If you have problems, send mail to vu-vlsi!plot.  And please send
+any modifications you make so they can be #ifdef'd into later releases.
+
+These #defines should be checked before compilation:
+
+VFORK       Makefile        define if you've got vfork() system call
+vms         Makefile        define if compiling under VMS;
+                              automatically defined by DEC C
+PC          Makefile        define if compiling on a PClone
+MSDOS       Makefile        define if compiling under MSDOS;
+                              automatically defined by Microsoft C 4.0
+AED         Makefile        define these if you want this terminal driver
+HP75           .              included
+QMS            .
+REGIS          .
+TEK            .
+UNIXPLOT       .
+
+CGA            .            same, but only if PC is defined
+CORONA         .
+EGA            .
+
+HUGE        plot.h          define to be largest double if not defined
+                              in <math.h>
+HELP        plot.h          program run by 'help' command
+SHELL       plot.h          default shell to spawn if SHELL environment
+                              variable not found at run-time
+
+To compile:
+
+under UNIX:  type 'make'
+
+under VMS:  type '@compile', then '@link'.  Use the 'vmshelp.csh' script
+to convert the help files.  If you don't have access to a Unix machine,
+send us mail and we'll send you the VMS GNUPLOT.HLB.
+
+under MSDOS:  use 'make make.msc' for Microsoft C 4.0.  If you've got
+another compiler, you're on your own!

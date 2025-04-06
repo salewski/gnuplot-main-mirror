@@ -1,0 +1,42 @@
+.\" dummy line
+.TH GNUPLOT 1 "17 November 1986"
+.UC 4
+.SH NAME
+gnuplot \- an interactive plotting program
+.SH SYNOPSIS
+.B gnuplot
+.br
+.SH DESCRIPTION
+.I   GNUPLOT
+is a command-driven interactive function plotting program.
+Here are some of its features:
+.PP
+  Plots any number of functions, built up of C operators, C library
+functions, and some things C doesn't have like **, sgn(), etc.  Also
+support for plotting scatter-plots of data files for comparing actual
+data to theoretical curves.
+.PP
+  User-defined X and Y ranges (optional Y auto-ranging), smart Y scaling,
+smart tic marks.
+.PP
+  User-defined constants and functions.
+.PP
+  Support through a generalized graphics driver for ReGis (VT125 and VT2xx),
+Tek 401x, AED 767, HP plotters, and QMS laser printers.  The PC version
+supports IBM CGA & EGA and Corona 325 graphics.  Other devices can be added
+simply, but will require recompiling.
+.PP
+  Shell escapes and command line substitution.
+.PP
+  Load and save capability.
+.PP
+  Output redirection.
+.PP
+  All computations performed in the complex domain.  Just the real part is
+plotted by default, but functions like imag() and abs() and arg() are
+available to override this.
+.SH AUTHORS
+Colin Kelley and Tom Williams (vu-vlsi!plot)
+.SH BUGS
+The unixplot driver automatically writes to stdout, so you have to
+redirect the gnuplot's output from the shell.

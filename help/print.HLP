@@ -1,0 +1,5 @@
+This command prints the value of <expression>.
+
+Syntax:  print <expression>
+
+See 'expressions'.

@@ -1,0 +1,16 @@
+Command-line subsitution is specified by a system command encolsed in
+backquotes (``).   This command is spawned and the output it produces
+replaces the name of the command (and backquotes) on the command line.
+
+Newlines in the output produced by the spawned command are replaced with
+blanks.
+
+Command-line subsitution can be used anywhere on the GNUPLOT command line.
+
+
+
+Examples:
+
+a(x) = `leastsq`                  ; subsitutes "`leastsq`" with output produced
+                    by a program named leastsq.
+a(x) = `run leastsq.exe`          ; same but for VMS.

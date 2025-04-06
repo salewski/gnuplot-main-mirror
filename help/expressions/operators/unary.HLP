@@ -1,0 +1,6 @@
+The following is a list of all the unary operators and their usage:
+
+Symbol      Example     Explantion
+-           -a          unary minus
+~           ~a          one's complement
+!           !a          logical negation

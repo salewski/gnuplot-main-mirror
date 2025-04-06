@@ -1,0 +1,21 @@
+The following is a list of all the binary operators and their usage:
+
+Symbol      Example     Explantion
+**          a**b        exponentiation
+*           a*b         multiplication
+/           a/b         division
+%           a%b         modulo
++           a+b         addition
+-           a-b         subtraction
+==          a==b        equality
+!=          a!=b        inequality
+&           a&b         bitwise and
+^           a^b         bitwise exclusive or
+|           a|b         bitwise inclusive or
+&&          a&&b        logical and
+||          a||b        logical or
+?:          a?b:c       terniary operation
+
+The terniary operator evaluates its first argument (a).  If it is true
+(non-zero) the second argument (b) is returned, otherwise the
+third argument (c) is returned.

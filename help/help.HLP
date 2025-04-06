@@ -1,0 +1,8 @@
+The 'help' command will display on-line help.  To specify information
+on a particular topic use the syntax:
+
+    help <topic>
+
+You may exit the help utility and return to the plot program
+by either pressing <return> at the 'Topic?' prompt or pressing your
+computer's END-OF-FILE character at any help prompt.

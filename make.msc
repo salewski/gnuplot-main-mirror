@@ -1,0 +1,56 @@
+OBJS =  command.obj eval.obj graphics.obj internal.obj misc.obj parse.obj plot.obj scanner.obj standard.obj term.obj util.obj version.obj pcgraph.obj corgraph.obj
+
+LIBFLAGS =
+
+# corgraph will include code for Corona 325 graphics
+# if omitted, be sure to delete corgraph elsewhere, and get rid of
+#   /DCORONA in CFLAGS
+GRAPHICS = pcgraph+corgraph
+
+# /AL means use large model (necessary!)
+CFLAGS = /AL /DPC /DCORONA
+
+# default rules
+.c.obj:
+        msc $(CFLAGS) $*;
+
+.asm.obj:
+        masm $*;
+
+
+pcgraph.obj: pcgraph.asm
+
+corgraph.obj: corgraph.asm
+
+command.obj: command.c plot.h
+
+eval.obj: eval.c plot.h
+
+graphics.obj: graphics.c plot.h
+
+internal.obj: internal.c plot.h
+
+misc.obj: misc.c plot.h
+
+parse.obj: parse.c plot.h
+
+plot.obj: plot.c plot.h
+
+scanner.obj: scanner.c plot.h
+
+standard.obj: standard.c plot.h
+
+term.obj: term.c plot.h
+
+util.obj: util.c plot.h
+
+version.obj: version.c
+
+gnuplot.exe: $(OBJS)
+        link$(LIBFLAGS) command+eval+graphics+internal+misc+parse+plot+scanner+standard+term+util+version+$(GRAPHICS),gnuplot,nul,;
+x               ; sum,dx
+        add bx,si               ; y1,y2
+i27:
+        inc ax                  ; x1
+        cmp ax,cx               ; x1,x2
+        jbe

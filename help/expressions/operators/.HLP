@@ -1,0 +1,6 @@
+The operators in GNUPLOT are the same as the corresponding operators
+in the C programming language, except that all operators accept integer, real,
+and complex arguments, unless otherwise noted.  The FORTRAN **
+(exponentiation) operator is also supported.
+
+Parentheses may be used to change order of evaluation.

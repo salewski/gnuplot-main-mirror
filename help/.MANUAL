@@ -1,0 +1,1 @@
+nroff -man /usr/man/manl/gnuplot.l | more -s
