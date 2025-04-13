@@ -2033,6 +2033,7 @@ plot_hsteps (struct curve_points *plot)
     TBOOLEAN opt_split	  = plot->hsteps_options.split;     /* flag for splitting */
     TBOOLEAN opt_above	  = (plot->filledcurves_options.oneside > 0) ? TRUE : FALSE;
     TBOOLEAN opt_below	  = (plot->filledcurves_options.oneside < 0) ? TRUE : FALSE;
+    TBOOLEAN filter_bins  = (plot->plot_filter == FILTER_BINS) ? TRUE : FALSE;
     int fill_style	  = 0;		    /* fill style */
     TBOOLEAN has_border   = FALSE;
     gpiPoint *nodes	  = NULL;	    /* node data of polygon */
@@ -2110,8 +2111,16 @@ plot_hsteps (struct curve_points *plot)
     /* Setting xlow/xhigh member of 'points' array according to anchor value */
     /* For variable width (3rd column), xlow/xhigh is already set in plot2d.c:get_data() */
     for (i=0; i<np; i++) {
-        if (points[i].z >= 0.0)
+	/* z holds variable boxwidth */
+        if (!filter_bins && points[i].z >= 0.0)
 	    continue;
+	/* 'boxwidth absolute' for hsteps */
+        if (plot->plot_style == HSTEPS && boxwidth > 0 && boxwidth_is_absolute) {
+	    points[i].z = boxwidth;
+	    points[i].xlow  = points[i].x - anchor*boxwidth;
+	    points[i].xhigh = points[i].x + (1.0-anchor)*boxwidth;
+	    continue;
+	}
 	/* anchor */
 	/*	  0 : xl = x - 0.0*w, xr = x + 1.0*w */
 	/*	0.5 : xl = x - 0.5*w, xr = x + 0.5*w */
@@ -2136,7 +2145,7 @@ plot_hsteps (struct curve_points *plot)
 
     for (i=1; i<np-1; i++) {
 
-	if (points[i].z >= 0)                           /* skip if variable width */
+	if (!filter_bins && points[i].z >= 0)                           /* skip if variable width */
 	    continue;
 
 	if (state[i] == HSTEPS_POINT_UNDEFINED)        /* skip if UNDEFINED */
@@ -2157,6 +2166,18 @@ plot_hsteps (struct curve_points *plot)
     /* last point: UNDEFINED if previous point is UNDEFINED */
     if (points[np-1].z < 0.0 && state[np-2] == HSTEPS_POINT_UNDEFINED)
 	state[np-1] = HSTEPS_POINT_UNDEFINED;
+
+    /* 'boxwidth relative' for hsteps */
+    if (plot->plot_style == HSTEPS && boxwidth > 0 && ! boxwidth_is_absolute) {
+	for (i=0; i<np; i++) {
+	    /* z holds variable boxwidth */
+	    if (!filter_bins && points[i].z >= 0)
+		continue;
+	    points[i].z = boxwidth;
+	    points[i].xlow  = (1.0-boxwidth)*points[i].x + boxwidth*points[i].xlow;
+	    points[i].xhigh = (1.0-boxwidth)*points[i].x + boxwidth*points[i].xhigh;
+	}
+    }
 
     /* Emulation of steps/fsteps/fillsteps */
 
