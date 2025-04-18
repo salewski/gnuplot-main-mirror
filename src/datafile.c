@@ -3078,7 +3078,12 @@ expect_string(const signed char column)
 	return -1;
     }
 
+    /* We already know both that it's a string and what to do with it */
+    if (use_spec[column-1].expected_type >= CT_XTICLABEL)
+	return -1;
+
     use_spec[column-1].expected_type = CT_STRING;
+
     /* Nasty hack to make 'plot "file" using "A":"B":"C" with labels' work.
      * The case of named columns is handled by create_call_column_at(),
      * which fakes an action table as if '(column("string"))' was written
