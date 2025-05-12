@@ -24,10 +24,17 @@ development version.
 * CHANGE The configuration option --with-wx-multithreaded has been removed.
 	 The multi-thread code has not worked under linux for quite a while.
 	 This change does not affect the Windows version of the wxt terminal,
+* CHANGE "with hsteps" takes default width from "set boxwidth".
+* CHANGE column(0) returns an integer (not complex) value
+* CHANGE win: dll function loading altered for compatibility with gcc15
 * FIX	 Support for combined hidden3d + pm3d depthorder back-ported from 6.1
 	 This allows placing contours on a depth-sorted pm3d surface
 * FIX	 qt: opaque key caused incorrect interactive toggling of final plot
 * FIX	 6.0.2 regression in "splot ... using 1:2:3:4 lc palette"
+* FIX	 placement of category labels along x-axis of boxplots
+* FIX	 qt, cairo: "set colorbox invert" produced empty colorbox
+* FIX	 placement of minor tics along logscale axis with narrow range
+* FIX	 OK to have missing corners in an image from a sparse matrix
 	 
 
 KNOWN ISSUES
@@ -58,7 +65,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  24 March 2025
+Release Notes date:  13 May 2025
 
 
 			Changes in 6.0.2
