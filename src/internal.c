@@ -92,6 +92,7 @@ eval_reset_after_error()
     reset_stack();
     recursion_depth = 0;
     undefined = FALSE;
+    evaluate_inside_functionblock = FALSE;
     eval_fail_soft = FALSE;
 }
 
