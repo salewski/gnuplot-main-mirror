@@ -1141,6 +1141,8 @@ is_array_assignment()
 	newvalue.type = NOTDEFINED;
 	int_error(c_token, "Cannot nest arrays");
     }
+    if (udv->udv_value.type != ARRAY)
+	int_error(NO_CARET, "array %s was corrupted", udv->udv_name);
     gpfree_string(&udv->udv_value.v.value_array[index]);
     udv->udv_value.v.value_array[index] = newvalue;
 
