@@ -5,6 +5,9 @@ This is the third incremental release for gnuplot stable version 6.0.
 It contains several new features and improvements back-ported from the
 development version.
 
+NEW (backported from development version)
+-----------------------------------------
+
 * NEW	 "contourfill {at base} {fs {no}border}"
 * NEW	 "save changes <filename>"
          This variant saves only the differences between the current program
@@ -17,7 +20,13 @@ development version.
 	 Any real-valued function is legal as a watchpoint target.
 	 Current x, y, and z values are available inside a watchpoint target function.
 	 Watchpoints are possible for splot in "set view map" projection.
-* NEW	 Continued work on multiplot replot and mousing back-ported from 6.1
+	 See
+	    * https://gnuplot.info/demo_6.0/watch_contours.html
+* NEW	 Continued work on multiplot replot and mousing
+
+CHANGES
+-------
+
 * CHANGE 3D polygon objects can have per-object fill border properties.
 	 The restriction that all 3D polygons share a single set of
 	 properties from "set pm3d" remains true for "splot with polygons".
@@ -27,6 +36,10 @@ development version.
 * CHANGE "with hsteps" takes default width from "set boxwidth".
 * CHANGE column(0) returns an integer (not complex) value
 * CHANGE win: dll function loading altered for compatibility with gcc15
+
+FIXES
+-----
+
 * FIX	 Support for combined hidden3d + pm3d depthorder back-ported from 6.1
 	 This allows placing contours on a depth-sorted pm3d surface
 * FIX	 qt: opaque key caused incorrect interactive toggling of final plot
@@ -35,10 +48,17 @@ development version.
 * FIX	 qt, cairo: "set colorbox invert" produced empty colorbox
 * FIX	 placement of minor tics along logscale axis with narrow range
 * FIX	 OK to have missing corners in an image from a sparse matrix
+* FIX	 error handling for various corner cases involving function blocks
 	 
 
 KNOWN ISSUES
 ------------
+
+- Redefining a global array variable inside a user function or function block
+  may lead to memory corruption and/or a program crash.  The development version
+  now handles this cleanly, but the necessary framework has not yet been 
+  back-ported to verion 6.0.  The current version may issue the confusing error
+  message "non-numeric array index" and leave the corrupted array in place.
 
 - Font handling by the cairo/pango libraries supporting some gnuplot terminals
   (pdf, png, wxt, ...) on both Windows and MacOS are sensitive to the
@@ -65,7 +85,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  13 May 2025
+Release Notes date:  03 June 2025
 
 
 			Changes in 6.0.2
@@ -318,7 +338,7 @@ file of the source package; the short version for linux/unix-like
 systems is to unpack the tarball and then
 <PRE>
 build it:
-      cd gnuplot-6.0.2 ; ./configure ; make
+      cd gnuplot-6.0.3 ; ./configure ; make
 test it:
       make check
 install it:

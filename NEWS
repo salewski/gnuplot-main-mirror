@@ -27,6 +27,7 @@ Changes in 6.0.3
 * FIX	 qt, cairo: "set colorbox invert" produced empty colorbox
 * FIX	 placement of minor tics along logscale axis with narrow range  Bug 2765
 * FIX	 OK to have missing corners in an image from a sparse matrix    Bug 2791
+* FIX	 error handling for various cases involving function blocks     Bug 2797
 
 Changes in 6.0.2
 ================
