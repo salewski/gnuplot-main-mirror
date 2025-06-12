@@ -39,7 +39,7 @@ html: airfoil.html animation.html approximate.html armillary.html array.html arr
       timedat.html ttics.html unicode.html using.html \
       varcolor.html vector.html violinplot.html viridis.html voxel.html vplot.html \
       walls.html waterfallplot.html windrose.html world.html zerror.html \
-      watchpoints.html isosurface.html
+      watchpoints.html watch_contours.html isosurface.html
 
 index.html: index.save
 	cp index.save index.html

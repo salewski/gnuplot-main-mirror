@@ -41,7 +41,8 @@ html: airfoil.html approximate.html armillary.html array.html \
     azimuth.html projection.html \
     textbox.html transparent.html transparent_solids.html tics.html timedat.html \
     ttics.html unicode.html using.html varcolor.html vector.html violinplot.html \
-    walls.html waterfallplot.html world.html watchpoints.html windrose.html zerror.html
+    walls.html waterfallplot.html world.html watchpoints.html watch_contours.html \
+    windrose.html zerror.html
 
 index.html: index.svg
 	cp index.svg index.html
@@ -55,7 +56,6 @@ rugplot.html: random.html
 showcase_plot.svg:
 	export DEMOTERM="svg dashed enhanced font 'arial,11' mouse size 500,350 dynamic jsdir '.'"; ./webify_svg.pl --mouse transparent
 	mv transparent.2.svg showcase_plot.svg
-	rm transparent.html
 
 jsdir:
 	cp ../../term/js/gnuplot_svg.js .

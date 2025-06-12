@@ -575,6 +575,7 @@ load "isosurface.dem"
 
 print "*********************** file watchpoints.dem *********************"
 load "watchpoints.dem"
+load "watch_contours.dem"
 
 pause 2
 print "**********************   all done   ************************"
