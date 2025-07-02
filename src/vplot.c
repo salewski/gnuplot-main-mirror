@@ -322,11 +322,7 @@ tessellate_one_cube( struct surface_points *plot, int ix, int iy, int iz )
 		    quad[3].z = intersection[ivertex][2];
 
 	    /* Color choice */
-	    quad[0].c = plot->lp_properties.pm3d_color.lt;
-
-	    /* Debugging aid: light up all facets of the same class */
-	    if (debug > 0 && debug == corner_flags)
-		quad[0].c = 6+it;
+	    quad[0].c = (unsigned int) (plot->lp_properties.pm3d_color.lt);
 
 	    /* Hand off this facet to the pm3d code */
 	    pm3d_add_quadrangle( plot, quad );
@@ -359,7 +355,7 @@ tessellate_one_cube( struct surface_points *plot, int ix, int iy, int iz )
 		    quad[3] = quad[2];
 
 	    /* Color choice */
-	    quad[0].c = plot->lp_properties.pm3d_color.lt;
+	    quad[0].c = (unsigned int) (plot->lp_properties.pm3d_color.lt);
 
 	    /* Hand off this triangle to the pm3d code */
 	    pm3d_add_quadrangle( plot, quad );

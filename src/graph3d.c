@@ -4332,8 +4332,11 @@ plot3d_polygons(struct surface_points *plot)
 	else if (plot->fill_properties.border_color.type == TC_DEFAULT) {
 	    double z = pm3d_assign_triangle_z(points[0].z, points[1].z, points[2].z);
 	    quad[0].c = rgb_from_gray(cb2gray(z));
+	} else if (plot->fill_properties.border_color.type == TC_LT
+		&& plot->fill_properties.border_color.lt == LT_BACKGROUND) {
+	    quad[0].c = LT_BACKGROUND;
 	} else
-	    quad[0].c = plot->fill_properties.border_color.lt;
+	    quad[0].c = (unsigned int) plot->fill_properties.border_color.lt;
 	quad[1].c = style;
 	pm3d_add_polygon( plot, quad, nv );
     }

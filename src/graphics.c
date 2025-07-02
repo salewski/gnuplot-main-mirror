@@ -5312,10 +5312,10 @@ do_polygon( int dimensions, t_object *this_object, int style, int facing )
 		quad[nv].z = p->vertex[nv].z;
 	    }
 	    /* Allow 2-sided coloring */
-	    /* FIXME: this assumes pm3d_color.type == TC_RGB
-	     *        if type == TC_LT instead this will come out off-white
-	     */
-	    quad[0].c = this_object->lp_properties.pm3d_color.lt;
+	    if (this_object->lp_properties.pm3d_color.type == TC_RGB)
+		quad[0].c = (unsigned int) this_object->lp_properties.pm3d_color.lt;
+	    else
+		quad[0].c = this_object->lp_properties.pm3d_color.lt;
 	    if (this_object->lp_properties.pm3d_color.type == TC_LINESTYLE) {
 		int base_color = this_object->lp_properties.pm3d_color.lt;
 		struct coordinate triangle[3];
@@ -5330,7 +5330,7 @@ do_polygon( int dimensions, t_object *this_object, int style, int facing )
 		/* NB: This is sensitive to the order of the vertices */
 		side = pm3d_side( &(triangle[0]), &(triangle[1]), &(triangle[2]) );
 		lp_use_properties(&face, side < 0 ? base_color+1 : base_color);
-		quad[0].c = face.pm3d_color.lt;
+		quad[0].c = (unsigned int) face.pm3d_color.lt;
 	    }
 
 	    /* NB: This is the only call site where pm3d_add_polygon() is called with
