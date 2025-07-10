@@ -978,7 +978,9 @@ show_version(FILE *fp)
 #endif
 
 	    const char *have_cexint =
-#ifdef HAVE_CEXINT
+#if defined(HAVE_ZEXINT)
+		"+ZEXINT  ";
+#elif defined(HAVE_CEXINT)
 		"+CEXINT  ";
 #else
 		"";
