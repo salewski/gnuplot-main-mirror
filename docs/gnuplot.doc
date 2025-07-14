@@ -1147,10 +1147,18 @@ C  need @ in table, so end and restart the table !
  is not needed for printable special characters since they are handled in a
  text string like any other character. However it is useful for combining forms
  or supplemental diacritical marks (e.g. an arrow over a letter to represent
- a vector).  See `set encoding`, `utf8`, and the
-^ <a href="http://www.gnuplot.info/demo_5.4/unicode.html">
+ a vector).  See `utf8`, `string encoding`, and the
+^ <a href="http://www.gnuplot.info/demo/unicode.html">
  online unicode demo.
 ^ </a>
+
+ Note that Unicode escape codes are stored in a string without interpretation,
+ and later replaced by the character they represent when the string is printed
+ or evaluated during substring processing.  Thus after defining a string
+ S = "A + \U+03A3 B", S[5:5] evaluates to "Σ" rather than "\",
+ but (S eq S[1:*]) evaluates to FALSE because S holds the unprocessed escape
+ sequence while evaluation of S[1:*] replaces the escape sequence with the
+ UTF-8 byte sequence for Σ.  Both will display as "A + Σ B" when used in a plot.
 
 2 Environment
 ?environment
@@ -4518,6 +4526,8 @@ Ffigure_newsyntax
  In single-quoted strings, backslashes are just ordinary characters.  To get
  a single-quote (ascii 39) in a single-quoted string, it must be doubled.
  Thus the strings "d\" s' b\\" and 'd" s'' b\' are completely equivalent.
+ However, unicode escape sequences \U+xxxx are processed for both
+ single-quoted and double-quoted strings.
 
  Text justification is the same for each line of a multi-line string.
  Thus the center-justified string
