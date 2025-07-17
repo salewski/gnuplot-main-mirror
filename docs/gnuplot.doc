@@ -4226,11 +4226,6 @@ Ffigure_newsyntax
  If the name of a local variable duplicates the name of a global variable,
  the global variable is shadowed until exit from the local scope.
 #TeX \newline
- EXPERIMENTAL: As currently implemented the scope of a local variable
- extends into functions called from the code block it was declared in;
- this includes `call`, `load`, and function block invocation.
- This will probably change in the future so that the scope is strictly
- confined to the declaring code block.
 
 2 Start-up (initialization)
 ?startup
@@ -6180,8 +6175,6 @@ Ffigure_mask
  Although it is not shown here, a single mask can include multiple polygonal
  regions.
 
- The masking commands are EXPERIMENTAL. Details may change in a future release.
-
 2 parallelaxes
 Ffigure_parallel
 ?plotting styles parallelaxes
@@ -6931,8 +6924,8 @@ Ffigure_zerror
  special tokens $0, $1, ... $9 with the literal contents of <param-1> ...
  That older mechanism is no longer supported.
 
- EXPERIMENTAL:  Function blocks (new in this version) provide a more flexible
- alternative to `call`.  See `function blocks`.
+ Function blocks (new in this version) provide a more flexible alternative
+ to `call`.  See `function blocks`.
  
 3 ARGV[ ]
 ?argv
@@ -7816,9 +7809,6 @@ Ffigure_zerror
 #TeX }
 #TeX \end{minipage}
 #TeX \end{center}
-
- Use of function blocks is EXPERIMENTAL.
- Details may change before inclusion in a release version.
 #TeX \newpage
 2 help
 ?commands help
@@ -7972,11 +7962,10 @@ Ffigure_zerror
  arguments to `gnuplot`.  These are loaded in the order specified, and
  then `gnuplot` exits.
 
- EXPERIMENTAL:  It is also possible to execute commands from lines of text
- stored internally. See `function blocks`. A function block may be defined
- in-line or in an external file. Once the function block has been defined
- the commands may be executed repeatedly using `evaluate` on the internal
- copy rather than reloading the file.
+ It is also possible to execute commands from lines of text stored internally.
+ See `function blocks`. A function block may be defined in-line or read from a
+ file. The commands in a function block may be executed repeatedly by using
+ `evaluate` on the internal copy rather than reloading the file.
 
 2 local
 ?local
@@ -15198,10 +15187,9 @@ Ffigure_gradient
  options are possible.  This allows you to use separate coloring schemes for
  different surfaces in the same plot.
  
- EXPERIMENTAL: This gnuplot version introduces an option `zclip` that
- clips the generated surface smoothly at a pair of limiting z values.
- The example below animates gradual removal of the top portion of a
- two-color 3D surface.
+ This gnuplot version introduces an option `zclip` that clips the generated
+ surface smoothly at a pair of limiting z values.  The example below animates
+ gradual removal of the top portion of a two-color 3D surface.
       set style line 101 lc "gray"
       set style line 102 lc "blue"
       set pm3d depthorder
