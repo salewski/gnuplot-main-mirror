@@ -3280,6 +3280,9 @@ C ... and restart the table:
 ?user-defined variables
 ?user-defined
 ?variables
+?Inf
+?NaN
+?pi
  New user-defined variables and functions of one through twelve variables may
  be declared and used anywhere, including on the `plot` command itself.
 
@@ -3314,12 +3317,13 @@ C ... and restart the table:
 
 =NaN
 =pi
- Note that the variables `pi` (3.14159...) and `NaN` (IEEE "Not a Number") are
- already defined.  You can redefine these to something else if you really need
- to. The original values can be recovered by setting:
+=Inf
+ Variables `pi` (3.14159...), `Inf` (INFINITY), and `NaN` (IEEE "Not a Number")
+ are defined at program entry.  You can redefine these to something else if you
+ really need to. The original values can be recovered by `reset session` or by
+ setting:
 
-       NaN = GPVAL_NaN
-       pi  = GPVAL_pi
+       pi  = GPVAL_pi;  Inf = GPVAL_Inf;  NaN = GPVAL_NaN
 
  Other variables may be defined under various gnuplot operations like mousing in
  interactive terminals or fitting; see `gnuplot-defined variables` for details.
