@@ -2041,8 +2041,8 @@ C 4 FresnelS
 %_
 4 gprintf
 ?expressions functions gprintf
-#gprintf("format",x,...) & any & string result from applying gnuplot's format parser \\
-%gprintf("format",x,...)@any@string result from applying gnuplot's format parser
+#gprintf("format",x) & any & string result from applying gnuplot's format parser \\
+%gprintf("format",x)@any@string result from applying gnuplot's format parser
  `gprintf("format",x)` applies gnuplot's own format specifiers to the single
  variable x and returns the resulting string. If you want standard C-language
  format specifiers, you must instead use `sprintf("format",x)`.
@@ -11395,9 +11395,9 @@ D discrete 3
  border line style for drawing the border of the color box.
 
  The axis of the color box is called `cb` and it is controlled by means of the
- usual axes commands, i.e. `set/unset/show` with `cbrange`, `[m]cbtics`,
- `format cb`, `grid [m]cb`, `cblabel`, and perhaps even `cbdata`, `[no]cbdtics`,
- `[no]cbmtics`.
+ usual axis commands, i.e. `set/unset/show` with target properties `cbrange`,
+ `[m]cbtics`, `format cb`, `grid [m]cb`, `cblabel`, and perhaps even `cbdata`,
+ `[no]cbdtics`, `[no]cbmtics`.
 
  `set colorbox` without any parameter switches the position to default.
  `unset colorbox` resets the default parameters for the colorbox and switches
@@ -12126,8 +12126,7 @@ D heatmap_points 3
 ?set format
 ?show format
 ?format
-?format cb
- The format of the tic-mark labels can be set with the `set format` command
+ The format of the axis tic-mark labels can be set with the `set format` command
  or with the `set tics format` or individual `set {axis}tics format` commands.
  For information on using an explicit format for input data see `using format`.
 
@@ -12141,10 +12140,17 @@ D heatmap_points 3
        set format y "%.2f"
        set ytics format "%.2f"
 
- The length of the string is restricted to 100 characters.  The default format
- is "% h", "$%h$" for LaTeX terminals. Other formats such as "%.2f" or "%3.0em"
- are often desirable. "set format" with no following string will restore the
- default.
+ The format type (numeric, timedate, or geographic) controls interpretation
+ of the format string.  Numeric formats are handled by gnuplot's `gprintf`
+ routine. See `format specifiers`.  This is the default unless the axis has
+ been marked as representing time or geographic coordinates.
+ See `set xdata time`, `set xdata geographic`.
+
+ The length of the format string is restricted to 100 characters.
+ The default format is "% h", except that LaTeX terminals use  "$%h$".
+ You can modify this to provide units or a different numeric format,
+ for example 'set xtics format "%.2f MHz"'.
+ "set format" with no following string will restore the default.
 
  If the empty string "" is given, tics will have no labels, although the tic
  mark will still be plotted.  To eliminate the tic marks, use `unset xtics` or
@@ -17847,6 +17853,8 @@ Ffigure_walls
 4 geographic
 ?commands set xtics geographic
 ?set xtics geographic
+?set xdata geographic
+?set format geographic
 ?geographic
  `set xtics geographic` indicates that x-axis values are to be interpreted as
  a geographic coordinate measured in degrees.  Use `set xtics format` or
