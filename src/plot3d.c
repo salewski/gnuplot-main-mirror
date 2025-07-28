@@ -2181,37 +2181,41 @@ eval_3dplots()
 		}
 
 		/* Some plots have a fill style as well */
-		if ((this_plot->plot_style & PLOT_STYLE_HAS_FILL) && !set_fillstyle){
-		    int stored_token = c_token;
+		if (!set_fillstyle) {
+		    if ((this_plot->plot_style & PLOT_STYLE_HAS_FILL)
+		    ||  (pm3d.implicit == PM3D_IMPLICIT)) {
+			int stored_token = c_token;
 
-		    if (this_plot->plot_style == CONTOURFILL) {
-			this_plot->fill_properties.fillstyle = FS_SOLID;
-			this_plot->fill_properties.filldensity = 100;
-			if (!set_lpstyle) {
-			    /* TC_DEFAULT indicates "retrace", TC_LT would give "noborder" */
-			    this_plot->fill_properties.border_color.type = TC_DEFAULT;
-			    this_plot->fill_properties.border_color.lt = LT_NODRAW;
-			}
-		    } else {
-			this_plot->fill_properties.fillstyle = default_fillstyle.fillstyle;
-			this_plot->fill_properties.filldensity = default_fillstyle.filldensity;
-			this_plot->fill_properties.fillpattern = 1;
-			if (this_plot->fill_properties.fillstyle == FS_EMPTY)
+			if (this_plot->plot_style == CONTOURFILL) {
 			    this_plot->fill_properties.fillstyle = FS_SOLID;
+			    this_plot->fill_properties.filldensity = 100;
+			    if (!set_lpstyle) {
+				/* TC_DEFAULT indicates "retrace", TC_LT would give "noborder" */
+				this_plot->fill_properties.border_color.type = TC_DEFAULT;
+				this_plot->fill_properties.border_color.lt = LT_NODRAW;
+			    }
+			} else {
+			    this_plot->fill_properties.fillstyle = default_fillstyle.fillstyle;
+			    this_plot->fill_properties.filldensity = default_fillstyle.filldensity;
+			    this_plot->fill_properties.fillpattern = 1;
+			    if (this_plot->fill_properties.fillstyle == FS_EMPTY)
+				this_plot->fill_properties.fillstyle = FS_SOLID;
+			}
+			if (equals(c_token,"fs") || almost_equals(c_token,"fill$style")) {
+			    parse_fillstyle(&this_plot->fill_properties);
+			    set_fillstyle = TRUE;
+			}
+			if ((this_plot->plot_style == PM3DSURFACE)
+			||  (pm3d.implicit == PM3D_IMPLICIT))
+			    this_plot->fill_properties.border_color.type = TC_DEFAULT;
+			if (equals(c_token,"fc") || almost_equals(c_token,"fillc$olor")) {
+			    parse_colorspec(&fillcolor, TC_VARIABLE);
+			    set_fillstyle = TRUE;
+			    set_fillcolor = TRUE;
+			}
+			if (stored_token != c_token)
+			    continue;
 		    }
-		    if (equals(c_token,"fs") || almost_equals(c_token,"fill$style")) {
-			parse_fillstyle(&this_plot->fill_properties);
-			set_fillstyle = TRUE;
-		    }
-		    if (this_plot->plot_style == PM3DSURFACE)
-			this_plot->fill_properties.border_color.type = TC_DEFAULT;
-		    if (equals(c_token,"fc") || almost_equals(c_token,"fillc$olor")) {
-			parse_colorspec(&fillcolor, TC_RGB);
-			set_fillstyle = TRUE;
-			set_fillcolor = TRUE;
-		    }
-		    if (stored_token != c_token)
-			continue;
 		}
 
 #ifdef USE_WATCHPOINTS
@@ -2325,20 +2329,28 @@ eval_3dplots()
 	     * FIXME: make other plot styles work like BOXES.
 	     *        ZERRORFILL and CONTOURFILL are weird.
 	     */
-	    if ((this_plot->plot_style & PLOT_STYLE_HAS_FILL) && set_fillcolor) {
-		if (this_plot->plot_style == ZERRORFILL
-		||  this_plot->plot_style == FILLEDCURVES
-		||  this_plot->plot_style == CONTOURFILL) { 
-		    this_plot->fill_properties.border_color = this_plot->lp_properties.pm3d_color;
-		    this_plot->lp_properties.pm3d_color = fillcolor;
-		} else if (this_plot->plot_style == BOXES) {
-		    this_plot->lp_properties.pm3d_color = fillcolor;
-		} else if (this_plot->plot_style == CIRCLES) {
-		    this_plot->lp_properties.pm3d_color = fillcolor;
-		} else if (this_plot->plot_style == ISOSURFACE) {
-		    this_plot->lp_properties.pm3d_color = fillcolor;
+	    if ((this_plot->plot_style & PLOT_STYLE_HAS_FILL)
+	    ||  (pm3d.implicit == PM3D_IMPLICIT)) {
+		if (set_fillcolor) {
+		    if (this_plot->plot_style == ZERRORFILL
+		    ||  this_plot->plot_style == FILLEDCURVES
+		    ||  this_plot->plot_style == CONTOURFILL) {
+			this_plot->fill_properties.border_color = this_plot->lp_properties.pm3d_color;
+			this_plot->lp_properties.pm3d_color = fillcolor;
+		    } else if (this_plot->plot_style == BOXES) {
+			this_plot->lp_properties.pm3d_color = fillcolor;
+		    } else if (this_plot->plot_style == CIRCLES) {
+			this_plot->lp_properties.pm3d_color = fillcolor;
+		    } else if (this_plot->plot_style == ISOSURFACE) {
+			this_plot->lp_properties.pm3d_color = fillcolor;
+		    } else {
+			this_plot->fill_properties.border_color = fillcolor;
+		    }
 		} else {
-		    this_plot->fill_properties.border_color = fillcolor;
+		    /* fillcolor should still be the default (TC_DEFAULT) */
+		    if (this_plot->plot_style == LINES
+		    ||  this_plot->plot_style == PM3DSURFACE)
+			this_plot->fill_properties.border_color = fillcolor;
 		}
 	    }
 
