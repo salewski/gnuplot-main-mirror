@@ -272,9 +272,18 @@ TERM_PUBLIC void cairotrm_options()
 	char tmp_term_options[MAX_LINE_LEN+1] = "";
 
 	/* Initialize terminal-dependent values */
-	if ((strcmp(term->name, "pngcairo") == 0) || (strcmp(term->name, "kittycairo") == 0)) {
+	if ((strcmp(term->name, "pngcairo") == 0)) {
 	    cairo_params = &cairopng_params;
 	    cairo_params_default = &cairopng_params_default;
+	} else if ((strcmp(term->name, "kittycairo") == 0)) {
+	    int xpixels, ypixels;
+	    cairo_params = &cairopng_params;
+	    cairo_params_default = &cairopng_params_default;
+	    term_get_termsize( &xpixels, &ypixels );
+	    if (xpixels > 0 && ypixels > 0) {
+		cairo_params->width = xpixels;
+		cairo_params->height = ypixels * 0.75;
+	    }
 	} else if (strcmp(term->name, "epscairo") == 0) {
 	    cairo_params = &cairoeps_params;
 	    cairo_params_default = &cairoeps_params_default;
@@ -721,6 +730,7 @@ TERM_PUBLIC void cairotrm_options()
 	if (strcmp(term->name, "webp") == 0)
 	    WEBP_options(1);
 #endif
+
 }
 
 /* "Called once, when the device is first selected."
@@ -1107,20 +1117,24 @@ void cairotrm_text()
 		}
 #ifdef HAVE_KITTY_TERM
         } else if (strcmp(term->name, "kittycairo") == 0) {
-          base64s *b64;
-          cairo_surface_t *surface = cairo_get_target(plot.cr);
-          /* TODO: crop */
+	    base64s *b64;
+	    cairo_surface_t *surface = cairo_get_target(plot.cr);
+	    /* TODO: crop */
 	  /* Draw starting at top left of screen */
-	  if (cairo_params->anchor)
+	    if (cairo_params->anchor) {
+		fprintf(gpoutfile,  "\033[0J");
 		fprintf(gpoutfile,  "\033[H");
-          kitty_init(KITTY_FORMAT_PNG);
-          b64 = gp_alloc(sizeof(base64s), "base64s");
-          init_base64_state_data(b64, kitty_writechar, NULL);
-          cairo_surface_write_to_png_stream(surface, cairo_write_base64_callback, b64);
-          piecemeal_write_base64_data_finish(b64);
-          free(b64);
-          kitty_flush(FALSE);
-          fputc('\n', gpoutfile);
+	    }
+	    kitty_init(KITTY_FORMAT_PNG);
+	    b64 = gp_alloc(sizeof(base64s), "base64s");
+	    init_base64_state_data(b64, kitty_writechar, NULL);
+	    cairo_surface_write_to_png_stream(surface, cairo_write_base64_callback, b64);
+	    piecemeal_write_base64_data_finish(b64);
+	    free(b64);
+	    kitty_flush(FALSE);
+	    if (cairo_params->anchor)
+		fprintf(gpoutfile,  "\033[0J");
+	    fputc('\n', gpoutfile);
 #endif
         }
 
