@@ -1336,19 +1336,19 @@ endif
 	$(MAKE) DESTDIR=./gnuplot install
 ifndef M32
 ifdef RELEASE
-	7za u -mx9 gp$(SHORTVERSION)-win64-mingw.7z gnuplot
+	7z u -mx9 gp$(SHORTVERSION)-win64-mingw.7z gnuplot
 else
-	7za u -mx9 gp$(SHORTVERSION)-`date +%Y%m%d`-win64-mingw.7z gnuplot
+	7z u -mx9 gp$(SHORTVERSION)-`date +%Y%m%d`-win64-mingw.7z gnuplot
 endif
 else
 ifdef RELEASE
-	7za u -mx9 gp$(SHORTVERSION)-win32-mingw.7z gnuplot
+	7z u -mx9 gp$(SHORTVERSION)-win32-mingw.7z gnuplot
 else
-	7za u -mx9 gp$(SHORTVERSION)-`date +%Y%m%d`-win32-mingw.7z gnuplot
+	7z u -mx9 gp$(SHORTVERSION)-`date +%Y%m%d`-win32-mingw.7z gnuplot
 endif
 endif
 
 # rebuild makefile.all
-maint: 
+maint:
 	-$(RM) $(S)/makefile.all $(S)/makefile.awc
 	$(MAKE) -C $(S) srcdir=. top_srcdir=.. -f Makefile.maint makefile.all makefile.awc
