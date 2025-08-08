@@ -1,4 +1,27 @@
 
+Changes in 6.0.4
+=================
+
+* NEW	 variable Inf is pre-set to floating point INFINITY
+* NEW	 sharpen filter handles vertical edges in a step function
+* CHANGE splot with pm3d fillcolor <x> generates a matching key sample
+* CHANGE gprintf %H format is distinct from %h in utf8 context
+         %H uses dot operator between mantissa and exponent
+* CHANGE kitty terminals: default size to 100% width, 75% width of terminal
+* FIX	 kitty: support animation on a transparent background
+* FIX	 webp: support animation on a transparent background
+* FIX	 backport fixes for color assignment to pm3d surfaces
+	 "set pm3d implicit" + "with lines" treated the same as "with pm3d"
+	 adds support for "fc background"
+	 pm3d interpolate > 1 inherits rgb color assignments from the parent tile
+* FIX	 fill style of colorbox should match fill style of pm3d surface
+* FIX	 svg: fillstyle solid <frac> was incorrectly treated as transparent
+* FIX	 transparent fill color in 3D boxes and polygons		Bug 2812
+* FIX	 alpha channel colors on ARM platforms                          Bug 2812
+* FIX	 resolve ambiguous syntax in "set dashtype i (n,m)"             Bug 2814
+* FIX	 svg: font size changes within a text fragment could be lost	Bug 2816
+* FIX	 "reset session" must terminate multiplot mode
+
 Changes in 6.0.3
 =================
 * NEW	 backport "contourfill {at base} {fs {no}border}"

@@ -267,6 +267,20 @@ no longer require a special configuration option.
 Platform-specific tips
 ======================
 
+Version requirements
+--------------------
+  The code now uses some syntax from C99 that were not present in earlier
+  C standards.
+
+  The Makefile in the demo directory may require gnu make version 4.3
+  or newer.
+
+  We continue to see reports of font problems that arise from version
+  mismatches among the cairo/pango/harfbuzz/fontconfig libraries.
+  Gnuplot is a victim here, not the cause of the problems.
+
+  More information may be found in the Release Notes for the current version.
+
 Linux
 -----
 	
@@ -280,9 +294,6 @@ Linux
   fail to include "-lX11" in the string provided for auto-configuration.
   You may have to add this manually when configuring gnuplot:
       TERMLIBS="-lX11" ./configure
-  Note that some people have reported runtime problems with wxgtk 3.0.
-  If you have the option of linking to libraries for wxgtk 2.8 instead,
-  this may be preferable.  The -lX11 flag is not need in this case.
 
 Ubuntu
 ------
