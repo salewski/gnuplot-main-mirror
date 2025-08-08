@@ -2049,6 +2049,8 @@ reset_command()
     /* Reset session state as well as internal graphics state */
     if (equals(c_token, "session")) {
 	clear_udf_list();
+	if (in_multiplot)
+	    multiplot_end();
 	init_constants();
 	init_session();
 	reset_mouse();
