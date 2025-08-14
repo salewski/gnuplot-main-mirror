@@ -2959,6 +2959,9 @@ eval_3dplots()
 	    ||  this_plot->plot_style == RGBIMAGE
 	    ||  this_plot->plot_style == RGBA_IMAGE)
 		continue;
+	    if ((this_plot->plot_style == POLYGONS)
+	    ||  (this_plot->plot_style == FILLEDCURVES))
+		continue;
 	    if (this_plot->plot_type == NODATA)
 		continue;
 	    if (this_plot->plot_type == KEYENTRY)
