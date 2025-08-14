@@ -177,7 +177,7 @@ set isosamples 500,100
 splot Rosenbrock(x,y) with lines lc rgb "#007700"
 
 set isosamples 50,50
-set cntrlabel start 25 interval -1 font ",7"
+set cntrlabel start 25 interval 100 font ",7"
 splot Rosenbrock(x,y) with labels boxed
 
 unset multiplot
