@@ -565,7 +565,7 @@ lf_push(FILE *fp, char *name, char *cmdline)
     lf->call_argc = call_argc;
 
     lf->depth = lf_head ? lf_head->depth+1 : 1;	/* recursion depth */
-    if (lf->depth > STACK_DEPTH)
+    if (lf->depth > MAX_RECURSION_DEPTH)
 	int_error(NO_CARET, "load/eval nested too deeply");
 
     /* call/load/functionblock all establish a new scope for local variables.
