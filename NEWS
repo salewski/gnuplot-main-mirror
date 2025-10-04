@@ -10,6 +10,10 @@ Changes in 6.0.4
 	 %Ci formats a complex value as a + bi
 	     Both the real and imaginary parts are printed using libc format %g
 	     with optional width and precision
+* NEW	 Allow installation of 64bit version on Windows on ARM systems
+* NEW	 mingw: optionally use the MSYS2/CLANG64 environment
+	 Support for cross-compilation for Windows on ARM
+* CHANGE update configure and headers for better compatibility with c23/gcc15
 * CHANGE splot with pm3d fillcolor <x> generates a matching key sample
 * CHANGE gprintf %H format is distinct from %h in utf8 context
          %H uses dot operator between mantissa and exponent
@@ -35,6 +39,9 @@ Changes in 6.0.4
 * FIX	 svg: font size changes within a text fragment could be lost    Bug 2816
 * FIX	 "reset session" must terminate multiplot mode
 * FIX	 determination of above/below in polar mode filledcurves        Bug 2825
+* FIX	 always flush hidden3d line cache if present                    Bug 2836
+* FIX	 incorrect evaluation of a**b for integer a, integer b < 0
+	 in the case of "set overflow NaN" or "set overflow undefined"
 
 Changes in 6.0.3
 =================

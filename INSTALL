@@ -269,8 +269,14 @@ Platform-specific tips
 
 Version requirements
 --------------------
-  The code now uses some syntax from C99 that were not present in earlier
+  The code now uses some syntax from c99 that were not present in earlier
   C standards.
+
+  Recent version of gcc (staring with gcc 15) default to -std=c23
+  Unfortunately some bits of the gnuplot code are not yet fully compliant
+  with c23.  You may need to force an earlier baseline standard by setting
+     CFLAGS = "-std=gnu17"  (the previous default for gcc)
+  before running ./configure
 
   The Makefile in the demo directory may require gnu make version 4.3
   or newer.
@@ -283,7 +289,7 @@ Version requirements
 
 Linux
 -----
-	
+
   lua: ./configure may fail to find lua support if the package configuration
   tool is installed as "lua5.1" or "lua5.3" rather than "lua".  If necessary,
   you can fix this by adding a symlink prior to running ./configure
