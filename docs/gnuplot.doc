@@ -12225,6 +12225,7 @@ D heatmap_points 3
        %h or %H     like %g with "x10^{%S}" or "*10^{%S}" instead of "e%S"
        %x or %X     hex
        %o or %O     octal
+       %C or %Ci    complex value
        %t           mantissa to base 10
        %l           mantissa to base of current logscale
        %s           mantissa to base of current logscale; scientific power
@@ -12245,6 +12246,7 @@ D heatmap_points 3
 #\verb@%h@ or \verb@%H@ & like \verb@%g with "x10^{%S}" or "*10^{%S}" instead of "e%S"@ \\
 #\verb@%x@ or \verb@%X@ & hex \\
 #\verb@%o@ or \verb@%O@ & octal \\
+#\verb@%C@ or \verb@%Ci@ & complex value \\
 #\verb@%t@ & mantissa to base 10 \\
 #\verb@%l@ & mantissa to base of current logscale \\
 #\verb@%s@ & mantissa to base of current logscale; scientific power \\
@@ -12264,6 +12266,7 @@ D heatmap_points 3
 %%h or %H@like %g with "x10^{%S}" or "*10^{%S}" instead of "e%S"
 %%x or %X@hex
 %%o or %O@octal
+%%C or %Ci@complex value
 %%t@mantissa to base 10
 %%l@mantissa to base of current logscale
 %%s@mantissa to base of current logscale; scientific power
@@ -12291,6 +12294,7 @@ D heatmap_points 3
 ^<tr>    <td><tt>%h</tt> or <tt>%H</tt></td>    <td><tt>%g</tt> with "x10^{%S}" or "*10^{%S}" instead of "e%S"</td></tr>
 ^<tr>    <td><tt>%x</tt> or <tt>%X</tt></td>    <td>hex</td></tr>
 ^<tr>    <td><tt>%o</tt> or <tt>%O</tt></td>    <td>octal</td></tr>
+^<tr>    <td><tt>%C</tt> or <tt>%Ci</tt></td>    <td>complex value</td></tr>
 ^<tr>    <td><tt>%t</tt></td>    <td>mantissa to base 10</td></tr>
 ^<tr>    <td><tt>%l</tt></td>    <td>mantissa to base of current logscale</td></tr>
 ^<tr>    <td><tt>%s</tt></td>    <td>mantissa to base of current logscale; scientific power</td></tr>
@@ -12344,6 +12348,15 @@ D heatmap_points 3
  If the data type for the axis is time/date, the format string must contain
  valid codes for the 'strftime' function (outside of `gnuplot`, type "man
  strftime").  See `set timefmt` for a list of the allowed input format codes.
+4 Complex format specifiers
+?gprintf complex
+ gprintf offers two format specifiers, %C and %Ci, to print a complex value.
+ Both apply format %g separately to the real and imaginary components using
+ any optional field modifiers that were given.
+
+ Suppose complex Z = {1.2, -3.4}.
+      gprintf("%C", Z) produces the string "{1.2, -3.4}"
+      gprintf("%Ci", Z) produces the string "1.2 - 3.4i"
 4 time/date specifiers
 ?commands set format date_specifiers
 ?commands set format time_specifiers
