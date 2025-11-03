@@ -1185,6 +1185,11 @@ f_power(union argument *arg)
 		}
 		(void) Ginteger(&result, t);
 		break;
+	    } else {
+		/* a**b where b is negative */
+		double mag = pow((double)a.v.int_val,(double)b.v.int_val);
+		Gcomplex(&result, mag, 0.0);
+		break;
 	    }
 	integer_power_overflow:
 	    if (overflow_handling == INT64_OVERFLOW_NAN) {
