@@ -520,7 +520,11 @@ endif
 	MOC = $(QT_BIN)/moc
 	UIC = $(QT_BIN)/uic
 	RCC = $(QT_BIN)/rcc
-	LRELEASE = $(QT_BIN)/lrelease
+ifdef QT6
+	LRELEASE = lrelease-qt6
+else
+	LRELEASE = lrelease
+endif
 	QT_FILES_TARGETS  = qrc_QtGnuplotResource.cpp ui_QtGnuplotSettings.h moc_QtGnuplotWindow.cpp moc_QtGnuplotApplication.cpp 
 	QT_FILES_TARGETS += moc_QtGnuplotWidget.cpp moc_QtGnuplotScene.cpp moc_QtGnuplotEvent.cpp
 	QT_TRANSLATION = qtgnuplot_fr.qm qtgnuplot_ja.qm
@@ -600,7 +604,7 @@ endif
 ifdef DIRECT2D11
 	CFLAGS += -DHAVE_D2D11
 	TERMLIBS += -ld3d11 -ldxguid -lwindowscodecs -lprntvpt
-	EXTRALIBS += prntvpt.lib
+	# EXTRALIBS += prntvpt.lib
 endif
 
 ifdef GNU_RC
@@ -720,7 +724,7 @@ ifdef MINGW64
 LDFLAGS2 += -L.
 endif
 ifndef M32
-	EXTRALIBS += htmlhelp.lib
+	# EXTRALIBS += htmlhelp.lib
 endif
 
 # pull in dependency info for existing object files
@@ -1219,7 +1223,6 @@ endif
 # docs
 	mkdir -p $(DESTDIR)/docs
 	-cp -p gnuplot.pdf $(DESTDIR)/docs/
-	cp -p FAQ.pdf $(DESTDIR)/docs/FAQ.pdf
 	mkdir -p $(DESTDIR)/docs/psdoc
 	cp -p $(D)psdoc/ps_file.doc $(DESTDIR)/docs/psdoc/ps_file_doc.txt
 	cp -p $(D)psdoc/ps_guide.ps $(DESTDIR)/docs/psdoc/
