@@ -17,13 +17,17 @@ Changes in 6.0.4
 * CHANGE splot with pm3d fillcolor <x> generates a matching key sample
 * CHANGE gprintf %H format is distinct from %h in utf8 context
          %H uses dot operator between mantissa and exponent
-* CHANGE kitty terminals: default size to 100% width, 75% width of terminal
+* CHANGE kitty, sixel: default size to 100% width, 75% height of terminal window
 * CHANGE partially deprecate the "sample" keyword for plot commands
 	 The plot command accepts axis ranges as the first thing after "plot".
 	 If present, they update the primary axis ranges x y x2 y2.
 	 If a second colon is found in the range, as in [t=min:max:increment],
 	 this is unambiguously a sample range rather than an axis range so
 	 the "sample" keyword is not required.                          Bug 2666
+* CHANGE do not break contour lines into 100-segment fragments
+	 This fixes a bug when saved contour lines are used as polygons.
+	 To maintain previous placement of contour labels, use
+	 "set cntrlabl interval 100".
 * FIX	 sixel: improved support for a transparent background           Bug 2828
 * FIX	 kitty: support animation on a transparent background
 * FIX	 webp:  support animation on a transparent background
@@ -42,6 +46,7 @@ Changes in 6.0.4
 * FIX	 always flush hidden3d line cache if present                    Bug 2836
 * FIX	 incorrect evaluation of a**b for integer a, integer b < 0
 	 in the case of "set overflow NaN" or "set overflow undefined"
+* FIX	 loss of precision in some ranges for asin acos asinh acosh     Bug 2839
 
 Changes in 6.0.3
 =================

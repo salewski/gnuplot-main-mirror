@@ -8,33 +8,38 @@ development version. Builds for Windows now support ARM 64-bit architectures.
 Changes in 6.0.4
 =================
 
-NEW (backported from development version)
------------------------------------------
+NEW (back-ported from development version)
+------------------------------------------
 * variable Inf is pre-set to floating point INFINITY
 * "sharpen" filter handles vertical edges in a step function
 * gprintf format specifiers %C and %Ci
-  %C  formats a complex value as {a, b}
+  - %C  formats a complex value as {a, b}
       This is the format used by the gnuplot "print" command
-  %Ci formats a complex value as a + bi
+  - %Ci formats a complex value as a + bi
       Both the real and imaginary parts are printed using libc format %g
       with optional width and precision
 * Support for Windows on ARM 64-bit architectures
-  mingw: optionally use the MSYS2/CLANG64 environment
-  Cross-compilation for Windows on ARM is possible using MSYS2/CLANG64/CLANGARM64
+  - mingw: optionally use the MSYS2/CLANG64 environment
+  - Cross-compilation for Windows on ARM is possible using MSYS2/CLANG64/CLANGARM64
 
 CHANGES
 -------
-* update configure script for better compatibility with gcc 15
+* better adherence to c23 standard
 * splot with pm3d fillcolor <x> generates a matching key sample
 * gprintf %H format is distinct from %h in utf8 context
-  %H uses dot operator between mantissa and exponent
-* kitty terminals: default size to 100% width, 75% width of terminal
-* partially deprecate the "sample" keyword for plot commands
+  - %H uses dot operator between mantissa and exponent
+* kitty, sixel: default size to 100% width, 75% height of terminal window
+* Partially deprecate the "sample" keyword for plot commands.
   The plot command accepts axis ranges as the first thing after "plot".
   If present, they update the primary axis ranges x y x2 y2.
-  If a second colon is found in the range, as in [t=min:max:increment],
-  this is unambiguously a sample range rather than an axis range so
-  the "sample" keyword is not required.
+  However if this is preced by the keyword "sample" it refers to a sampling range
+  rather than an axis range.  If a second colon is found in the range,
+  as in [t=min:max:increment], this is unambiguously a sample range so the
+  "sample" keyword is not required.
+* Do not break contour lines into 100-segment fragments.
+  - This fixes a bug when saved contour lines are used as polygons.
+  - To maintain previous placement of contour labels along long contours, use
+  "set cntrlabl interval 100".
 
 FIXES
 -----
@@ -42,9 +47,9 @@ FIXES
 * kitty: support animation on a transparent background
 * webp:  support animation on a transparent background
 * backport fixes for color assignment to pm3d surfaces
-  "set pm3d implicit" + "with lines" treated the same as "with pm3d"
-  adds support for "fc background"
-  pm3d interpolate > 1 inherits rgb color assignments from the parent tile
+  - "set pm3d implicit" + "with lines" treated the same as "with pm3d"
+  - adds support for "fc background"
+  - pm3d interpolate > 1 inherits rgb color assignments from the parent tile
 * fill style of colorbox should match fill style of pm3d surface
 * svg: fillstyle solid <frac> was incorrectly treated as transparent
 * transparent fill color in 3D boxes and polygons
@@ -56,6 +61,7 @@ FIXES
 * always flush cached lines from hidden3d if any are present
 * incorrect evaluation of a**b for integer a, integer b < 0
   in the case that overflow handling has been set to "NaN" or "undefined"
+* loss of precision in some ranges for asin acos asinh acosh
 
 
 KNOWN ISSUES
@@ -63,8 +69,8 @@ KNOWN ISSUES
 
 - Recent releases of gcc version 15 default to -std=c23 but the gnuplot
   source is not fully compliant with c23.  You may need to add a compiler flag
-      CFLAGS="-std=gnu17" (the previous default). 
   before running ./configure and building the program.
+	CFLAGS="-std=gnu17" (the previous default). 
 
 - Font handling by the cairo/pango libraries supporting some gnuplot terminals
   (pdf, png, wxt, ...) on both Windows and MacOS are sensitive to the
@@ -91,7 +97,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  03 November 2025
+Release Notes date:  01 December 2025
 
 
 			Changes in 6.0.3
