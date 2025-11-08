@@ -145,15 +145,6 @@ CERF=1
 # (not recommended)
 #GNUREADLINE=1
 
-# Uncomment if you want to use watchpoints
-WATCHPOINTS=1
-
-# Uncomment if you want to use polar grid
-POLAR_GRID=1
-
-# Uncomment if you want to use functionblocks
-FUNCTIONBLOCKS=1
-
 # Uncomment if you want a stable sort for pm3d and hidden3d surfaces
 STABLE_SORT=1
 
