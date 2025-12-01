@@ -387,7 +387,13 @@ gp_read_history(const char *filename)
 	return errno;
     }
 }
-#endif
+#else  /* GNUPLOT_HISTORY */
+int
+gp_read_history(const char *filename)
+{
+    return 0;
+}
+#endif /* GNUPLOT_HISTORY */
 
 
 #ifdef USE_READLINE
