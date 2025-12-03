@@ -456,6 +456,24 @@ D viridis 1
 ## act as you would like.  This will be improved in the future.
 #end
 
+ Multiplot restrictions (new in version 6)
+#start
+#b Some commands such as "set terminal" and "set output" are not accepted
+## inside a multiplot.
+#b Inline data from a plot command using '-' as an input file is not saved,
+## so replotting or mousing will fail. To plot and save inline data,
+## place the data in a named datablock. Example below.
+#end
+
+      $DATA << EOD
+      1 2 3
+      4 5 6
+      EOD
+      set multiplot
+        plot $DATA using 1:2 with points pt 5
+        plot $DATA using 1:3 with points pt 6
+      unset multiplot
+
 3 New terminals and terminal options
 ?new terminals
 #start
