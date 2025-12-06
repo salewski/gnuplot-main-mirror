@@ -173,6 +173,13 @@ TERM_PUBLIC void ENHGD_boxed_text(unsigned int, unsigned int, int);
 # define gdUseFontConfig(x) 0
 #endif
 
+#if !GD_MIN_VERSION(2,1,0)
+#  ifndef gdEffectNormal
+#    define gdEffectNormal 2
+#    define gdEffectReplace 0
+#  endif
+#endif
+
 /* These intermediate functions are necessary on Windows since
    the shared version of libgd uses a different calling convention
    and there is no proper macro defined.
