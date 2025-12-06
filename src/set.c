@@ -65,8 +65,8 @@
 #include <ctype.h>
 #ifdef USE_MOUSE
 #include "mouse.h"
-#include "multiplot.h"
 #endif
+#include "multiplot.h"
 #include "encoding.h"
 #include "voxelgrid.h"
 #include "watch.h"

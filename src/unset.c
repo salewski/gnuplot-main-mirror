@@ -2116,9 +2116,7 @@ reset_command()
      * suppress some of the commentary output by the individual
      * unset_...() routines. */
     interactive = FALSE;
-#ifdef USE_MOUSE
     reset_since_last_plot = TRUE;
-#endif
 
     unset_samples();
     unset_isosamples();
