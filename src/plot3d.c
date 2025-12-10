@@ -1693,6 +1693,7 @@ eval_3dplots()
 	    TBOOLEAN set_labelstyle = FALSE;
 	    TBOOLEAN set_fillstyle = FALSE;
 	    TBOOLEAN set_fillcolor = FALSE;
+	    TBOOLEAN set_lc =FALSE;
 	    t_colorspec fillcolor = DEFAULT_COLORSPEC;
 	    TBOOLEAN set_smooth = FALSE;
 
@@ -2114,6 +2115,7 @@ eval_3dplots()
 		if (this_plot->plot_style != LABELPOINTS) {
 		    int stored_token = c_token;
 		    struct lp_style_type lp = DEFAULT_LP_STYLE_TYPE;
+		    t_colorspec starting_lc;
 		    int new_lt = 0;
 
 		    lp.l_type = line_num;
@@ -2125,12 +2127,15 @@ eval_3dplots()
 			lp_use_properties(&lp, line_num+1);
 		    else
 			load_linetype(&lp, line_num+1);
+		    starting_lc = lp.pm3d_color;
 
  		    new_lt = lp_parse(&lp, LP_ADHOC,
 			     this_plot->plot_style & PLOT_STYLE_HAS_POINT);
 
 		    checked_once = TRUE;
 		    if (stored_token != c_token) {
+			if (memcmp(&starting_lc, &lp.pm3d_color, sizeof(t_colorspec)))
+			    set_lc = TRUE;
 			if (set_lpstyle) {
 			    duplication=TRUE;
 			    break;
@@ -2338,6 +2343,11 @@ eval_3dplots()
 			this_plot->fill_properties.border_color = this_plot->lp_properties.pm3d_color;
 			this_plot->lp_properties.pm3d_color = fillcolor;
 		    } else if (this_plot->plot_style == BOXES) {
+			this_plot->lp_properties.pm3d_color = fillcolor;
+		    } else if (this_plot->plot_style == POLYGONS) {
+			if (set_lc && !set_fillstyle)
+			    this_plot->fill_properties.border_color
+				= this_plot->lp_properties.pm3d_color;
 			this_plot->lp_properties.pm3d_color = fillcolor;
 		    } else if (this_plot->plot_style == CIRCLES) {
 			this_plot->lp_properties.pm3d_color = fillcolor;
