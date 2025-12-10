@@ -4342,12 +4342,13 @@ ytick2d_callback(
     }
 
     /* we precomputed tic posn and text posn */
-    (*t->move) (tic_start, y);
-    (*t->vector) (tic_start + ticsize, y);
-
-    if (tic_mirror >= 0) {
-	(*t->move) (tic_mirror, y);
-	(*t->vector) (tic_mirror - ticsize, y);
+    if (y >= plot_bounds.ybot && y <= plot_bounds.ytop) {
+	(*t->move) (tic_start, y);
+	(*t->vector) (tic_start + ticsize, y);
+	if (tic_mirror >= 0) {
+	    (*t->move) (tic_mirror, y);
+	    (*t->vector) (tic_mirror - ticsize, y);
+	}
     }
 
     /* If grid_tics_in_front, defer tic labels until LAYER_FOREGROUND */
