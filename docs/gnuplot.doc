@@ -1582,7 +1582,7 @@ C marker below is used to signal this to doc2html:
  The `airy(x)` function returns the value of the Airy function Ai(x) of its
  argument. The function Ai(x) is that solution of the equation y'' - x y = 0
  which is everywhere finite. If the argument is complex, its imaginary part
- is ignored.
+ is ignored.  For complex Airy functions see `Ai`.
 4 arg
 ?expressions functions arg
 ?arg
