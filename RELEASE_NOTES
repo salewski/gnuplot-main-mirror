@@ -78,6 +78,14 @@ KNOWN ISSUES
   try setting this to
 	PANGOCAIRO_BACKEND=fc
 
+- The libgd terminals (png/jpeg/sixelgd) may mangle the character spacing
+  of rotated text, especially vertical text.  This is due to version mismatches
+  with the shared libraries libgd.so and libraqm.so.  I do not know the full
+  set of which pairs of versions work nicely with each other, but these recent
+  versions do not suffer from this problem when used together.
+	- libgd   version 2.4.0     (libgd.so.3)
+	- libraqm version 0.10.3 
+
 - Support for replot and pan/zoom mouse operations in multiplot mode is still
   incomplete. Expect further improvement in subsequent releases.
 
@@ -97,7 +105,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  01 December 2025
+Release Notes date:  21 December 2025
 
 
 			Changes in 6.0.3
