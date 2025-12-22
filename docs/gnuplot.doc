@@ -12392,6 +12392,20 @@ D heatmap_points 3
  Suppose complex Z = {1.2, -3.4}.
       gprintf("%C", Z) produces the string "{1.2, -3.4}"
       gprintf("%Ci", Z) produces the string "1.2 - 3.4i"
+
+ The output of "%Ci" can be further customized by the command `set imaginary_i`
+ to replace the character "i" that follows the imaginary component with a
+ different character or character sequence.
+ See `imaginary_i`.
+
+ Examples:
+      Z = {1.2222, 0.3333}
+      gprintf("%.2C", Z)            # {1.2, 0.33}
+      gprintf("%.3Ci", Z)           # 1.22 + 0.333i
+      set imaginary_i "{/Times*0.5 im}"
+      gprintf("[%Ci]", Z)           # [1.2222 + 0.3333im]
+      gprintf("[%.1Ci]", -Z)        # [-1 - 0.3im]
+
 4 time/date specifiers
 ?commands set format date_specifiers
 ?commands set format time_specifiers
@@ -12834,6 +12848,62 @@ D hidden 6
  by removing earlier instances of the current command.
 
  Default settings: `set history size 500 numbers trim`.
+3 imaginary_i
+?commands set imaginary_i
+?set imaginary_i
+?imaginary_i
+ Syntax:
+      set imaginary_i {"<character string>"}
+
+ The gprintf format specifier %Ci prints a complex value {A,B} as A + Bi
+ (see `gprintf complex`). The command `set imaginary_i "<character string>"`
+ modifies the action of %Ci by replacing the character "i" with the
+ character string requested. Common conventions for this string are shown in
+ the table below.  If no character string is given, the default is restored.
+
+@start table
+  character string          Result          Convention
+                            A + Bi          default
+  "\imath"                  A + Bi          may be necessary for LaTeX output
+  "{/:Italic i}"            A + Bi          gnuplot enhanced text markup
+  "\U+2148"                 A + Bⅈ          Unicode DOUBLE-STRUCK ITALIC SMALL I
+  "\U+1D456"                A + B𝑖          Unicode MATHEMATICAL ITALIC SMALL I
+  "im"                      A + Bim         Julia
+  "j"                       A + Bj          Numpy
+
+#\begin{tabular}{|lll|} \hline
+#character string & result & convention \\
+#\hline
+#\verb~   ~ & A+Bi & default \\
+#\verb~"\imath"~ & {$A+B\imath$} & may or may not be necessary for LaTeX output \\
+#\verb~"{/:Italic i}"~ & A + B{\emph i} & gnuplot enhanced text markup \\
+#\verb~"\U+2148"~ & A + Bⅈ & Unicode DOUBLE-STRUCK ITALIC SMALL I \\
+#\verb~"\U+1D456"~ & A + B$i$ & Unicode MATHEMATICAL ITALIC SMALL I \\
+#\verb~"im"~ & A + Bim & Julia \\
+#\verb~"j"~ & A + Bj & Numpy \\
+#
+@end table
+
+^<table align="center" border="1" rules="groups" frame="hsides" cellpadding="3">
+^<colgroup>
+^  <col align="left">
+^  <col align="left">
+^  <col align="left">
+^</colgroup>
+^<thead>
+^<tr>    <th>character string</th>  <th>result</th>  <th>convention</th> </tr>
+^</thead>
+^<tbody>
+^<tr>  <td></td>    <td>A+Bi</td>  <td>default</td> </tr>
+^<tr>  <td>"\imath"</td>    <td><em>A+Bi</em></td>  <td>may or may not be necessary for LaTeX</td> </tr>
+^<tr>  <td>"{/:Italic i}"</td>    <td>A+B<em>i</em></td>  <td>gnuplot enhanced text markup</td> </tr>
+^<tr>  <td>"\U+2148"</td>    <td>A+Bⅈ</td>  <td>Unicode DOUBLE-STRUCK ITALIC SMALL I</td> </tr>
+^<tr>  <td>"\U+1D456"</td>    <td>A+B������</td>  <td>Unicode MATHEMATICAL ITALIC SMALL I</td> </tr>
+^<tr>  <td>"im"</td>    <td>A+Bim</td>  <td>Julia</td> </tr>
+^<tr>  <td>"j"</td>    <td>A+Bj</td>  <td>Numpy</td> </tr>
+^</tbody>
+^</table>
+
 3 isosamples
 ?commands set isosamples
 ?commands show isosamples
