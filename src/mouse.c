@@ -297,6 +297,8 @@ static void do_save_3dplot(struct surface_points *, int, REPLOT_TYPE);
 static void load_mouse_variables(double, double, TBOOLEAN, int);
 static TBOOLEAN mouse_is_outside_plot(void);
 static TBOOLEAN mouse_outside_active_region(void);
+static TBOOLEAN mouse_inside_panel(BoundingBox *panel);
+static int which_panel(int mx, int my);
 
 static void do_zoom_in_around_mouse(void);
 static void do_zoom_out_around_mouse(void);
@@ -406,6 +408,10 @@ mouse_from_saved_mapping(int pos, axis_mapping *map)
 {
     double frac;
 
+    /* The mapping is out of date */
+    if (!map->in_use)
+	return NAN;
+
     /* Logscale is possible, but not general nonlinear */
     if (map->nonlinear)
 	return NAN;
@@ -478,13 +484,20 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
      * valid but the mouse coordinates can still be tracked and reported
      * if we stored axis range information along with active_bounds.
      * FIXME:
-     *   Nonlinear axes cannot be handled this way, should we emit a warning?
+     * - Nonlinear axes cannot be handled this way, should we emit a warning?
      */
     if (reset_since_last_plot) {
-	*x = mouse_from_saved_mapping(xx, &x_mapping);
-	*y = mouse_from_saved_mapping(yy, &y_mapping);
-	*x2 = mouse_from_saved_mapping(xx, &x2_mapping);
-	*y2 = mouse_from_saved_mapping(yy, &y2_mapping);
+	int panel = 0;
+	for (int p = 0; p < multiplot_last_panel; p++) {
+	    if (mouse_inside_panel(&(panel_bounds[panel]))) {
+		panel = p;
+		break;
+	    }
+	}
+	*x = mouse_from_saved_mapping(xx, &x_mapping[panel]);
+	*y = mouse_from_saved_mapping(yy, &y_mapping[panel]);
+	*x2 = mouse_from_saved_mapping(xx, &x2_mapping[panel]);
+	*y2 = mouse_from_saved_mapping(yy, &y2_mapping[panel]);
 	return;
     }
 
@@ -1057,38 +1070,15 @@ incr_mousemode(const int amount)
 void
 UpdateStatusline()
 {
-    if (last_plot_was_multiplot && mouse_outside_active_region()) {
-	if (term->put_tmptext)
-	    (term->put_tmptext) (0, "inactive region of multiplot");
-	return;
-    }
-
     UpdateStatuslineWithMouseSetting(&mouse_setting);
 }
 
 static void
 UpdateStatuslineWithMouseSetting(mouse_setting_t * ms)
 {
+    int panel;
     char s0[256], *sp;
     s0[0] = 0;
-
-#if (0)
-    /* This suppresses mouse coordinate update after a ^C */
-
-    /* History:
-     *	This check was present in version 4,
-     *	disabled in versions 5.0 and 5.2 with a comment that
-     *	any terminal driver that cared should check for itself,
-     *	and then reenabled in 5.4 without comment when similar checks
-     *  were added elsewhere.
-     * Jul 2025:
-     *	The loss of mousing after ^C is annoying.
-     *	Disable this check again (as it was in 5.0 - 5.2) with
-     *	the intent to find a terminal-specific fix if needed.
-     */
-    if (!term_initialised)
-	return;
-#endif
 
     if (!ms->on)
 	return;
@@ -1105,23 +1095,45 @@ UpdateStatuslineWithMouseSetting(mouse_setting_t * ms)
 	strcat(format, ", ");
 	strcat(format, ms->fmt);
 	snprintf(s0, 255, format, surface_rot_x, surface_rot_z, surface_scale, surface_zscale);
-    } else if ((!TICS_ON(SECOND_X_AXIS) && !TICS_ON(SECOND_Y_AXIS))
+	if (term->put_tmptext)
+	    (term->put_tmptext) (0, s0);
+	return;
+    }
+
+    /* Allow multiplot mousing */
+    panel = 0;
+    if (last_plot_was_multiplot || in_multiplot) {
+	panel = which_panel(mouse_x, mouse_y);
+	if (panel >= 0) {
+	    real_x = mouse_from_saved_mapping(mouse_x, &x_mapping[panel]);
+	    real_y = mouse_from_saved_mapping(mouse_y, &y_mapping[panel]);
+	    real_x2 = mouse_from_saved_mapping(mouse_x, &x2_mapping[panel]);
+	    real_y2 = mouse_from_saved_mapping(mouse_y, &y2_mapping[panel]);
+	} else {
+	    if (term->put_tmptext)
+		term->put_tmptext(0, "panel not moused");
+	    FPRINTF((stderr, "mouse %d %d panel not found\n", mouse_x, mouse_y));
+	    return;
+	}
+    }
+
+    if ((!TICS_ON(SECOND_X_AXIS) && !TICS_ON(SECOND_Y_AXIS))
 	   && !reset_since_last_plot) {
 	/* only first X and Y axis are in use */
 	sp = GetAnnotateString(s0, 255, real_x, real_y, mouse_mode, mouse_alt_string);
 	if (ruler.on)
 	    GetRulerString(sp, real_x, real_y);
-    } else if (reset_since_last_plot && r_mapping.active) {
+    } else if (reset_since_last_plot && r_mapping[panel].active) {
 	double r;
 	double phi = atan2(real_y, real_x);
-        double rmin = r_mapping.min;
+        double rmin = r_mapping[panel].min;
 	double theta = phi / DEG2RAD;
-	double theta_origin = theta_mapping.min;
-	double theta_direction = theta_mapping.max;
+	double theta_origin = theta_mapping[panel].min;
+	double theta_direction = theta_mapping[panel].max;
 	theta = (theta - theta_origin) * theta_direction;
 	if (theta > 180.)
 	    theta = theta - 360.;
-	if (r_mapping.max < r_mapping.min)
+	if (r_mapping[panel].max < r_mapping[panel].min)
 	    r = rmin - real_x / cos(phi);
 	else
 	    r = rmin + real_x / cos(phi);
@@ -1140,12 +1152,12 @@ UpdateStatuslineWithMouseSetting(mouse_setting_t * ms)
 	    sp = mkstr(sp, real_y, FIRST_Y_AXIS);
 	    *sp++ = ' ';
 	}
-	if (TICS_ON(SECOND_X_AXIS) || (reset_since_last_plot && x2_mapping.active)) {
+	if (TICS_ON(SECOND_X_AXIS) || (reset_since_last_plot && x2_mapping[panel].active)) {
 	    sp = stpcpy(sp, "x2=");
 	    sp = mkstr(sp, real_x2, SECOND_X_AXIS);
 	    *sp++ = ' ';
 	}
-	if (TICS_ON(SECOND_Y_AXIS) || (reset_since_last_plot && y2_mapping.active)) {
+	if (TICS_ON(SECOND_Y_AXIS) || (reset_since_last_plot && y2_mapping[panel].active)) {
 	    sp = stpcpy(sp, "y2=");
 	    sp = mkstr(sp, real_y2, SECOND_Y_AXIS);
 	    *sp++ = ' ';
@@ -1834,6 +1846,32 @@ mouse_outside_active_region(void)
 	return TRUE;
 
     return FALSE;
+}
+
+static TBOOLEAN
+mouse_inside_panel(BoundingBox *panel)
+{
+    if (mouse_x >= panel->xleft && mouse_x <= panel->xright
+    &&  mouse_y >= panel->ybot && mouse_y <= panel->ytop)
+	return TRUE;
+
+    return FALSE;
+}
+
+static int
+which_panel(int mx, int my)
+{
+    /* Search panels in reverse order so that an inset will */
+    /* be found before the larger panel it is embedded in.  */
+    if (in_multiplot || last_plot_was_multiplot)
+	for (int p = multiplot_highest_panel; p >= 0; p--) {
+	    if (mouse_inside_panel(&(panel_bounds[p]))) {
+//		multiplot_event_panel = p;
+		return p;
+	    }
+	}
+    /* Not in a multiplot panel */
+    return -1;
 }
 
 /* Return a new upper or lower axis limit that is a linear

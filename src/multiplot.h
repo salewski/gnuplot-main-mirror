@@ -7,12 +7,11 @@ void replay_multiplot(void);
 void multiplot_reset_after_error(void);
 void multiplot_use_size_and_origin(void);
 int multiplot_current_panel(void);
-TBOOLEAN multiplot_auto(void);
 
 extern TBOOLEAN multiplot_playback;	/* TRUE while inside "remultiplot" playback */
 extern TBOOLEAN suppress_multiplot_save;/* TRUE while inside a for/while loop */
 extern int multiplot_last_panel;	/* only this panel will work for zooming */
-extern BoundingBox panel_bounds;		/* terminal coords of next panel to be drawn */
+extern int multiplot_highest_panel;	/* the highest panel number actually used */
 
 /* Some commands (pause, reset, ...) would be problematic if executed during
  * multiplot playback.  Invoke this from the command that should be filtered.
@@ -22,3 +21,14 @@ extern BoundingBox panel_bounds;		/* terminal coords of next panel to be drawn *
 	    while (!END_OF_COMMAND) c_token++; \
 	    return; \
 	}
+
+/*
+ * multiplot mousing structures
+ */
+#define MAX_PANELS 16
+extern BoundingBox panel_bounds[MAX_PANELS];	/* terminal coords of next panel */
+#ifdef USE_MOUSE
+extern axis_mapping x_mapping[], x2_mapping[], y_mapping[], y2_mapping[];
+extern axis_mapping r_mapping[], theta_mapping[];
+#endif
+

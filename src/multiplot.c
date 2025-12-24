@@ -56,7 +56,8 @@ static t_value multiplot_udv = {
 	.type = DATABLOCK,
 	.v.blockdata = NULL
 };
-int multiplot_last_panel = 0;
+int multiplot_last_panel = 0;		/* only this panel will work for zooming */
+int multiplot_highest_panel = 0;	/* the highest panel number actually used */
 
 /* Local prototypes */
 static void mp_layout_size_and_offset(void);
@@ -64,6 +65,7 @@ static void mp_layout_margins_and_spacing(void);
 static void mp_layout_set_margin_or_spacing(t_position *);
 static void init_multiplot_datablock(void);
 static void multiplot_previous(void);
+static void reset_axis_mapping(void);
 
 enum set_multiplot_id {
     S_MULTIPLOT_LAYOUT,
@@ -136,7 +138,23 @@ static struct {
     double title_height;   /* fractional height reserved for title */
 } mp_layout = MP_LAYOUT_DEFAULT;
 
-BoundingBox panel_bounds;/* terminal coords of next panel to be drawn */
+
+/*		Support for multiplot mousing
+ *		-----------------------------
+ * The axis mappings are loaded by update_active_region(),
+ * consumed by mouse.c:MousePosToGraphPosReal,
+ * and potentially saved for multiplot and off-line mousing.
+ */
+BoundingBox panel_bounds[MAX_PANELS];	/* terminal coords of each panel */
+#ifdef USE_MOUSE
+axis_mapping x_mapping[MAX_PANELS] = {};
+axis_mapping x2_mapping[MAX_PANELS] = {};
+axis_mapping y_mapping[MAX_PANELS] = {};
+axis_mapping y2_mapping[MAX_PANELS] = {};
+axis_mapping r_mapping[MAX_PANELS] = {};
+axis_mapping theta_mapping[MAX_PANELS] = {};
+#endif
+
 
 /* Helper routines */
 void
@@ -202,7 +220,10 @@ multiplot_previous(void)
 int
 multiplot_current_panel()
 {
-    return mp_layout.current_panel;
+    if (mp_layout.current_panel >= MAX_PANELS)
+	return MAX_PANELS - 1;
+    else
+	return mp_layout.current_panel;
 }
 
 void
@@ -242,6 +263,10 @@ multiplot_start()
     free(mp_layout.title.font);
     mp_layout.title.font = NULL;
     mp_layout.title.boxed = 0;
+    multiplot_last_panel = 0;
+    multiplot_highest_panel = 0;
+
+    reset_axis_mapping();	/* only needed for multiplot mousing */
 
     /* Parse options */
     while (!END_OF_COMMAND) {
@@ -528,12 +553,6 @@ multiplot_end()
     last_plot_was_multiplot = TRUE;
 }
 
-/* Helper functions for multiplot auto layout to issue size and offset cmds */
-TBOOLEAN multiplot_auto()
-{
-    return mp_layout.auto_layout_margins;
-}
-
 void
 multiplot_reset()
 {
@@ -546,15 +565,17 @@ multiplot_reset()
 void
 multiplot_use_size_and_origin()
 {
-    panel_bounds.xleft = xoffset * term->xmax;
-    panel_bounds.xright = panel_bounds.xleft + xsize * term->xmax;
-    panel_bounds.ybot = yoffset * term->ymax;
-    panel_bounds.ytop = panel_bounds.ybot + ysize * term->ymax;
+    int p = multiplot_current_panel();
+    panel_bounds[p].xleft = xoffset * term->xmax;
+    panel_bounds[p].xright = panel_bounds[p].xleft + xsize * term->xmax;
+    panel_bounds[p].ybot = yoffset * term->ymax;
+    panel_bounds[p].ytop = panel_bounds[p].ybot + ysize * term->ymax;
 }
 
 static void
 mp_layout_size_and_offset(void)
 {
+    int p;
     if (!mp_layout.auto_layout)
 	return;
 
@@ -585,15 +606,17 @@ mp_layout_size_and_offset(void)
     /* At this point we know the boundary of the next multiplot panel to be drawn.
      * Save this somewhere for use by "clear"; maybe also for subsequent mousing.
      */
-    panel_bounds.xleft = xoffset * term->xmax;
-    panel_bounds.xright = (xoffset + xsize) * term->xmax;
-    panel_bounds.ybot = yoffset * term->ymax;
-    panel_bounds.ytop = (yoffset + ysize) * term->ymax;
-    FPRINTF((stderr, "next multiplot panel\t%d\t%d\t%d\t%d\n",
-	    panel_bounds.xleft, panel_bounds.xright, panel_bounds.ybot, panel_bounds.ytop));
+    p = multiplot_current_panel();
+    panel_bounds[p].xleft = xoffset * term->xmax;
+    panel_bounds[p].xright = (xoffset + xsize) * term->xmax;
+    panel_bounds[p].ybot = yoffset * term->ymax;
+    panel_bounds[p].ytop = (yoffset + ysize) * term->ymax;
+    FPRINTF((stderr, "next multiplot panel %d\t%d\t%d\t%d\t%d\n", p,
+	    panel_bounds[p].xleft, panel_bounds[p].xright,
+	    panel_bounds[p].ybot, panel_bounds[p].ytop));
 }
 
-/* Helper function for multiplot auto layout to set the explicit plot margins, 
+/* Helper function for multiplot auto layout to set the explicit plot margins,
    if requested with 'margins' and 'spacing' options. */
 static void
 mp_layout_margins_and_spacing(void)
@@ -601,6 +624,7 @@ mp_layout_margins_and_spacing(void)
     /* width and height of a single sub plot. */
     double tmp_width, tmp_height;
     double leftmargin, rightmargin, topmargin, bottommargin, xspacing, yspacing;
+    int p;
 
     if (!mp_layout.auto_layout_margins) return;
 
@@ -657,12 +681,14 @@ mp_layout_margins_and_spacing(void)
     /* At this point we know the boundary of the next multiplot panel to be drawn.
      * Save this somewhere for use by "clear"; maybe also for subsequent mousing.
      */
-    panel_bounds.xleft = mp_layout.act_col * term->xmax / mp_layout.num_cols;
-    panel_bounds.xright = panel_bounds.xleft + term->xmax / mp_layout.num_cols;
-    panel_bounds.ytop = term->ymax - mp_layout.act_row * term->ymax / mp_layout.num_rows;
-    panel_bounds.ybot = panel_bounds.ytop - term->ymax / mp_layout.num_rows;
-    FPRINTF((stderr, "next multiplot panel:\t%d\t%d\t%d\t%d\n",
-	    panel_bounds.xleft, panel_bounds.xright, panel_bounds.ybot, panel_bounds.ytop));
+    p = multiplot_current_panel();
+    panel_bounds[p].xleft = mp_layout.act_col * term->xmax / mp_layout.num_cols;
+    panel_bounds[p].xright = panel_bounds[p].xleft + term->xmax / mp_layout.num_cols;
+    panel_bounds[p].ytop = term->ymax - mp_layout.act_row * term->ymax / mp_layout.num_rows;
+    panel_bounds[p].ybot = panel_bounds[p].ytop - term->ymax / mp_layout.num_rows;
+    FPRINTF((stderr, "next multiplot panel %d:\t%d\t%d\t%d\t%d\n", p,
+	    panel_bounds[p].xleft, panel_bounds[p].xright,
+	    panel_bounds[p].ybot, panel_bounds[p].ytop));
 }
 
 static void
@@ -747,3 +773,19 @@ multiplot_reset_after_error()
     multiplot_playback = FALSE;
     suppress_multiplot_save = FALSE;
 }
+
+#ifdef USE_MOUSE
+static void reset_axis_mapping()
+{
+    for (int p = 0;  p < MAX_PANELS; p++) {
+	x_mapping[p].in_use = FALSE;
+	x2_mapping[p].in_use = FALSE;
+	y_mapping[p].in_use = FALSE;
+	y2_mapping[p].in_use = FALSE;
+	r_mapping[p].in_use = FALSE;
+	theta_mapping[p].in_use = FALSE;
+    }
+}
+#else
+static void reset_axis_mapping() {}
+#endif /* USE_MOUSE */

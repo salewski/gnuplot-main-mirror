@@ -35,7 +35,7 @@
 #include "command.h"
 #include "graph3d.h" /* for map3d_position_r() */
 #include "graphics.h"
-#include "multiplot.h" /* for multiplot_auto() */
+#include "multiplot.h" /* for multiplot mousing structures */
 #include "plot3d.h" /* For is_plot_with_palette() */
 #include "axis.h" /* For CB_AXIS */
 
@@ -233,7 +233,6 @@ static void clip_polygon_to_boundary(gpiPoint *in, gpiPoint *out, int in_length,
 				int *out_length, gpiPoint *clip_boundary);
 
 /* local prototypes */
-static void save_axis_mapping(AXIS *axis, axis_mapping *map);
 
 /*****************************************************************/
 /* Routines that deal with global objects defined in this module */
@@ -1275,37 +1274,49 @@ construct_2D_mask_set( struct coordinate *points, int p_count )
     }
 }
 
+#ifdef USE_MOUSE
+
+/* local prototype */
+static void save_axis_mapping(AXIS *axis, axis_mapping *map);
+
 /* Calculate the region on the canvas used by the current plot.
  * This can be saved to guide subsequent mousing.
  */
 void
 update_active_region(void)
 {
-    if (in_multiplot && multiplot_auto()) {
-	active_bounds.xleft = panel_bounds.xleft;
-	active_bounds.xright = panel_bounds.xright;
-	active_bounds.ybot = panel_bounds.ybot;
-	active_bounds.ytop = panel_bounds.ytop;
+    int p;
+
+    if (in_multiplot) {
+	p = multiplot_current_panel();
+	active_bounds.xleft = panel_bounds[p].xleft;
+	active_bounds.xright = panel_bounds[p].xright;
+	active_bounds.ybot = panel_bounds[p].ybot;
+	active_bounds.ytop = panel_bounds[p].ytop;
     } else {
+	p = 0;
 	active_bounds.xleft = term->xmax * xoffset;
 	active_bounds.xright = term->xmax * (xoffset + xsize);
 	active_bounds.ybot = term->ymax * yoffset;
 	active_bounds.ytop = term->ymax * (yoffset + ysize);
     }
+    if (multiplot_highest_panel < p)
+	multiplot_highest_panel = p;
 
-    save_axis_mapping(&axis_array[FIRST_X_AXIS], &x_mapping);
-    save_axis_mapping(&axis_array[FIRST_Y_AXIS], &y_mapping);
-    save_axis_mapping(&axis_array[SECOND_X_AXIS], &x2_mapping);
-    save_axis_mapping(&axis_array[SECOND_Y_AXIS], &y2_mapping);
-    save_axis_mapping(&axis_array[POLAR_AXIS], &r_mapping);
-    r_mapping.active = polar;
-    theta_mapping.min = theta_origin;
-    theta_mapping.max = theta_direction;
+    save_axis_mapping(&axis_array[FIRST_X_AXIS], &(x_mapping[p]));
+    save_axis_mapping(&axis_array[FIRST_Y_AXIS], &(y_mapping[p]));
+    save_axis_mapping(&axis_array[SECOND_X_AXIS], &(x2_mapping[p]));
+    save_axis_mapping(&axis_array[SECOND_Y_AXIS], &(y2_mapping[p]));
+    save_axis_mapping(&axis_array[POLAR_AXIS], &(r_mapping[p]));
+    r_mapping[p].active = polar;
+    theta_mapping[p].min = theta_origin;
+    theta_mapping[p].max = theta_direction;
 }
 
 static void
 save_axis_mapping(AXIS *axis, axis_mapping *map)
 {
+    map->in_use = TRUE;
     map->min = axis->min;
     map->max = axis->max;
     map->term_lower = axis->term_lower;
@@ -1321,3 +1332,8 @@ save_axis_mapping(AXIS *axis, axis_mapping *map)
 	map->active = TRUE;
 }
 
+#else /* USE_MOUSE */
+
+void update_active_region(void) {}
+
+#endif /* USE_MOUSE */

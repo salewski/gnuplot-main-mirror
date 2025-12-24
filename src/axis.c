@@ -73,18 +73,6 @@ const AXIS_DEFAULTS axis_defaults[AXIS_ARRAY_SIZE] = {
 
 const AXIS default_axis_state = DEFAULT_AXIS_STRUCT;
 
-/* These are loaded by update_active_region(),
- * consumed by mouse.c:MousePosToGraphPosReal,
- * and potentially saved for multiplot and off-line mousing.
- */
-axis_mapping x_mapping = {};
-axis_mapping x2_mapping = {};
-axis_mapping y_mapping = {};
-axis_mapping y2_mapping = {};
-axis_mapping r_mapping = {};
-axis_mapping theta_mapping = {};
-
-
 /* Parallel axis structures are held in an array that is dynamically
  * allocated on demand.
  */

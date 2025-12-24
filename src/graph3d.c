@@ -878,7 +878,7 @@ do_3dplot(
     else
 	zcenter3d =  -(ceiling_z - floor_z) / 2.0 * zscale3d + 1;
 
-    /* Needed for mousing by outboard terminal drivers */
+    /* Needed for multiplot mousing and for outboard terminal drivers */
     if (splot_map) {
 	AXIS *X = &axis_array[FIRST_X_AXIS];
 	AXIS *Y = &axis_array[FIRST_Y_AXIS];
@@ -888,6 +888,7 @@ do_3dplot(
 	map3d_xy(X->max, Y->max, Z->min, &xr, &yt);
 	axis_set_scale_and_range(X, xl, xr);
 	axis_set_scale_and_range(Y, yb, yt);
+	update_active_region();
     }
 
     /* Initialize palette */
