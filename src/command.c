@@ -620,7 +620,7 @@ void
 do_string_and_free(char *cmdline)
 {
 #ifdef USE_MOUSE
-    if (display_ipc_commands())
+    if (display_ipc_commands() && !multiplot_playback)
 	fprintf(stderr, "%s\n", cmdline);
 #endif
 
@@ -1280,12 +1280,12 @@ clear_command()
 
     term_start_plot();
 
-    if (in_multiplot && term->fillbox) {
-	int xx1 = xoffset * term->xmax;
-	int yy1 = yoffset * term->ymax;
-	unsigned int width = xsize * term->xmax;
-	unsigned int height = ysize * term->ymax;
-	(*term->fillbox) (0, xx1, yy1, width, height);
+    if (in_multiplot) {
+	int p = multiplot_current_panel();
+	(*term->fillbox)(FS_EMPTY, panel_bounds[p].xleft, panel_bounds[p].ybot,
+		    panel_bounds[p].xright - panel_bounds[p].xleft,
+		    panel_bounds[p].ytop - panel_bounds[p].ybot);
+	panel_flags[p] = 0;
     }
     term_end_plot();
 
@@ -2237,10 +2237,6 @@ plot_command()
     add_udv_by_name("MOUSE_SHIFT")->udv_value.type = NOTDEFINED;
     add_udv_by_name("MOUSE_ALT")->udv_value.type = NOTDEFINED;
     add_udv_by_name("MOUSE_CTRL")->udv_value.type = NOTDEFINED;
-    if (multiplot_playback) {
-	/* This will only get applied to a multiplot panel with active mousing */
-	apply_saved_zoom();
-    }
 #endif
     if (evaluate_inside_functionblock && inside_plot_command)
 	int_error(NO_CARET, "plot command not available in this context");

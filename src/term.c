@@ -589,6 +589,16 @@ term_end_plot()
 	(*term->text) ();
 	term_graphics = FALSE;
     } else {
+#ifdef USE_MOUSE
+	/* We just completed the queued zoom panel, so clear the queue */
+	if (multiplot_playback && (multiplot_current_panel() == queued_zoom_panel))
+	    queued_zoom_panel = -1;
+	/* Save the final state of the axes and panel properties so that thay
+	 * persist across multiple playback instances, e.g. sequential zoom/pan/rotate.
+	 */
+	save_all_axis_mappings();
+	save_panel_view();
+#endif
 	multiplot_next();
     }
 
@@ -600,6 +610,14 @@ term_end_plot()
 	(void) fflush(gpoutfile);
 
 #ifdef USE_MOUSE
+    /* If there is a zoom or pan operation queued for the next panel
+     * apply it now.  At the end of the panel we will clear the queue.
+     */
+    if (in_multiplot && multiplot_playback) {
+	check_for_queued_action();
+	return;
+    }
+
     if (term->set_ruler) {
 	recalc_statusline();
 	update_ruler();

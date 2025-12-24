@@ -589,9 +589,6 @@ extern int current_x11_windowid;
 /* initialization (called once on program entry */
 void init_gadgets(void);
 
-/* called by each 2D or 3D plot */
-void update_active_region(void);
-
 /* moved here from util3d: */
 int draw_clip_line(int, int, int, int);
 void draw_clip_polygon(int , gpiPoint *);

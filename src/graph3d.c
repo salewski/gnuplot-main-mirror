@@ -55,6 +55,7 @@
 #include "gadgets.h"
 #include "hidden3d.h"
 #include "misc.h"
+#include "multiplot.h"
 #include "term_api.h"
 #include "util3d.h"
 #include "util.h"
@@ -106,7 +107,6 @@ float surface_rot_z = 30.0;
 float surface_rot_x = 60.0;
 float surface_scale = 1.0;
 float surface_zscale = 1.0;
-float surface_lscale = 0.0;
 float mapview_scale = 1.0;
 float azimuth = 0.0;
 
@@ -592,8 +592,7 @@ boundary3d(struct surface_points *plots, int count)
     else
 	clip_area = &canvas;
 
-    /* mark the entire region as available for mousing */
-    update_active_region();
+    set_panel_flag(PANEL_3D);
 }
 
 static TBOOLEAN
@@ -876,7 +875,7 @@ do_3dplot(
     else
 	zcenter3d =  -(ceiling_z - floor_z) / 2.0 * zscale3d + 1;
 
-    /* Needed for mousing by outboard terminal drivers */
+    /* Needed for multiplot mousing and for outboard terminal drivers */
     if (splot_map) {
 	AXIS *X = &axis_array[FIRST_X_AXIS];
 	AXIS *Y = &axis_array[FIRST_Y_AXIS];
@@ -886,6 +885,7 @@ do_3dplot(
 	map3d_xy(X->max, Y->max, Z->min, &xr, &yt);
 	axis_set_scale_and_range(X, xl, xr);
 	axis_set_scale_and_range(Y, yb, yt);
+	set_panel_flag(PANEL_SPLOT);
     }
 
     /* Initialize palette */
@@ -1750,9 +1750,6 @@ do_3dplot(
     /* Release the palette if we have used one (PostScript only?) */
     if (is_plot_with_palette() && term->previous_palette)
 	term->previous_palette();
-
-    term_end_plot();
-
     if (hidden3d && draw_surface) {
 	term_hidden_line_removal();
     }
@@ -1763,6 +1760,10 @@ do_3dplot(
 	surface_scale = 1.0;
     else if (yz_projection)
 	flip_projection_axis(&axis_array[FIRST_Z_AXIS]);
+
+    /* term_end_plot will save the final axis mappings so it must come after any flips */
+    term_end_plot();
+
 }
 
 

@@ -41,6 +41,7 @@
 #include "term_api.h"
 #include "gplocale.h"
 #include "mouse.h"	/* for inside_zoom() */
+#include "multiplot.h"	/* for multiplot_playback */
 
 /* HBB 20000725: gather all per-axis variables into a struct, and set
  * up a single large array of such structs. Next step might be to use
@@ -72,18 +73,6 @@ const AXIS_DEFAULTS axis_defaults[AXIS_ARRAY_SIZE] = {
 };
 
 const AXIS default_axis_state = DEFAULT_AXIS_STRUCT;
-
-/* These are loaded by update_active_region(),
- * consumed by mouse.c:MousePosToGraphPosReal,
- * and potentially saved for multiplot and off-line mousing.
- */
-axis_mapping x_mapping = {};
-axis_mapping x2_mapping = {};
-axis_mapping y_mapping = {};
-axis_mapping y2_mapping = {};
-axis_mapping r_mapping = {};
-axis_mapping theta_mapping = {};
-
 
 /* Parallel axis structures are held in an array that is dynamically
  * allocated on demand.
@@ -962,6 +951,8 @@ setup_tics(struct axis *this, int max)
 
     /* It is disconcerting when the response to pan or zoom is asymmetric */
     if (inside_zoom())
+	autoextend_min = autoextend_max = FALSE;
+    if (multiplot_playback)
 	autoextend_min = autoextend_max = FALSE;
 
     /* If an explicit stepsize was set, axis->timelevel wasn't defined,
@@ -1869,10 +1860,12 @@ void
 set_explicit_range(struct axis *this_axis, double newmin, double newmax)
 {
     this_axis->set_min = newmin;
+    this_axis->min = newmin;
     this_axis->set_autoscale &= ~AUTOSCALE_MIN;
     this_axis->min_constraint = CONSTRAINT_NONE;
 
     this_axis->set_max = newmax;
+    this_axis->max = newmax;
     this_axis->set_autoscale &= ~AUTOSCALE_MAX;
     this_axis->max_constraint = CONSTRAINT_NONE;
 

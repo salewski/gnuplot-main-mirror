@@ -46,6 +46,7 @@
 #include "graphics.h"
 #include "interpol.h"
 #include "misc.h"
+#include "multiplot.h"	/* for multiplot_playback */
 #include "mouse.h"	/* for inside_zoom() */
 #include "parse.h"
 #include "pm3d.h"	/* for is_plot_with_palette */
@@ -237,9 +238,14 @@ plotrequest()
 
     /* initialize the arrays from the 'set' scalars */
     axis_init(&axis_array[FIRST_X_AXIS], FALSE);
-    axis_init(&axis_array[FIRST_Y_AXIS], TRUE);
     axis_init(&axis_array[SECOND_X_AXIS], FALSE);
-    axis_init(&axis_array[SECOND_Y_AXIS], TRUE);
+    if (multiplot_playback) {
+	axis_array[FIRST_Y_AXIS].autoscale = AUTOSCALE_NONE;
+	axis_array[SECOND_Y_AXIS].autoscale = AUTOSCALE_NONE;
+    } else {
+	axis_init(&axis_array[FIRST_Y_AXIS], TRUE);
+	axis_init(&axis_array[SECOND_Y_AXIS], TRUE);
+    }
     axis_init(&axis_array[T_AXIS], FALSE);
     axis_init(&axis_array[U_AXIS], FALSE);
     axis_init(&axis_array[V_AXIS], FALSE);
