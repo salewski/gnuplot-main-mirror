@@ -1332,8 +1332,16 @@ save_axis_mapping(AXIS *axis, axis_mapping *map)
 	map->active = TRUE;
 }
 
+void
+set_panel_flag(unsigned int flag)
+{
+    int panel = multiplot_current_panel();
+    panel_flags[panel] |= flag;
+}
+
 #else /* USE_MOUSE */
 
 void update_active_region(void) {}
+void set_panel_flag(unsigned int) {}
 
 #endif /* USE_MOUSE */

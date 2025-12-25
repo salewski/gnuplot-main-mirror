@@ -47,6 +47,7 @@
 #include "marks.h"
 #include "misc.h"
 #include "mouse.h"	/* for inside_zoom() */
+#include "multiplot.h"
 #include "gadgets.h"
 #include "jitter.h"
 #include "plot2d.h"		/* for boxwidth */
@@ -756,6 +757,9 @@ do_plot(struct curve_points *plots, int pcount)
      *     the font dimensions are not known yet, so calculations are imperfect.
      */
     boundary(plots, pcount);
+    set_panel_flag(PANEL_2D);
+    if (polar)
+	set_panel_flag(PANEL_POLAR);
 
     /* Make palette */
     if (is_plot_with_palette())

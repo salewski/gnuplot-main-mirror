@@ -1303,7 +1303,9 @@ clear_command()
 	(*term->fillbox)(FS_EMPTY, panel_bounds[p].xleft, panel_bounds[p].ybot,
 		    panel_bounds[p].xright - panel_bounds[p].xleft,
 		    panel_bounds[p].ytop - panel_bounds[p].ybot);
+	panel_flags[p] = 0;
     }
+    update_active_region();
     term_end_plot();
 
     screen_ok = FALSE;

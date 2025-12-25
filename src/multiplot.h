@@ -27,8 +27,14 @@ extern int multiplot_highest_panel;	/* the highest panel number actually used */
  */
 #define MAX_PANELS 16
 extern BoundingBox panel_bounds[MAX_PANELS];	/* terminal coords of next panel */
+extern unsigned int panel_flags[MAX_PANELS];	/* bit settings, e.g. PANEL_3D */
 #ifdef USE_MOUSE
 extern axis_mapping x_mapping[], x2_mapping[], y_mapping[], y2_mapping[];
 extern axis_mapping r_mapping[], theta_mapping[];
 #endif
+
+#define PANEL_3D	0x01	/* Bit settings in panel_flags[] */
+#define PANEL_SPLOT	0x02
+#define PANEL_2D	0x04
+#define PANEL_POLAR	0x08
 

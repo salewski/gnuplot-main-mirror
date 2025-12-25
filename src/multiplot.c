@@ -146,6 +146,7 @@ static struct {
  * and potentially saved for multiplot and off-line mousing.
  */
 BoundingBox panel_bounds[MAX_PANELS];	/* terminal coords of each panel */
+unsigned int panel_flags[MAX_PANELS];	/* bit settings, e.g. PANEL_3D */
 #ifdef USE_MOUSE
 axis_mapping x_mapping[MAX_PANELS] = {};
 axis_mapping x2_mapping[MAX_PANELS] = {};
@@ -170,6 +171,7 @@ multiplot_next()
 		if (mp_layout.act_col == mp_layout.num_cols) {
 		    /* int_warn(NO_CARET,"will overplot first plot"); */
 		    mp_layout.act_col = 0;
+		    mp_layout.current_panel = 0;
 		}
 	    }
 	} else { /* column-major */
@@ -180,6 +182,7 @@ multiplot_next()
 		if (mp_layout.act_row == mp_layout.num_rows ) {
 		    /* int_warn(NO_CARET,"will overplot first plot"); */
 		    mp_layout.act_row = 0;
+		    mp_layout.current_panel = 0;
 		}
 	    }
 	}
@@ -200,6 +203,7 @@ multiplot_previous(void)
 		if (mp_layout.act_col < 0) {
 		    /* int_warn(NO_CARET,"will overplot first plot"); */
 		    mp_layout.act_col = mp_layout.num_cols-1;
+		    mp_layout.current_panel = (mp_layout.num_rows * mp_layout.num_cols)-1;
 		}
 	    }
 	} else { /* column-major */
@@ -210,10 +214,16 @@ multiplot_previous(void)
 		if (mp_layout.act_row < 0) {
 		    /* int_warn(NO_CARET,"will overplot first plot"); */
 		    mp_layout.act_row = mp_layout.num_rows-1;
+		    mp_layout.current_panel = (mp_layout.num_rows * mp_layout.num_cols)-1;
 		}
 	    }
 	}
 	multiplot_reset();
+    }
+    /* Should not be possible */
+    if (mp_layout.current_panel < 0) {
+	mp_layout.current_panel = 0;
+	int_error(c_token, "No previous multiplot panel");
     }
 }
 
@@ -497,6 +507,10 @@ multiplot_start()
 	mp_layout.title_height = 0.0;
     }
 
+    /* clear all panel flags */
+    for (int panel = 0; panel < MAX_PANELS; panel++)
+	panel_flags[panel] = 0;
+    /* set bounds for first panel */
     multiplot_reset();
 }
 

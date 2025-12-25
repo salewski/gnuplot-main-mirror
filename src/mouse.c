@@ -348,6 +348,10 @@ static char *builtin_zoom_in_X(struct gp_event_t * ge);
 static char *builtin_zoom_out_X(struct gp_event_t * ge);
 #endif
 
+static TBOOLEAN is_3d_plot_or_panel(void);
+static TBOOLEAN splot_map_or_panel(void);
+static TBOOLEAN almost2d(void);
+
 /* prototypes for bind stuff
  * which are used only here. */
 static void bind_install_default_bindings(void);
@@ -433,7 +437,7 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
     /*
      * 3D Plot
      */
-    if (is_3d_plot) {
+    if (is_3d_plot_or_panel()) {
 	/* for 3D plots, we treat the mouse position as if it is
 	 * in the bottom plane, i.e., the plane of the x and y axis */
 	/* note: at present, this projection is only correct if
@@ -460,7 +464,7 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
 		+ ((double) xx) / axis3d_y_dx * (axis_array[FIRST_Y_AXIS].max -
 						 axis_array[FIRST_Y_AXIS].min);
 	} else if (axis3d_y_dy != 0) {
-	    if (splot_map)
+	    if (splot_map_or_panel())
 		*y = axis_array[FIRST_Y_AXIS].max
 		    + ((double) yy) / axis3d_y_dy * (axis_array[FIRST_Y_AXIS].min -
 						     axis_array[FIRST_Y_AXIS].max);
@@ -488,7 +492,7 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
      */
     if (reset_since_last_plot) {
 	int panel = 0;
-	for (int p = 0; p < multiplot_last_panel; p++) {
+	for (int p = 0; p <= multiplot_highest_panel; p++) {
 	    if (mouse_inside_panel(&(panel_bounds[panel]))) {
 		panel = p;
 		break;
@@ -834,8 +838,6 @@ static AXIS *shadow_axis_array_copy = NULL;
 static void
 apply_zoom(struct t_zoom *z)
 {
-    int is_splot_map = (is_3d_plot && (splot_map == TRUE));
-
     if (zoom_now != NULL) {	/* remember the current zoom */
 	zoom_now->xmin = axis_array[FIRST_X_AXIS].set_min;
 	zoom_now->xmax = axis_array[FIRST_X_AXIS].set_max;
@@ -851,9 +853,10 @@ apply_zoom(struct t_zoom *z)
 
     /* The autoscale save/restore was too complicated, and broke refresh.
      * Just save the complete axis state and have done with it.
-     * FIXME: Can there be a memory leak if a non-linear axis was declared
-     *        inside the multiplot and not freed here before restoring the
-     *        original shadow axis structure?
+     * FIXME: If the linear/log or linear/nonlinear state of an axis is
+     *        changed inside the multiplot, there will be either a memory
+     *        leak or a double-free after the original axis structures are
+     *        restored and then eventually the state changes again.
      */
     if (zoom_now == zoom_head && z != zoom_head) {
 	axis_array_copy = gp_realloc( axis_array_copy, sizeof(axis_array), "axis_array copy");
@@ -883,7 +886,7 @@ apply_zoom(struct t_zoom *z)
 	return;
     }
 
-    /* Now we're committed. Notify the terminal the the next replot is a zoom */
+    /* Now we're committed. Notify the terminal that the next replot is a zoom */
     (*term->layer)(TERM_LAYER_BEFORE_ZOOM);
 
     /* New range on primary axes */
@@ -893,11 +896,11 @@ apply_zoom(struct t_zoom *z)
 
     /* EAM Apr 2013 - The tests on VERYLARGE protect against trying to   */
     /* interpret the autoscaling initial state as an actual limit value. */
-    if (!is_3d_plot
+    if (!is_3d_plot_or_panel()
     && (zoom_now->x2min < VERYLARGE && zoom_now->x2max > -VERYLARGE)) {
 	set_explicit_range(&axis_array[SECOND_X_AXIS], zoom_now->x2min, zoom_now->x2max);
     }
-    if (!is_3d_plot
+    if (!is_3d_plot_or_panel()
     && (zoom_now->y2min < VERYLARGE && zoom_now->y2max > -VERYLARGE)) {
 	set_explicit_range(&axis_array[SECOND_Y_AXIS], zoom_now->y2min, zoom_now->y2max);
     }
@@ -915,7 +918,7 @@ apply_zoom(struct t_zoom *z)
 		refresh_request();
 		return;
 	    }
-	    if (is_splot_map && (refresh_ok == E_REFRESH_OK_3D)) {
+	    if (splot_map_or_panel() && (refresh_ok == E_REFRESH_OK_3D)) {
 		refresh_request();
 		return;
 	    }
@@ -1022,6 +1025,8 @@ ZoomPrevious()
 {
     if (zoom_now == NULL || zoom_now->prev == NULL)
 	alert();
+    else if (zoom_now == zoom_head)
+	int_error(NO_CARET, "mouse.c:1018 no previous zoom");
     else
 	apply_zoom(zoom_now->prev);
     if (display_ipc_commands()) {
@@ -1083,7 +1088,7 @@ UpdateStatuslineWithMouseSetting(mouse_setting_t * ms)
     if (!ms->on)
 	return;
 
-    if (!ALMOST2D) {
+    if (!almost2d()) {
 	char format[0xff];
 	format[0] = '\0';
 	strcat(format, "view: ");
@@ -1228,7 +1233,7 @@ builtin_toggle_border(struct gp_event_t *ge)
 	draw_border = user_border;
     else if (draw_border == user_border && draw_border != 31)
 	draw_border = 31;
-    else if (is_3d_plot && draw_border == 31)
+    else if (is_3d_plot_or_panel() && draw_border == 31)
 	draw_border = 4095;
     else
 	draw_border = 0;
@@ -1316,7 +1321,7 @@ builtin_toggle_log(struct gp_event_t *ge)
     else if ((color_box.bounds.xleft < mouse_x && mouse_x < color_box.bounds.xright)
 	 &&  (color_box.bounds.ybot  < mouse_y && mouse_y < color_box.bounds.ytop))
 	do_string_replot( CB_AXIS.log ? "unset log cb" : "set log cb");
-    else if (is_3d_plot && !splot_map)
+    else if (is_3d_plot_or_panel() && !splot_map_or_panel())
 	do_string_replot( Z_AXIS.log ? "unset log z" : "set log z");
     else
 	do_string_replot( axis_array[FIRST_Y_AXIS].log ? "unset log y" : "set log y");
@@ -1333,7 +1338,7 @@ builtin_nearest_log(struct gp_event_t *ge)
     if ((color_box.bounds.xleft < mouse_x && mouse_x < color_box.bounds.xright)
     &&  (color_box.bounds.ybot  < mouse_y && mouse_y < color_box.bounds.ytop)) {
 	do_string_replot( CB_AXIS.log ? "unset log cb" : "set log cb");
-    } else if (is_3d_plot && !splot_map) {
+    } else if (is_3d_plot_or_panel() && !splot_map_or_panel()) {
 	do_string_replot( Z_AXIS.log ? "unset log z" : "set log z");
     } else {
 	/* 2D-plot: figure out which axis/axes is/are
@@ -1362,11 +1367,11 @@ builtin_nearest_log(struct gp_event_t *ge)
 	    do_string(axis_array[FIRST_X_AXIS].log ? "unset log x" : "set log x");
 	if (change_y1)
 	    do_string(axis_array[FIRST_Y_AXIS].log ? "unset log y" : "set log y");
-	if (change_x2 && !splot_map)
+	if (change_x2 && !splot_map_or_panel())
 	    do_string(axis_array[SECOND_X_AXIS].log ? "unset log x2" : "set log x2");
-	if (change_y2 && !splot_map)
+	if (change_y2 && !splot_map_or_panel())
 	    do_string(axis_array[SECOND_Y_AXIS].log ? "unset log y2" : "set log y2");
-	if (!change_x1 && !change_y1 && splot_map)
+	if (!change_x1 && !change_y1 && splot_map_or_panel())
 	    do_string_replot( Z_AXIS.log ? "unset log z" : "set log z");
 
 	if (change_x1 || change_y1 || change_x2 || change_y2)
@@ -1405,6 +1410,8 @@ builtin_toggle_mouse(struct gp_event_t *ge)
 static char *
 builtin_toggle_ruler(struct gp_event_t *ge)
 {
+    if (last_plot_was_multiplot)
+	return "ruler not available in multiplot";
     if (!ge) {
 	return "`builtin-toggle-ruler`";
     }
@@ -1414,9 +1421,8 @@ builtin_toggle_ruler(struct gp_event_t *ge)
 	turn_ruler_off();
 	if (display_ipc_commands())
 	    fprintf(stderr, "turning ruler off.\n");
-    } else if (ALMOST2D) {
-	/* only allow ruler, if the plot
-	 * is 2d or a 3d `map' */
+    } else if (almost2d()) {
+	/* only allow ruler if the plot is 2d or `splot map' */
 	struct udvt_entry *u;
 	ruler.on = TRUE;
 	ruler.px = ge->mx;
@@ -1550,7 +1556,7 @@ builtin_rotate_right(struct gp_event_t *ge)
 {
     if (!ge)
 	return "`scroll right in 2d, rotate right in 3d`; <Shift> faster";
-    if (is_3d_plot)
+    if (is_3d_plot_or_panel() && !splot_map_or_panel())
 	ChangeView(0, -1);
     else {
 	int k = (modifier_mask & Mod_Shift) ? 3 : 1;
@@ -1565,7 +1571,7 @@ builtin_rotate_left(struct gp_event_t *ge)
 {
     if (!ge)
 	return "`scroll left in 2d, rotate left in 3d`; <Shift> faster";
-    if (is_3d_plot)
+    if (is_3d_plot_or_panel() && !splot_map_or_panel())
 	ChangeView(0, 1);
     else {
 	int k = (modifier_mask & Mod_Shift) ? 3 : 1;
@@ -1580,7 +1586,7 @@ builtin_rotate_up(struct gp_event_t *ge)
 {
     if (!ge)
 	return "`scroll up in 2d, rotate up in 3d`; <Shift> faster";
-    if (is_3d_plot)
+    if (is_3d_plot_or_panel() && !splot_map_or_panel())
 	ChangeView(1, 0);
     else {
 	int k = (modifier_mask & Mod_Shift) ? 3 : 1;
@@ -1595,7 +1601,7 @@ builtin_rotate_down(struct gp_event_t *ge)
 {
     if (!ge)
 	return "`scroll down in 2d, rotate down in 3d`; <Shift> faster";
-    if (is_3d_plot)
+    if (is_3d_plot_or_panel() && !splot_map_or_panel())
 	ChangeView(-1, 0);
     else {
 	int k = (modifier_mask & Mod_Shift) ? 3 : 1;
@@ -1610,7 +1616,7 @@ builtin_azimuth_left(struct gp_event_t *ge)
 {
     if (!ge)
 	return "`rotate azimuth left in 3d`; <ctrl> faster";
-    if (is_3d_plot)
+    if (is_3d_plot_or_panel() && !splot_map_or_panel())
 	ChangeAzimuth(-1);
     return (char *) 0;
 }
@@ -1620,7 +1626,7 @@ builtin_azimuth_right(struct gp_event_t *ge)
 {
     if (!ge)
 	return "`rotate azimuth right in 3d`; <ctrl> faster";
-    if (is_3d_plot)
+    if (is_3d_plot_or_panel() && !splot_map_or_panel())
 	ChangeAzimuth(1);
     return (char *) 0;
 }
@@ -1730,6 +1736,12 @@ event_keypress(struct gp_event_t *ge, TBOOLEAN current)
     if (!(ptr = get_binding(ge, current)))
 	return;
 
+    /* Ignore hotkeys, including arrows, during multiplot replay.
+     * NB: Hotkeys are fine in a multiplot, just not while it is being redrawn.
+     */
+    if (multiplot_playback)
+	return;
+
     if ((keywin = add_udv_by_name("MOUSE_KEY_WINDOW")))
 	Ginteger(&keywin->udv_value, ge->winid);
 
@@ -1781,7 +1793,7 @@ ChangeView(int x, int z)
 
     do_save_3dplot(first_3dplot, plot3d_num, NORMAL_REPLOT);
 
-    if (ALMOST2D) {
+    if (almost2d()) {
 	/* 2D plot, or suitably aligned 3D plot: update statusline */
 	if (!term->put_tmptext)
 	    return;
@@ -1872,6 +1884,63 @@ which_panel(int mx, int my)
 	}
     /* Not in a multiplot panel */
     return -1;
+}
+
+/* Before the introduction of multiplot mousing, it was sufficient
+ * to test "if (is_3d_plot)" and "if (splot_map)" to see if 3D mouse
+ * operations were appropriate.
+ * Now, however, these refer only to the immediately previous splot
+ * command and are probably not valid for an entire multiplot.
+ * For use during multiplot mousing, these have been replaced by
+ * is_3d_plot_or_panel() and splot_map_or_panel().
+ * A similar issue exists with ALMOST2D, which has been replaced by
+ * almost2d().
+ * These routine assume that mouse_x and mouse_y have been updated.
+ */
+static TBOOLEAN
+is_3d_plot_or_panel()
+{
+    int this_panel;
+
+    if (!last_plot_was_multiplot)
+	return is_3d_plot;
+    this_panel = which_panel(mouse_x, mouse_y);
+    if ((this_panel >= 0) && ((panel_flags[this_panel] & PANEL_3D)))
+	return TRUE;
+    return FALSE;
+}
+
+static TBOOLEAN
+splot_map_or_panel()
+{
+    int this_panel;
+
+    if (!last_plot_was_multiplot)
+	return splot_map;
+    this_panel = which_panel(mouse_x, mouse_y);
+    if ((this_panel >= 0) && ((panel_flags[this_panel] & PANEL_SPLOT)))
+	return TRUE;
+    return FALSE;
+}
+
+static TBOOLEAN
+almost2d()
+{
+    int this_panel;
+
+    if (!last_plot_was_multiplot) {
+	/* This was the ALMOST2D macro */
+	return ( !is_3d_plot || splot_map ||
+		  (fabs(fmod(surface_rot_z,90.0)) < 0.1
+		&& fabs(fmod(surface_rot_x,180.0)) < 0.1) );
+    }
+    this_panel = which_panel(mouse_x, mouse_y);
+    if (this_panel < 0)
+	return TRUE;	/* shouldn't happen, but if it does TRUE is the better bet */
+    if (((panel_flags[this_panel] & PANEL_2D))
+    ||  ((panel_flags[this_panel] & PANEL_SPLOT)))
+	return TRUE;
+    return FALSE;
 }
 
 /* Return a new upper or lower axis limit that is a linear
@@ -2249,7 +2318,7 @@ event_buttonpress(struct gp_event_t *ge)
 	else
 	    do_zoom_scroll_down();
 
-    } else if (ALMOST2D) {
+    } else if (almost2d()) {
 	/* "pause button1" or "pause any" takes precedence over key bindings */
 	if (1 == b) {
 	    if (paused_for_mouse & PAUSE_BUTTON1) {
@@ -2370,6 +2439,7 @@ event_buttonpress(struct gp_event_t *ge)
 	    setting_zoom_region = FALSE;
 	}
     } else {
+	/* button 1 2 or 3 and not ALMOST2D */
 	if (term->set_cursor) {
 	    if (button & (1 << 1) || button & (1 << 3))
 		term->set_cursor(1, 0, 0);
@@ -2418,10 +2488,11 @@ event_buttonrelease(struct gp_event_t *ge)
 
     MousePosToGraphPosReal(mouse_x, mouse_y, &real_x, &real_y, &real_x2, &real_y2);
 
-    FPRINTF((stderr, "MOUSE.C: doublclick=%i, set=%i, motion=%i, ALMOST2D=%i\n", (int) doubleclick, (int) mouse_setting.doubleclick,
-	     (int) motion, (int) ALMOST2D));
+    FPRINTF((stderr, "MOUSE.C: doublclick=%i, set=%i, motion=%i, almost2d()=%i\n",
+		(int) doubleclick, (int) mouse_setting.doubleclick,
+		(int) motion, (int) almost2d()));
 
-    if (ALMOST2D) {
+    if (almost2d()) {
 	char s0[256];
 
 	if (b == 1 && term->set_clipboard
@@ -2430,7 +2501,7 @@ event_buttonrelease(struct gp_event_t *ge)
 	    /* put coordinates to clipboard. For 3d plots this takes
 	     * only place, if the user didn't drag (rotate) the plot */
 
-	    if (!is_3d_plot || !motion) {
+	    if (!is_3d_plot_or_panel() || !motion) {
 		GetAnnotateString(s0, 255, real_x, real_y, mouse_mode, mouse_alt_string);
 		term->set_clipboard(s0);
 		if (display_ipc_commands()) {
@@ -2446,7 +2517,7 @@ event_buttonrelease(struct gp_event_t *ge)
 
 	    /* draw temporary annotation or label. For 3d plots this is
 	     * only done if the user didn't drag (scale) the plot */
-	    if (!is_3d_plot || !motion) {
+	    if (!is_3d_plot_or_panel() || !motion) {
 		GetAnnotateString(s0, 255, real_x, real_y, mouse_mode, mouse_alt_string);
 		if (mouse_setting.label) {
 		    if (modifier_mask & Mod_Ctrl) {
@@ -2473,7 +2544,9 @@ event_buttonrelease(struct gp_event_t *ge)
 	    }
 	}
     }
-    if (is_3d_plot && (b == 1 || b == 2 || b == 3)) {
+    if (last_plot_was_multiplot && splot_map_or_panel()) {
+	/* do nothing - but maybe mouse wheel would be OK? */
+    } else if (is_3d_plot_or_panel() && (b == 1 || b == 2 || b == 3)) {
 	if (!!(modifier_mask & Mod_Ctrl) && !needreplot) {
 	    /* redraw the 3d plot if its last redraw was 'quick'
 	     * (only axes) because modifier key was pressed */
@@ -2496,20 +2569,24 @@ event_buttonrelease(struct gp_event_t *ge)
 static void
 event_motion(struct gp_event_t *ge)
 {
+    int panel;
     motion = 1;
 
     mouse_x = ge->mx;
     mouse_y = ge->my;
 
-    if (is_3d_plot
-	&& (splot_map == FALSE) /* Rotate the surface if it is 3D graph but not "set view map". */
-	) {
+    /* Event might have come from a multiplot panel */
+    panel = which_panel(mouse_x, mouse_y);
+
+    if ((panel < 0  && is_3d_plot_or_panel() && !splot_map_or_panel())
+    ||  (panel >= 0 && ((panel_flags[panel] & PANEL_3D) != 0) && ((panel_flags[panel] & PANEL_SPLOT) == 0)))
+    {
+	/* Rotate the surface if it is 3D graph but not "set view map". */
 
 	TBOOLEAN redraw = FALSE;
 
 	if (button & (1 << 1)) {
 	    /* dragging with button 1 -> rotate */
-	  /*surface_rot_x = floor(0.5 + zero_rot_x + 180.0 * mouse_y / term->ymax);*/
 	    surface_rot_x = floor(0.5 + fmod(zero_rot_x + 360.0 * mouse_y / term->ymax, 360));
 	    if (surface_rot_x < 0)
 		surface_rot_x += 360;
@@ -2561,7 +2638,7 @@ event_motion(struct gp_event_t *ge)
 	    }
 	}
 
-	if (!ALMOST2D) {
+	if (last_plot_was_multiplot || !almost2d()) {
 	    turn_ruler_off();
 	}
 
@@ -2586,7 +2663,7 @@ event_motion(struct gp_event_t *ge)
     } /* if (3D plot) */
 
 
-    if (ALMOST2D) {
+    if (almost2d()) {
 	/* 2D plot, or suitably aligned 3D plot: update
 	 * statusline and possibly the zoombox annotation */
 	if (!term->put_tmptext)
@@ -2618,7 +2695,7 @@ event_modifier(struct gp_event_t *ge)
 {
     modifier_mask = ge->par1;
 
-    if (modifier_mask == 0 && is_3d_plot && (button & ((1 << 1) | (1 << 2))) && !needreplot) {
+    if (modifier_mask == 0 && is_3d_plot_or_panel() && (button & ((1 << 1) | (1 << 2))) && !needreplot) {
 	/* redraw the 3d plot if modifier key released */
 	do_save_3dplot(first_3dplot, plot3d_num, NORMAL_REPLOT);
     }
@@ -3507,14 +3584,16 @@ inside_zoom()
     return TRUE;
 }
 
-/* When replotting a multiplot interactively, the final (mouse is active) panel
- * may have been zoomed but the previous panels overwrote the zoom state.
- */
 void
 apply_saved_zoom()
 {
     if (!zoom_now)
 	return;
+
+    /* When replotting a multiplot interactively, the final (mouse is active) panel
+     * may have been zoomed but the previous panels overwrote the zoom state.
+     */
+    /* FIXME:  This logic is no longer valid since all panels are moused */
     if (1+multiplot_current_panel() != multiplot_last_panel)
 	return;
 
@@ -3529,10 +3608,10 @@ apply_saved_zoom()
     set_explicit_range(&axis_array[FIRST_Z_AXIS], zoom_now->zmin, zoom_now->zmax);
 
     /* Do not mistake autoscaling initial state as an actual limit value. */
-    if (!is_3d_plot
+    if (!is_3d_plot_or_panel()
     && (zoom_now->x2min < VERYLARGE && zoom_now->x2max > -VERYLARGE))
 	set_explicit_range(&axis_array[SECOND_X_AXIS], zoom_now->x2min, zoom_now->x2max);
-    if (!is_3d_plot
+    if (!is_3d_plot_or_panel()
     && (zoom_now->y2min < VERYLARGE && zoom_now->y2max > -VERYLARGE))
 	set_explicit_range(&axis_array[SECOND_Y_AXIS], zoom_now->y2min, zoom_now->y2max);
 }

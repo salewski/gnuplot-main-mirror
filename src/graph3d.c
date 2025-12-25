@@ -55,6 +55,7 @@
 #include "gadgets.h"
 #include "hidden3d.h"
 #include "misc.h"
+#include "multiplot.h"
 #include "term_api.h"
 #include "util3d.h"
 #include "util.h"
@@ -596,6 +597,7 @@ boundary3d(struct surface_points *plots, int count)
 
     /* mark the entire region as available for mousing */
     update_active_region();
+    set_panel_flag(PANEL_3D);
 }
 
 static TBOOLEAN
@@ -889,6 +891,7 @@ do_3dplot(
 	axis_set_scale_and_range(X, xl, xr);
 	axis_set_scale_and_range(Y, yb, yt);
 	update_active_region();
+	set_panel_flag(PANEL_SPLOT);
     }
 
     /* Initialize palette */
