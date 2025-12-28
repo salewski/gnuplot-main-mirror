@@ -67,6 +67,7 @@
 #include "misc.h"
 #include "multiplot.h"
 #include "util.h"
+#include "save.h"	/* used by save_set_to_datablock() */
 
 #ifdef USE_FUNCTIONBLOCKS
 /* Set by "return" command and pushed onto the evaluation stack by f_eval */
@@ -390,6 +391,52 @@ append_multiline_to_datablock(struct value *datablock_value, const char *lines)
 	free((char *) lines);
     }
 }
+
+/*
+ * Save current graphics state to a datablock.
+ */
+void
+save_set_to_datablock(char *datablock_name)
+{
+    FILE *fp = tmpfile();
+    struct udvt_entry *datablock;
+    char line[256];
+
+#if defined(_MSC_VER) || defined(__MINGW32__)
+    /* On Windows tmpfile() fails because it tries to write to the root directory */
+    if (!fp) {
+	char tempname[PATH_MAX];
+	/* We really want the "ANSI" version */
+	GetTempPathA(sizeof(tempname), buf);
+	strcat(buf, "gnuplot-save.tmp");
+	fp = fopen(tempname, "wt+, ccs=UTF-8");
+	fp = fopen(buf, "w+");
+    }
+#endif
+
+    if (!fp)
+	int_error(NO_CARET, "cannot write temporary file");
+
+    /* Save to temp file */
+    save_set_all(fp);
+    rewind(fp);
+
+    /* Read back from temp file into a datablock */
+    datablock = add_udv_by_name(datablock_name);
+    free_value(&datablock->udv_value);
+    datablock->udv_value.type = DATABLOCK;
+    datablock->udv_value.v.data_array = NULL;
+
+    while (fgets(line, sizeof(line), fp)) {
+	int length = strlen(line);
+	if (line[length-1] == '\n')
+	    line[length-1] = '\0';
+	append_to_datablock(&datablock->udv_value, strdup(line));
+    }
+
+    fclose(fp);
+}
+
 
 #ifdef USE_FUNCTIONBLOCKS
 /* Internal version of eval() that can be called from the evaluation stack

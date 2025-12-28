@@ -62,7 +62,6 @@ static void save_key(FILE *);
 static void save_tics(FILE *, struct axis *);
 static void save_mtics(FILE *, struct axis *);
 static void save_zeroaxis(FILE *,AXIS_INDEX);
-static void save_set_all(FILE *);
 static void save_justification(int just, FILE *fp);
 static void save_pointstyle(FILE *fp, lp_style_type *lp);
 static void save_contours(FILE *fp);
@@ -313,7 +312,7 @@ save_justification(int just, FILE *fp)
     }
 }
 
-static void
+void
 save_set_all(FILE *fp)
 {
     struct text_label *this_label;

@@ -10,6 +10,7 @@ void gpfree_datablock(struct value *datablock_value);
 void gpfree_functionblock(struct value *functionblock_value);
 void append_to_datablock(struct value *datablock_value, const char * line);
 void append_multiline_to_datablock(struct value *datablock_value, const char * lines);
+void save_set_to_datablock(char *datablock_name);
 int datablock_size(struct value *datablock_value);
 void f_eval(union argument *arg);
 
