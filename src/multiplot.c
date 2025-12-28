@@ -421,8 +421,18 @@ multiplot_start()
 	    }
     }
 
-    /* If we reach here, then the command has been successfully parsed.
-     * Call term_start_plot() before setting multiplot so that
+    /* If we reach here, then the command has been successfully parsed. */
+
+    /* Save current graphics state to a datablock so that it can later
+     * be restored before re-executing the multiplot.  This is useful
+     * in conjunction with "remultiplot" from the command line and to
+     * precede the implicit "replot" performed by pan/zoom multiplot
+     * mousing operations.
+     */
+    if (!multiplot_playback)
+	save_set_to_datablock("$GPVAL_PRE_MULTIPLOT");
+
+    /* Call term_start_plot() before setting multiplot so that
      * the wxt and qt terminals will reset the plot count to 0 before
      * ignoring subsequent TERM_LAYER_RESET requests. 
      */
