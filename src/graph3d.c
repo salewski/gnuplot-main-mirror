@@ -508,9 +508,11 @@ boundary3d(struct surface_points *plots, int count)
      * but the user can adjust it with "offset" and "set rmargin".
      * Later we will adjust the colorbox position by the same amount.
      */
-    if (splot_map && axis_array[SECOND_X_AXIS].label.text)
+    if (splot_map && axis_array[SECOND_X_AXIS].label.text
+                  && *axis_array[SECOND_X_AXIS].label.text)
 	plot_bounds.ytop -= 1.5 * t->v_char;
-    if (splot_map && axis_array[SECOND_Y_AXIS].label.text)
+    if (splot_map && axis_array[SECOND_Y_AXIS].label.text
+                  && *axis_array[SECOND_Y_AXIS].label.text)
 	plot_bounds.xright -= 2.5 * t->h_char;
 
     if (!splot_map && aspect_ratio_3D > 0) {
@@ -971,7 +973,8 @@ do_3dplot(
 	    y = (map_y1 + tics_len + (titlelin + 0.5) * (t->v_char));
 	    if (splot_map && axis_array[SECOND_X_AXIS].ticmode)
 		y += 0.5 * t->v_char;
-	    if (splot_map && axis_array[SECOND_X_AXIS].label.text)
+	    if (splot_map && axis_array[SECOND_X_AXIS].label.text
+	                  && *axis_array[SECOND_X_AXIS].label.text)
 		y += 1.0 * t->v_char;
 	} else { /* usual 3d set view ... */
 	    x = (plot_bounds.xleft + plot_bounds.xright) / 2;
@@ -2900,7 +2903,8 @@ draw_3d_graphbox(struct surface_points *plot, int plot_num, WHICHGRID whichgrid,
 	/* In "set view map" 2D projection there may also be x2 tics and label */
 	if (splot_map && axis_array[SECOND_X_AXIS].ticmode)
 	    gen_tics(&axis_array[SECOND_X_AXIS], xtick_callback);
-	if (splot_map && axis_array[SECOND_X_AXIS].label.text) {
+	if (splot_map && axis_array[SECOND_X_AXIS].label.text
+	              && *axis_array[SECOND_X_AXIS].label.text) {
 	    int x2 = (plot_bounds.xright + plot_bounds.xleft) / 2;
 	    int y2 = plot_bounds.ytop + 1.0 * t->v_char;
 	    if (axis_array[SECOND_X_AXIS].ticmode)
@@ -3031,7 +3035,8 @@ draw_3d_graphbox(struct surface_points *plot, int plot_num, WHICHGRID whichgrid,
 		gen_tics(&axis_array[SECOND_Y_AXIS], widest_tic_callback);
 		y2tic_textwidth = (1.5 + widest_tic_strlen) * t->h_char;
 	    }
-	    if (axis_array[SECOND_Y_AXIS].label.text) {
+	    if (axis_array[SECOND_Y_AXIS].label.text
+	    && *axis_array[SECOND_Y_AXIS].label.text) {
 		int y2 = (plot_bounds.ytop + plot_bounds.ybot) / 2;
 		int x2 = plot_bounds.xright;
 		y2label_width = 2.5 * t->h_char;

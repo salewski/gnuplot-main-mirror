@@ -271,8 +271,8 @@ void
 save_axis_label_or_title(FILE *fp, char *name, char *suffix,
 			struct text_label *label, TBOOLEAN savejust)
 {
-    fprintf(fp, "set %s%s \"%s\" ",
-	    name, suffix, label->text ? conv_text(label->text) : "");
+    if (label->text)
+	fprintf(fp, "set %s%s \"%s\" ", name, suffix, conv_text(label->text));
     fprintf(fp, "\nset %s%s ", name, suffix);
     save_position(fp, &(label->offset), 3, TRUE);
     fprintf(fp, " font \"%s\"", label->font ? conv_text(label->font) : "");
@@ -293,6 +293,8 @@ save_axis_label_or_title(FILE *fp, char *name, char *suffix,
 	    fprintf(fp,"bs %d ",label->boxed);
     }
     fprintf(fp, "%s\n", (label->noenhanced) ? " noenhanced" : "");
+    if (!label->text)
+	fprintf(fp, "unset %s%s\n", name, suffix);
 }
 
 static void
