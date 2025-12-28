@@ -1959,8 +1959,10 @@ unset_range(AXIS_INDEX axis)
 {
     struct axis *this_axis = &axis_array[axis];
 
-    this_axis->writeback_min = this_axis->set_min = axis_defaults[axis].min;
-    this_axis->writeback_max = this_axis->set_max = axis_defaults[axis].max;
+    this_axis->min = this_axis->set_min = axis_defaults[axis].min;
+    this_axis->writeback_min = axis_defaults[axis].min;
+    this_axis->max = this_axis->set_max = axis_defaults[axis].max;
+    this_axis->writeback_max = axis_defaults[axis].max;
     this_axis->set_autoscale = AUTOSCALE_BOTH;
     this_axis->min_constraint = CONSTRAINT_NONE;
     this_axis->max_constraint = CONSTRAINT_NONE;

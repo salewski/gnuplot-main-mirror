@@ -1448,6 +1448,23 @@ save_prange(FILE *fp, struct axis *this_axis)
 {
     TBOOLEAN noextend = FALSE;
 
+    /* If the axis state matches visible state at program entry,
+     * call it a "reset".  There is no way to save the hidden state.
+     * Jan 2026: This is a change.
+     */
+    if (this_axis->index < PARALLEL_AXES) {
+	int i = this_axis->index;
+	if (this_axis->set_min == axis_defaults[i].min
+	&&  this_axis->set_max == axis_defaults[i].max
+	&&  this_axis->set_autoscale == AUTOSCALE_BOTH
+	&&  this_axis->min_constraint == CONSTRAINT_NONE
+	&&  this_axis->max_constraint == CONSTRAINT_NONE
+	&&  this_axis->range_flags == 0) {
+	    fprintf(fp, "unset %srange\n", axis_name(this_axis->index));
+	    return;
+	}
+    }
+
     fprintf(fp, "set %srange [ ", axis_name(this_axis->index));
     if (this_axis->set_autoscale & AUTOSCALE_MIN) {
 	if (this_axis->min_constraint & CONSTRAINT_LOWER ) {
