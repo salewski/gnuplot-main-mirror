@@ -12,6 +12,7 @@ extern TBOOLEAN multiplot_playback;	/* TRUE while inside "remultiplot" playback 
 extern TBOOLEAN suppress_multiplot_save;/* TRUE while inside a for/while loop */
 extern int multiplot_last_panel;	/* only this panel will work for zooming */
 extern int multiplot_highest_panel;	/* the highest panel number actually used */
+extern int multiplot_event_panel;	/* most recent event attributed to this */
 
 /* Some commands (pause, reset, ...) would be problematic if executed during
  * multiplot playback.  Invoke this from the command that should be filtered.

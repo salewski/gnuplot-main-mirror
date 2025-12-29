@@ -853,19 +853,18 @@ apply_zoom(struct t_zoom *z)
 
     /* The autoscale save/restore was too complicated, and broke refresh.
      * Just save the complete axis state and have done with it.
-     * FIXME: If the linear/log or linear/nonlinear state of an axis is
-     *        changed inside the multiplot, there will be either a memory
-     *        leak or a double-free after the original axis structures are
-     *        restored and then eventually the state changes again.
+     * Multiplot mousing has a separate save/restore mechanism.
      */
-    if (zoom_now == zoom_head && z != zoom_head) {
-	axis_array_copy = gp_realloc( axis_array_copy, sizeof(axis_array), "axis_array copy");
-	memcpy(axis_array_copy, axis_array, sizeof(axis_array));
-	if (shadow_axis_array) {
-	    size_t shadowsize = NUMBER_OF_MAIN_VISIBLE_AXES * sizeof(AXIS);
-	    shadow_axis_array_copy =
-		gp_realloc( shadow_axis_array_copy, shadowsize, "shadow_array copy");
-	    memcpy(shadow_axis_array_copy, shadow_axis_array, shadowsize);
+    if (!multiplot_playback) {
+	if (zoom_now == zoom_head && z != zoom_head) {
+	    axis_array_copy = gp_realloc( axis_array_copy, sizeof(axis_array), "axis_array copy");
+	    memcpy(axis_array_copy, axis_array, sizeof(axis_array));
+	    if (shadow_axis_array) {
+		size_t shadowsize = NUMBER_OF_MAIN_VISIBLE_AXES * sizeof(AXIS);
+		shadow_axis_array_copy =
+		    gp_realloc( shadow_axis_array_copy, shadowsize, "shadow_array copy");
+		memcpy(shadow_axis_array_copy, shadow_axis_array, shadowsize);
+	    }
 	}
     }
 
@@ -932,23 +931,30 @@ apply_zoom(struct t_zoom *z)
 }
 
 /*
- * helper routine called from apply_zoomi() and apply_saved_zoom()
+ * This helper routine is called from apply_zoom() and apply_saved_zoom().
+ *	At the start of a zoom/pan operation the initial axis settings were
+ * saved in axis_array_copy. The settings will have been changed by executing
+ * the zoom.  Therefore when restoring we keep the current (post-zoom)
+ * content of certain dynamic structures rather than the original content.
+ * If it has changed that means the original was already freed and replaced,
+ * so restoring it would lead to double-free or use-after-free errors.
  */
 static void
 restore_saved_axis_structures()
 {
-    int i;
-    for (i=0; i<AXIS_ARRAY_SIZE; i++) {
-	axis_array_copy[i].label = axis_array[i].label;
-	axis_array_copy[i].ticdef.def.user = axis_array[i].ticdef.def.user;
-	axis_array_copy[i].ticdef.font = axis_array[i].ticdef.font;
-	axis_array_copy[i].ticfmt = axis_array[i].ticfmt;
-	axis_array_copy[i].formatstring = axis_array[i].formatstring;
-    }
-    memcpy(axis_array, axis_array_copy, sizeof(axis_array));
-    if (shadow_axis_array && shadow_axis_array_copy) {
-	size_t shadowsize = NUMBER_OF_MAIN_VISIBLE_AXES * sizeof(AXIS);
-	memcpy(shadow_axis_array, shadow_axis_array_copy, shadowsize);
+    if (!multiplot_playback) {
+	for (int i = 0; i < AXIS_ARRAY_SIZE; i++) {
+	    axis_array_copy[i].label = axis_array[i].label;
+	    axis_array_copy[i].ticdef.def.user = axis_array[i].ticdef.def.user;
+	    axis_array_copy[i].ticdef.font = axis_array[i].ticdef.font;
+	    axis_array_copy[i].ticfmt = axis_array[i].ticfmt;
+	    axis_array_copy[i].formatstring = axis_array[i].formatstring;
+	}
+	memcpy(axis_array, axis_array_copy, sizeof(axis_array));
+	if (shadow_axis_array && shadow_axis_array_copy) {
+	    size_t shadowsize = NUMBER_OF_MAIN_VISIBLE_AXES * sizeof(AXIS);
+	    memcpy(shadow_axis_array, shadow_axis_array_copy, shadowsize);
+	}
     }
 }
 
@@ -1122,13 +1128,8 @@ UpdateStatuslineWithMouseSetting(mouse_setting_t * ms)
 	}
     }
 
-    if ((!TICS_ON(SECOND_X_AXIS) && !TICS_ON(SECOND_Y_AXIS))
-	   && !reset_since_last_plot) {
-	/* only first X and Y axis are in use */
-	sp = GetAnnotateString(s0, 255, real_x, real_y, mouse_mode, mouse_alt_string);
-	if (ruler.on)
-	    GetRulerString(sp, real_x, real_y);
-    } else if (reset_since_last_plot && r_mapping[panel].active) {
+    if ((reset_since_last_plot && r_mapping[panel].active)
+    ||  (last_plot_was_multiplot && r_mapping[panel].active)) {
 	double r;
 	double phi = atan2(real_y, real_x);
         double rmin = r_mapping[panel].min;
@@ -1144,6 +1145,12 @@ UpdateStatuslineWithMouseSetting(mouse_setting_t * ms)
 	    r = rmin + real_x / cos(phi);
 	sp = s0;
 	sprintf(sp, "theta: %.1f%s  r: %g ", theta, degree_sign, r);
+    } else if ((!TICS_ON(SECOND_X_AXIS) && !TICS_ON(SECOND_Y_AXIS))
+	   && !reset_since_last_plot) {
+	/* only first X and Y axis are in use */
+	sp = GetAnnotateString(s0, 255, real_x, real_y, mouse_mode, mouse_alt_string);
+	if (ruler.on)
+	    GetRulerString(sp, real_x, real_y);
     } else {
 	/* X2 and/or Y2 are in use: use more verbose format */
 	sp = s0;
@@ -1878,7 +1885,7 @@ which_panel(int mx, int my)
     if (in_multiplot || last_plot_was_multiplot)
 	for (int p = multiplot_highest_panel; p >= 0; p--) {
 	    if (mouse_inside_panel(&(panel_bounds[p]))) {
-//		multiplot_event_panel = p;
+		multiplot_event_panel = p;
 		return p;
 	    }
 	}

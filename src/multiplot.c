@@ -58,6 +58,7 @@ static t_value multiplot_udv = {
 };
 int multiplot_last_panel = 0;		/* only this panel will work for zooming */
 int multiplot_highest_panel = 0;	/* the highest panel number actually used */
+int multiplot_event_panel = -1;		/* most recent event attributed to this */
 
 /* Local prototypes */
 static void mp_layout_size_and_offset(void);
@@ -562,7 +563,9 @@ multiplot_end()
 	multiplot_udv.v.blockdata = NULL;
 
 	/* Save panel number of last-drawn plot */
-	multiplot_last_panel = mp_layout.current_panel;
+	multiplot_last_panel = mp_layout.current_panel - 1;
+	if (multiplot_last_panel < 0)
+	    multiplot_last_panel = multiplot_highest_panel;
     }
     last_plot_was_multiplot = TRUE;
 }
