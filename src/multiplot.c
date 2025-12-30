@@ -56,9 +56,11 @@ static t_value multiplot_udv = {
 	.type = DATABLOCK,
 	.v.blockdata = NULL
 };
-int multiplot_last_panel = 0;		/* only this panel will work for zooming */
+int multiplot_last_panel = 0;		/* only this panel will support pan/zoom */
 int multiplot_highest_panel = 0;	/* the highest panel number actually used */
 int multiplot_event_panel = -1;		/* most recent event attributed to this */
+int queued_zoom_panel = -1;		/* pan or zoom requested for this panel */
+TBOOLEAN in_multiplot_zoom = FALSE;
 
 /* Local prototypes */
 static void mp_layout_size_and_offset(void);
@@ -172,7 +174,7 @@ multiplot_next()
 		if (mp_layout.act_col == mp_layout.num_cols) {
 		    /* int_warn(NO_CARET,"will overplot first plot"); */
 		    mp_layout.act_col = 0;
-		    mp_layout.current_panel = 0;
+		    mp_layout.current_panel = 0;	/* wrap around */
 		}
 	    }
 	} else { /* column-major */
@@ -183,7 +185,7 @@ multiplot_next()
 		if (mp_layout.act_row == mp_layout.num_rows ) {
 		    /* int_warn(NO_CARET,"will overplot first plot"); */
 		    mp_layout.act_row = 0;
-		    mp_layout.current_panel = 0;
+		    mp_layout.current_panel = 0;	/* wrap around */
 		}
 	    }
 	}
@@ -789,6 +791,7 @@ multiplot_reset_after_error()
     multiplot_end();
     multiplot_playback = FALSE;
     suppress_multiplot_save = FALSE;
+    in_multiplot_zoom = FALSE;
 }
 
 #ifdef USE_MOUSE

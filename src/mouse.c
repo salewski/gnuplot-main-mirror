@@ -885,6 +885,19 @@ apply_zoom(struct t_zoom *z)
 	return;
     }
 
+    /* In the case of a zoom in a multiplot the entire multiplot has to be redrawn.
+     * FIXME: Maybe it actually would be possible to redraw just this panel?
+     */
+    if (last_plot_was_multiplot && !multiplot_playback) {
+	fprintf(stderr, "queueing zoom request for panel %d\n", multiplot_event_panel);
+	queued_zoom_panel = multiplot_event_panel;
+	do_string("load $GPVAL_PRE_MULTIPLOT");
+	in_multiplot_zoom = TRUE;
+	replay_multiplot();
+	in_multiplot_zoom = FALSE;
+	return;
+    }
+
     /* Now we're committed. Notify the terminal that the next replot is a zoom */
     (*term->layer)(TERM_LAYER_BEFORE_ZOOM);
 
@@ -931,13 +944,14 @@ apply_zoom(struct t_zoom *z)
 }
 
 /*
- * This helper routine is called from apply_zoom() and apply_saved_zoom().
+ * This helper routine is called from apply_zoom().
  *	At the start of a zoom/pan operation the initial axis settings were
  * saved in axis_array_copy. The settings will have been changed by executing
  * the zoom.  Therefore when restoring we keep the current (post-zoom)
  * content of certain dynamic structures rather than the original content.
  * If it has changed that means the original was already freed and replaced,
  * so restoring it would lead to double-free or use-after-free errors.
+ * Note: Multiplot mousing has a separate save/restore mechanism.
  */
 static void
 restore_saved_axis_structures()
@@ -1217,6 +1231,8 @@ recalc_statusline()
 static char *
 builtin_autoscale(struct gp_event_t *ge)
 {
+    if (last_plot_was_multiplot)
+	return "toggle autoscale not available in a multiplot";
     if (!ge) {
 	return "`builtin-autoscale` (set autoscale keepfix; replot)";
     }
@@ -1320,6 +1336,8 @@ builtin_invert_plot_visibilities(struct gp_event_t *ge)
 static char *
 builtin_toggle_log(struct gp_event_t *ge)
 {
+    if (last_plot_was_multiplot)
+	return "toggle logscale not available in a multiplot";
     if (!ge)
 	return "`builtin-toggle-log` y logscale for plots, z and cb for splots";
 
@@ -1339,6 +1357,8 @@ builtin_toggle_log(struct gp_event_t *ge)
 static char *
 builtin_nearest_log(struct gp_event_t *ge)
 {
+    if (last_plot_was_multiplot)
+	return "toggle logscale not available in a multiplot";
     if (!ge)
 	return "`builtin-nearest-log` toggle logscale of axis nearest cursor";
 
@@ -1418,7 +1438,7 @@ static char *
 builtin_toggle_ruler(struct gp_event_t *ge)
 {
     if (last_plot_was_multiplot)
-	return "ruler not available in multiplot";
+	return "ruler not available in a multiplot";
     if (!ge) {
 	return "`builtin-toggle-ruler`";
     }
@@ -1744,10 +1764,37 @@ event_keypress(struct gp_event_t *ge, TBOOLEAN current)
 	return;
 
     /* Ignore hotkeys, including arrows, during multiplot replay.
-     * NB: Hotkeys are fine in a multiplot, just not while it is being redrawn.
+     * Note: Hotkeys are fine in a finished multiplot but not while it is
+     * in the process of being redrawn.
      */
     if (multiplot_playback)
 	return;
+
+    /* During multiplot mousing some actions, e.g. pan and zoom, are intended
+     * only for the panel in which the keypress was detected.
+     */
+    if (last_plot_was_multiplot) {
+	multiplot_event_panel = which_panel(ge->mx, ge->my);
+	FPRINTF((stderr, "responding to hotkey in panel %d\n",
+		multiplot_event_panel));
+    }
+
+    /* During multiplot mousing actions that will result in redrawing the
+     * entire multiplot probably want to restore the original state first.
+     * Pan/zoom operations will take care of this later in apply_zoom(),
+     * but that leaves other possible hotkey actions that would need it now.
+     * In this initial implementation we only check for 'e' = builtin-replot.
+     * or 'g' = toggle grid.
+     * FIXME:
+     *  Other builtin hotkeys?
+     *  User-defined hotkeys?
+     */
+    if (last_plot_was_multiplot) {
+	if (ptr->builtin == builtin_replot
+	||  ptr->builtin == builtin_toggle_grid) {
+	    do_string("load $GPVAL_PRE_MULTIPLOT");
+	}
+    }
 
     if ((keywin = add_udv_by_name("MOUSE_KEY_WINDOW")))
 	Ginteger(&keywin->udv_value, ge->winid);
@@ -3581,33 +3628,22 @@ zoom_reset_after_error()
 TBOOLEAN
 inside_zoom()
 {
-    if (!inside_zoom_flag)
-	return FALSE;
-    if (in_multiplot
-    &&  multiplot_current_panel() > 0
-    &&  multiplot_current_panel() != multiplot_last_panel)
-	return FALSE;
+    if (in_multiplot_zoom) {
+	if (multiplot_current_panel() == queued_zoom_panel)
+	return TRUE;
+    }
 
-    return TRUE;
+    if (inside_zoom_flag)
+	return TRUE;
+
+    return FALSE;
 }
 
 void
-apply_saved_zoom()
+apply_queued_zoom()
 {
     if (!zoom_now)
 	return;
-
-    /* When replotting a multiplot interactively, the final (mouse is active) panel
-     * may have been zoomed but the previous panels overwrote the zoom state.
-     */
-    /* FIXME:  This logic is no longer valid since all panels are moused */
-    if (1+multiplot_current_panel() != multiplot_last_panel)
-	return;
-
-    if (zoom_now == zoom_head) {
-	restore_saved_axis_structures();
-	return;
-    }
 
     /* New range on primary axes */
     set_explicit_range(&axis_array[FIRST_X_AXIS], zoom_now->xmin, zoom_now->xmax);
