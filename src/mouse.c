@@ -773,6 +773,8 @@ apply_zoom(struct t_zoom *z)
 	zoom_now->ymax = axis_array[FIRST_Y_AXIS].set_max;
 	zoom_now->y2min = axis_array[SECOND_Y_AXIS].set_min;
 	zoom_now->y2max = axis_array[SECOND_Y_AXIS].set_max;
+	zoom_now->zmin = axis_array[FIRST_Z_AXIS].set_min;
+	zoom_now->zmax = axis_array[FIRST_Z_AXIS].set_max;
     }
 
     /* The autoscale save/restore was too complicated, and broke refresh.
@@ -800,6 +802,7 @@ apply_zoom(struct t_zoom *z)
 	axis_array[FIRST_Y_AXIS].autoscale = AUTOSCALE_NONE;
 	axis_array[SECOND_X_AXIS].autoscale = AUTOSCALE_NONE;
 	axis_array[SECOND_Y_AXIS].autoscale = AUTOSCALE_NONE;
+	axis_array[FIRST_Z_AXIS].autoscale = AUTOSCALE_NONE;
     }
 
     zoom_now = z;
@@ -814,6 +817,7 @@ apply_zoom(struct t_zoom *z)
     /* New range on primary axes */
     set_explicit_range(&axis_array[FIRST_X_AXIS], zoom_now->xmin, zoom_now->xmax);
     set_explicit_range(&axis_array[FIRST_Y_AXIS], zoom_now->ymin, zoom_now->ymax);
+    set_explicit_range(&axis_array[FIRST_Z_AXIS], zoom_now->zmin, zoom_now->zmax);
 
     /* EAM Apr 2013 - The tests on VERYLARGE protect against trying to   */
     /* interpret the autoscaling initial state as an actual limit value. */
@@ -918,6 +922,10 @@ do_zoom(double xmin, double ymin, double x2min, double y2min, double xmax, doubl
     SET_AXIS(FIRST_Y_AXIS,  y,  max, > -VERYLARGE);
     SET_AXIS(SECOND_X_AXIS, x2, max, > -VERYLARGE);
     SET_AXIS(SECOND_Y_AXIS, y2, max, > -VERYLARGE);
+
+    /* z axis is implicit */
+    z->zmin = axis_array[FIRST_Z_AXIS].min;
+    z->zmax = axis_array[FIRST_Z_AXIS].max;
 
 #undef SET_AXIS
 
@@ -3385,6 +3393,7 @@ apply_saved_zoom()
     /* New range on primary axes */
     set_explicit_range(&axis_array[FIRST_X_AXIS], zoom_now->xmin, zoom_now->xmax);
     set_explicit_range(&axis_array[FIRST_Y_AXIS], zoom_now->ymin, zoom_now->ymax);
+    set_explicit_range(&axis_array[FIRST_Z_AXIS], zoom_now->zmin, zoom_now->zmax);
 
     /* Do not mistake autoscaling initial state as an actual limit value. */
     if (!is_3d_plot
