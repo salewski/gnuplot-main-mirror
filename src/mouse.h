@@ -50,6 +50,7 @@
 struct t_zoom {
   double xmin, ymin, xmax, ymax;
   double x2min, y2min, x2max, y2max;
+  double zmin, zmax;
   struct t_zoom *prev, *next;
 };
 
