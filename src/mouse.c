@@ -885,11 +885,10 @@ apply_zoom(struct t_zoom *z)
 	return;
     }
 
-    /* In the case of a zoom in a multiplot the entire multiplot has to be redrawn.
-     * FIXME: Maybe it actually would be possible to redraw just this panel?
-     */
+    /* In the case of a zoom in a multiplot the entire multiplot has to be redrawn. */
     if (last_plot_was_multiplot && !multiplot_playback) {
-	fprintf(stderr, "queueing zoom request for panel %d\n", multiplot_event_panel);
+	FPRINTF((stderr, "queueing zoom request for panel %d", multiplot_event_panel));
+	FPRINTF((stderr, "\t x[%g:%g] y[%g:%g]\n", z->xmin, z->xmax, z->ymin, z->ymax));
 	queued_zoom_panel = multiplot_event_panel;
 	do_string("load $GPVAL_PRE_MULTIPLOT");
 	in_multiplot_zoom = TRUE;
@@ -917,10 +916,8 @@ apply_zoom(struct t_zoom *z)
 	set_explicit_range(&axis_array[SECOND_Y_AXIS], zoom_now->y2min, zoom_now->y2max);
     }
 
-    /* EAM Jun 2007 - The autoscale save/restore was too complicated, and broke
-     * refresh. Just save/restore the complete axis state and have done with it.
-     * Well, not _quite_ the complete state.  The labels are maintained dynamically.
-     * Apr 2015 - The same is now true (dynamic storage) for ticfmt, formatstring.
+    /* The autoscale save/restore was too complicated, and broke refresh.
+     * Just save/restore the complete axis state and have done with it.
      */
     if (zoom_now == zoom_head) {
 	restore_saved_axis_structures();
@@ -951,6 +948,7 @@ apply_zoom(struct t_zoom *z)
  * content of certain dynamic structures rather than the original content.
  * If it has changed that means the original was already freed and replaced,
  * so restoring it would lead to double-free or use-after-free errors.
+ * Invoked by "unzoom".
  * Note: Multiplot mousing has a separate save/restore mechanism.
  */
 static void
@@ -1110,6 +1108,9 @@ UpdateStatuslineWithMouseSetting(mouse_setting_t * ms)
 
     if (!almost2d()) {
 	char format[0xff];
+	float rot_x, rot_z;
+	int panel = 0;
+
 	format[0] = '\0';
 	strcat(format, "view: ");
 	strcat(format, ms->fmt);
@@ -1119,7 +1120,15 @@ UpdateStatuslineWithMouseSetting(mouse_setting_t * ms)
 	strcat(format, ms->fmt);
 	strcat(format, ", ");
 	strcat(format, ms->fmt);
-	snprintf(s0, 255, format, surface_rot_x, surface_rot_z, surface_scale, surface_zscale);
+	
+	if (last_plot_was_multiplot && ((panel = which_panel(mouse_x, mouse_y)) >= 0)) {
+	    rot_x = panel_view[panel].rot_x;
+	    rot_z = panel_view[panel].rot_z;
+	} else {
+	    rot_x = surface_rot_x;
+	    rot_z = surface_rot_z;
+	}
+	snprintf(s0, 255, format, rot_x, rot_z, surface_scale, surface_zscale);
 	if (term->put_tmptext)
 	    (term->put_tmptext) (0, s0);
 	return;
@@ -1781,8 +1790,9 @@ event_keypress(struct gp_event_t *ge, TBOOLEAN current)
 
     /* During multiplot mousing actions that will result in redrawing the
      * entire multiplot probably want to restore the original state first.
-     * Pan/zoom operations will take care of this later in apply_zoom(),
-     * but that leaves other possible hotkey actions that would need it now.
+     * Pan/zoom operations will take care of this later in apply_zoom()
+     * or do_save_3dplot(), but that leaves other possible hotkey actions
+     * that would need it now.
      * In this initial implementation we only check for 'e' = builtin-replot.
      * or 'g' = toggle grid.
      * FIXME:
@@ -2336,6 +2346,10 @@ event_buttonpress(struct gp_event_t *ge)
 	(!replot_disabled || (E_REFRESH_NOT_OK != refresh_ok))	/* Use refresh if available */
 	&& !(paused_for_mouse & PAUSE_BUTTON3)) {
 
+	/* Ignore mouse wheel events that come in too fast */
+	if (in_multiplot_zoom)
+	    return;
+
 	/* Ctrl+Shift+wheel up or Squeeze (not implemented) */
 	if ((modifier_mask & Mod_Ctrl) && (modifier_mask & Mod_Shift))
 	    do_zoom_in_X();
@@ -2355,6 +2369,10 @@ event_buttonpress(struct gp_event_t *ge)
     } else if (((b == 5) || (b == 7)) && /* 5 - wheel down, 7 - wheel right */
 	       (!replot_disabled || (E_REFRESH_NOT_OK != refresh_ok))	/* Use refresh if available */
 	       && !(paused_for_mouse & PAUSE_BUTTON3)) {
+
+	/* Ignore mouse wheel events that come in too fast */
+	if (in_multiplot_zoom)
+	    return;
 
 	/* Ctrl+Shift+wheel down or Unsqueeze (not implemented) */
 	if ((modifier_mask & Mod_Ctrl) && (modifier_mask & Mod_Shift))
@@ -2623,21 +2641,29 @@ event_buttonrelease(struct gp_event_t *ge)
 static void
 event_motion(struct gp_event_t *ge)
 {
-    int panel;
     motion = 1;
 
     mouse_x = ge->mx;
     mouse_y = ge->my;
 
-    /* Event might have come from a multiplot panel */
-    panel = which_panel(mouse_x, mouse_y);
-
-    if ((panel < 0  && is_3d_plot_or_panel() && !splot_map_or_panel())
-    ||  (panel >= 0 && ((panel_flags[panel] & PANEL_3D) != 0) && ((panel_flags[panel] & PANEL_SPLOT) == 0)))
+    /*
+     * 3D plot
+     */
+    if (is_3d_plot_or_panel() && !splot_map_or_panel())
     {
 	/* Rotate the surface if it is 3D graph but not "set view map". */
-
 	TBOOLEAN redraw = FALSE;
+
+	/* Allow for multiplot mousing */
+	if (last_plot_was_multiplot) {
+	    UpdateStatusline();
+	    if ((button & (7 << 1)) != 0) {
+		/* Ignore mouse drags while plot is in the process of being redrawn. */
+		if (multiplot_playback)
+		    return;
+		multiplot_event_panel = which_panel(ge->mx, ge->my);
+	    }
+	}
 
 	if (button & (1 << 1)) {
 	    /* dragging with button 1 -> rotate */
@@ -2692,9 +2718,7 @@ event_motion(struct gp_event_t *ge)
 	    }
 	}
 
-	if (last_plot_was_multiplot || !almost2d()) {
-	    turn_ruler_off();
-	}
+	turn_ruler_off();
 
 	if (redraw) {
 	    if (allowmotion) {
@@ -2717,9 +2741,11 @@ event_motion(struct gp_event_t *ge)
     } /* if (3D plot) */
 
 
+    /*
+     * 2D plot, or suitably aligned 3D plot
+     *		update statusline and possibly the zoombox annotation
+     */
     if (almost2d()) {
-	/* 2D plot, or suitably aligned 3D plot: update
-	 * statusline and possibly the zoombox annotation */
 	if (!term->put_tmptext)
 	    return;
 	MousePosToGraphPosReal(mouse_x, mouse_y, &real_x, &real_y, &real_x2, &real_y2);
@@ -2740,7 +2766,7 @@ event_motion(struct gp_event_t *ge)
 	    do_string_replot("");
 	}
 #endif
-    }
+    } /* if (2D plot) */
 }
 
 
@@ -2978,11 +3004,10 @@ exec_event(char type, int mx, int my, int par1, int par2, int winid)
 static void
 do_save_3dplot(struct surface_points *plots, int pcount, REPLOT_TYPE quick)
 {
-
-    /* EXPERIMENTAL 3D mousing from inside a multiplot */
     if (last_plot_was_multiplot && refresh_ok == E_REFRESH_OK_3D) {
 	replay_multiplot();
-    } else
+	return;
+    }
 
     if (!plots || (E_REFRESH_NOT_OK == refresh_ok)) {
 	/* !plots might happen after the `reset' command for example
@@ -3639,6 +3664,25 @@ inside_zoom()
     return FALSE;
 }
 
+TBOOLEAN
+check_for_queued_action()
+{
+    TBOOLEAN action = FALSE;
+
+    if (in_multiplot && multiplot_playback) {
+	if (multiplot_current_panel() == queued_zoom_panel) {
+	    FPRINTF((stderr, "term_end_plot: apply queued zoom to panel %d\n",
+			queued_zoom_panel));
+	    apply_queued_zoom();
+	    action = TRUE;
+	} else {
+	    FPRINTF((stderr, "term_end_plot: not applying zoom to panel %d\n",
+			multiplot_current_panel()));
+	}
+    }
+    return action;
+}
+
 void
 apply_queued_zoom()
 {
@@ -3658,5 +3702,6 @@ apply_queued_zoom()
     && (zoom_now->y2min < VERYLARGE && zoom_now->y2max > -VERYLARGE))
 	set_explicit_range(&axis_array[SECOND_Y_AXIS], zoom_now->y2min, zoom_now->y2max);
 }
+
 
 #endif /* USE_MOUSE */

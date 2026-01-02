@@ -1280,7 +1280,11 @@ construct_2D_mask_set( struct coordinate *points, int p_count )
 static void save_axis_mapping(AXIS *axis, axis_mapping *map);
 
 /* Calculate the region on the canvas used by the current plot.
- * This can be saved to guide subsequent mousing.
+ * The mousing code tests for mouse_outside_active_region() to
+ * determined whether zoom/pan/rotate events are accepted or
+ * ignored.
+ * If a change is made to handle all mousing operations from
+ * all panels in a multiplot, this tracking mechanism can go away.
  */
 void
 update_active_region(void)
@@ -1303,14 +1307,9 @@ update_active_region(void)
     if (multiplot_highest_panel < p)
 	multiplot_highest_panel = p;
 
-    save_axis_mapping(&axis_array[FIRST_X_AXIS], &(x_mapping[p]));
-    save_axis_mapping(&axis_array[FIRST_Y_AXIS], &(y_mapping[p]));
-    save_axis_mapping(&axis_array[SECOND_X_AXIS], &(x2_mapping[p]));
-    save_axis_mapping(&axis_array[SECOND_Y_AXIS], &(y2_mapping[p]));
-    save_axis_mapping(&axis_array[POLAR_AXIS], &(r_mapping[p]));
-    r_mapping[p].active = polar;
-    theta_mapping[p].min = theta_origin;
-    theta_mapping[p].max = theta_direction;
+    FPRINTF((stderr, "update_active_region for panel %d [%d %d %d %d]\n", p,
+		active_bounds.xleft, active_bounds.xright,
+		active_bounds.ybot, active_bounds.ytop));
 }
 
 static void
@@ -1330,6 +1329,31 @@ save_axis_mapping(AXIS *axis, axis_mapping *map)
 	map->active = FALSE;
     else
 	map->active = TRUE;
+}
+
+void
+save_all_axis_mappings()
+{
+    int p = multiplot_current_panel();
+    save_axis_mapping(&axis_array[FIRST_X_AXIS], &(x_mapping[p]));
+    save_axis_mapping(&axis_array[FIRST_Y_AXIS], &(y_mapping[p]));
+    save_axis_mapping(&axis_array[SECOND_X_AXIS], &(x2_mapping[p]));
+    save_axis_mapping(&axis_array[SECOND_Y_AXIS], &(y2_mapping[p]));
+    save_axis_mapping(&axis_array[POLAR_AXIS], &(r_mapping[p]));
+    r_mapping[p].active = polar;
+    theta_mapping[p].min = theta_origin;
+    theta_mapping[p].max = theta_direction;
+
+    FPRINTF((stderr, "Save axis mappings for panel %d:  x [%g:%g] y [%g:%g] \n", p,
+	    x_mapping[p].min, x_mapping[p].max, y_mapping[p].min, y_mapping[p].max));
+}
+
+void
+save_panel_view()
+{
+    int p = multiplot_current_panel();
+    panel_view[p].rot_x = surface_rot_x;
+    panel_view[p].rot_z = surface_rot_z;
 }
 
 void

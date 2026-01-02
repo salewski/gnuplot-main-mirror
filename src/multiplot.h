@@ -31,6 +31,7 @@ extern TBOOLEAN in_multiplot_zoom;
 #define MAX_PANELS 16
 extern BoundingBox panel_bounds[MAX_PANELS];	/* terminal coords of next panel */
 extern unsigned int panel_flags[MAX_PANELS];	/* bit settings, e.g. PANEL_3D */
+extern view panel_view[MAX_PANELS];		/* view angles for a 3D panel */
 #ifdef USE_MOUSE
 extern axis_mapping x_mapping[], x2_mapping[], y_mapping[], y2_mapping[];
 extern axis_mapping r_mapping[], theta_mapping[];

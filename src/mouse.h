@@ -121,6 +121,7 @@ void bind_remove_all(void);
     /* expose zoom state to plot routines */
     TBOOLEAN inside_zoom(void);
     void apply_queued_zoom(void);
+    TBOOLEAN check_for_queued_action();
 #else
     #define inside_zoom() FALSE
 #endif

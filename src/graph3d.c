@@ -1758,9 +1758,6 @@ do_3dplot(
     /* Release the palette if we have used one (PostScript only?) */
     if (is_plot_with_palette() && term->previous_palette)
 	term->previous_palette();
-
-    term_end_plot();
-
     if (hidden3d && draw_surface) {
 	term_hidden_line_removal();
     }
@@ -1771,6 +1768,10 @@ do_3dplot(
 	surface_scale = 1.0;
     else if (yz_projection)
 	flip_projection_axis(&axis_array[FIRST_Z_AXIS]);
+
+    /* term_end_plot will save the final axis mappings so it must come after any flips */
+    term_end_plot();
+
 }
 
 

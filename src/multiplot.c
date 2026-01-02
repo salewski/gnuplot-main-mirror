@@ -144,13 +144,17 @@ static struct {
 
 /*		Support for multiplot mousing
  *		-----------------------------
- * The axis mappings are loaded by update_active_region(),
- * consumed by mouse.c:MousePosToGraphPosReal,
- * and potentially saved for multiplot and off-line mousing.
+ * Axis mappings are saved at the end of a plot by save_all_axis_mappings(),
+ * reloaded by multiplot_reset() for use in multiplot mousing,
+ * and consumed by mouse.c:MousePosToGraphPosReal.
  */
 BoundingBox panel_bounds[MAX_PANELS];	/* terminal coords of each panel */
 unsigned int panel_flags[MAX_PANELS];	/* bit settings, e.g. PANEL_3D */
+view panel_view[MAX_PANELS];		/* view angles for 3D panel */
 #ifdef USE_MOUSE
+static void reset_axis_mapping(void);
+static void restore_panel_view(void);
+
 axis_mapping x_mapping[MAX_PANELS] = {};
 axis_mapping x2_mapping[MAX_PANELS] = {};
 axis_mapping y_mapping[MAX_PANELS] = {};
@@ -279,7 +283,8 @@ multiplot_start()
     multiplot_last_panel = 0;
     multiplot_highest_panel = 0;
 
-    reset_axis_mapping();	/* only needed for multiplot mousing */
+    if (debug && !multiplot_playback)
+	reset_axis_mapping();	/* Only needed for multiplot mousing */
 
     /* Parse options */
     while (!END_OF_COMMAND) {
@@ -515,6 +520,23 @@ multiplot_start()
 	panel_flags[panel] = 0;
     /* set bounds for first panel */
     multiplot_reset();
+
+#ifdef USE_MOUSE
+    /* Normally this check happens when one multiplot panel
+     * finishes and the next one is about to begin.  But if
+     * there is only one panel, that would never happen.
+     */
+    if (multiplot_playback && (multiplot_highest_panel == 0)) {
+	TBOOLEAN check_for_queued_action(void);
+	check_for_queued_action();
+    }
+#endif
+
+    /* FIXME:  This makes the whole screen mousable at the start.
+     * However the active region will be recalculated in boundary()
+     * or boundary3d() so it may well be unnecessary.
+     */
+    update_active_region();
 }
 
 void
@@ -577,8 +599,14 @@ multiplot_reset()
 {
     if (mp_layout.auto_layout_margins)
 	mp_layout_margins_and_spacing();
-    else
+    else if (mp_layout.auto_layout)
 	mp_layout_size_and_offset();
+    else
+	multiplot_use_size_and_origin();
+#if USE_MOUSE
+    if (multiplot_playback)
+	restore_panel_view();
+#endif
 }
 
 void
@@ -795,7 +823,8 @@ multiplot_reset_after_error()
 }
 
 #ifdef USE_MOUSE
-static void reset_axis_mapping()
+static void
+reset_axis_mapping()
 {
     for (int p = 0;  p < MAX_PANELS; p++) {
 	x_mapping[p].in_use = FALSE;
@@ -804,6 +833,20 @@ static void reset_axis_mapping()
 	y2_mapping[p].in_use = FALSE;
 	r_mapping[p].in_use = FALSE;
 	theta_mapping[p].in_use = FALSE;
+    }
+}
+
+static void
+restore_panel_view()
+{
+    if (multiplot_playback) {
+	int p = multiplot_current_panel();
+	if ((p >= 0) && ((panel_flags[p] & PANEL_3D) != 0)) {
+	    surface_rot_x = panel_view[p].rot_x;
+	    surface_rot_z = panel_view[p].rot_z;
+	    fprintf(stderr, "restore panel %d view angles %g %g\n",
+			p, surface_rot_x, surface_rot_z);
+	}
     }
 }
 #else
