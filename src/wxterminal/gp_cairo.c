@@ -742,7 +742,7 @@ static gchar * gp_cairo_convert(plot_struct *plot, const char* string)
 	const char *charset = NULL;
 	gchar * string_utf8;
 
-	if (g_utf8_validate(string, -1, NULL)) {
+	if (g_utf8_validate(string, -1, NULL) && (encoding != S_ENC_EUCJP)) {
 	    string_utf8 = g_strdup(string);
 	} else {
 	    charset = gp_cairo_get_encoding(plot);
@@ -2080,6 +2080,7 @@ const char* gp_cairo_get_encoding(plot_struct *plot)
 	case S_ENC_CP852 :  return "cp852";
 	case S_ENC_CP1250 : return "windows-1250";
 	case S_ENC_CP1252 : return "windows-1252";
+	case S_ENC_EUCJP : return "EUC-JP";
 	case S_ENC_KOI8_R : return "KOI8-R";
 	case S_ENC_KOI8_U :  return "KOI8-U";
 	case S_ENC_ISO8859_1 : return "ISO-8859-1";

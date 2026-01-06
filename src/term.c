@@ -147,7 +147,7 @@ enum set_encoding_id encoding;
 const char *encoding_names[] = {
     "default", "iso_8859_1", "iso_8859_2", "iso_8859_9", "iso_8859_15",
     "cp437", "cp850", "cp852", "cp950", "cp1250", "cp1251", "cp1252", "cp1254",
-    "koi8r", "koi8u", "sjis", "utf8", NULL };
+    "koi8r", "koi8u", "sjis", "EUC_JP", "utf8", NULL };
 /* 'set encoding' options */
 const struct gen_table set_encoding_tbl[] =
 {
