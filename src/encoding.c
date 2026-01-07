@@ -126,7 +126,7 @@ encoding_from_locale(void)
 	    encoding = S_ENC_UTF8;
 	if (l && (strstr(l, "sjis") || strstr(l, "SJIS") || strstr(l, "932")))
 	    encoding = S_ENC_SJIS;
-	if (l && (strstr(l, "EUC-JP") || strstr(l, "euc-jp")))
+	if (l && (strstr(l, "EUC-JP") || strstr(l, "euc-jp") || strstr(l, "eucJP")))
 	    encoding = S_ENC_EUCJP;
 	if (l && (strstr(l, "850") || strstr(l, "858")))
 	    encoding = S_ENC_CP850;

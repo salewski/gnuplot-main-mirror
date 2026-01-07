@@ -148,7 +148,11 @@ const char *encoding_names[] = {
     "default", "iso_8859_1", "iso_8859_2", "iso_8859_9", "iso_8859_15",
     "cp437", "cp850", "cp852", "cp950", "cp1250", "cp1251", "cp1252", "cp1254",
     "koi8r", "koi8u", "sjis", "EUC_JP", "utf8", NULL };
-/* 'set encoding' options */
+/* 'set encoding' options
+ * Some names do not appear here (e.g. EUC_JP) because they
+ * are not supported for output, only input.
+ * Thus "set encoding EUC_JP" is not a valid command.
+ */
 const struct gen_table set_encoding_tbl[] =
 {
     { "def$ault", S_ENC_DEFAULT },
