@@ -541,6 +541,6 @@ int term_waitforinput(int options);
 char *escape_reserved_chars(const char *str, const char *reserved);
 
 /* replace escape sequences with the characters they represent */
-char *expand_unicode_escapes(char *text);
+char *expand_unicode_escapes(char *text, TBOOLEAN force);
 
 #endif /* GNUPLOT_TERM_API_H */

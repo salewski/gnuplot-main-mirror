@@ -1484,7 +1484,7 @@ f_strlen(union argument *arg)
     if (a.type != STRING)
 	int_error(NO_CARET, "internal error : strlen of non-STRING argument");
 
-    expanded_string = expand_unicode_escapes(a.v.string_val);
+    expanded_string = expand_unicode_escapes(a.v.string_val, FALSE);
     Ginteger(&result, (int)gp_strlen(expanded_string));
     gpfree_string(&a);
     free(expanded_string);
@@ -1507,10 +1507,10 @@ f_strstrt(union argument *arg)
 	int_error(NO_CARET, "internal error : non-STRING argument to strstrt");
 
     /* Convert escape sequences in both needle and haystack */
-    expanded_string = expand_unicode_escapes(needle.v.string_val);
+    expanded_string = expand_unicode_escapes(needle.v.string_val, FALSE);
     free(needle.v.string_val);
     needle.v.string_val = expanded_string;
-    expanded_string = expand_unicode_escapes(haystack.v.string_val);
+    expanded_string = expand_unicode_escapes(haystack.v.string_val, FALSE);
     free(haystack.v.string_val);
     haystack.v.string_val = expanded_string;
 
@@ -1576,7 +1576,7 @@ f_range(union argument *arg)
     if (full.type != STRING)
 	int_error(NO_CARET, "internal error: substring range operator applied to non-STRING type");
 
-    expanded_string = expand_unicode_escapes(full.v.string_val);
+    expanded_string = expand_unicode_escapes(full.v.string_val, FALSE);
 
     if (iend > gp_strlen(expanded_string))
 	iend = gp_strlen(expanded_string);

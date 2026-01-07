@@ -831,7 +831,7 @@ write_multiline(
     }
 
     /* Replace unicode escape sequences with utf8 byte sequence */
-    expanded_text = expand_unicode_escapes(text);
+    expanded_text = expand_unicode_escapes(text, FALSE);
     p = text = expanded_text;
 
     for (;;) {                  /* we will explicitly break out */
@@ -886,17 +886,21 @@ write_multiline(
  * UTF-8 byte sequences.  Note that a utf8 character encoding is no longer than
  * four bytes, which is always less than the seven character escape sequence,
  * so the substitution can be done in place.
- * If the current encoding is not utf8, do nothing.
+ * force == FALSE	If the current encoding is not utf8
+ * force == TRUE	Caller takes responsibility that this makes sense
+ *			e.g. the string may already have been converted to UTF-8
+ *			from its original encoding.
  * NB: Returned string must be freed by caller
  */
 char *
-expand_unicode_escapes(char *text)
+expand_unicode_escapes(char *text, TBOOLEAN force)
 {
     char *out = strdup(text);
     char *p, *rest;
 
-    if (encoding != S_ENC_UTF8)
+    if ((encoding != S_ENC_UTF8)  && !force)
 	return out;
+
     if ((p = strstr(text, "\\U+")) == NULL)
 	return out;
 
