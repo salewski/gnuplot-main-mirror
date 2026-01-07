@@ -60,6 +60,8 @@ static const char * encoding_minus(void);
 static void set_degreesign(char *);
 static TBOOLEAN utf8_getmore(unsigned long * wch, const char **str, int nbytes);
 
+/* Exported for the benefit of certain terminals */
+char * locale_encoding = NULL;
 
 /*
  * encoding functions
@@ -145,6 +147,8 @@ encoding_from_locale(void)
 	if (l && (strstr(l, "950")))
 	    encoding = S_ENC_CP950;
 	/* FIXME: "set encoding locale" has only limited support on non-Windows systems */
+	free(locale_encoding);
+	locale_encoding = strdup(l);
     }
 #endif
     return encoding;
