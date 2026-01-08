@@ -748,9 +748,6 @@ static gchar * gp_cairo_convert(plot_struct *plot, const char* string)
 	    charset = gp_cairo_get_encoding(plot);
 	    string_utf8 = g_convert(string, -1, "UTF-8", charset, &bytes_read, NULL, &error);
 	}
-	/* One way or the other, the string is now UTF-8 */
-	string_utf8 = expand_unicode_escapes(string_utf8, TRUE);
-
 	/* handle error case */
 	if (error != NULL) {
 		/* fatal error in conversion */
@@ -777,6 +774,9 @@ static gchar * gp_cairo_convert(plot_struct *plot, const char* string)
 				"in the current charset (%s), falling back to iso_8859_1\n",
 				string, charset);
 	}
+
+	/* One way or the other, the string is now UTF-8 */
+	string_utf8 = expand_unicode_escapes(string_utf8, TRUE);
 
 	return string_utf8;
 }
