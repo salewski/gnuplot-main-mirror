@@ -2655,7 +2655,7 @@ reread_command()
 #ifdef BACKWARD_COMPATIBILITY
     FILE *fp;
     c_token++;
-    if (evaluate_inside_functionblock || multiplot || multiplot_playback)
+    if (evaluate_inside_functionblock || in_multiplot || multiplot_playback)
 	int_error(NO_CARET, "reread command not possible here");
     fp = lf_top();
     if (fp != (FILE *) NULL)
