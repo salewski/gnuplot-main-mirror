@@ -4,7 +4,8 @@
 
 void datablock_command(void);
 void functionblock_command(void);
-char **get_datablock(char *name);
+struct data_array *get_datablock(char *name);
+struct data_array *new_data_array(void);
 char *parse_datablock_name(void);
 void gpfree_datablock(struct value *datablock_value);
 void gpfree_functionblock(struct value *functionblock_value);

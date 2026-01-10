@@ -4907,7 +4907,7 @@ set_table()
 	if (!append || table_var->udv_value.type != DATABLOCK) {
 	    free_value(&table_var->udv_value);
 	    table_var->udv_value.type = DATABLOCK;
-	    table_var->udv_value.v.data_array = NULL;
+	    table_var->udv_value.v.blockdata = new_data_array();
 	}
 
     } else if ((tablefile = try_to_get_string())) {  /* file name */

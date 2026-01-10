@@ -54,7 +54,7 @@ TBOOLEAN multiplot_playback = FALSE;	  /* TRUE while inside "remultiplot" playba
 TBOOLEAN suppress_multiplot_save = FALSE; /* TRUE inside a for/while loop */
 static t_value multiplot_udv = {
 	.type = DATABLOCK,
-	.v.data_array = NULL
+	.v.blockdata = NULL
 };
 int multiplot_last_panel = 0;
 
@@ -519,7 +519,8 @@ multiplot_end()
 	append_to_datablock(&multiplot_udv, strdup("unset multiplot"));
 
 	datablock->udv_value = multiplot_udv;
-	multiplot_udv.v.data_array = NULL;
+	datablock->udv_value.v.blockdata = multiplot_udv.v.blockdata;
+	multiplot_udv.v.blockdata = NULL;
 
 	/* Save panel number of last-drawn plot */
 	multiplot_last_panel = mp_layout.current_panel;
@@ -701,6 +702,7 @@ init_multiplot_datablock()
 {
     gpfree_datablock(&multiplot_udv);
     multiplot_udv.type = DATABLOCK;
+    multiplot_udv.v.blockdata = new_data_array();
     append_to_datablock(&multiplot_udv, strdup("# saved multiplot"));
 }
 

@@ -254,13 +254,13 @@ load_file(FILE *fp, char *name, int calltype)
 
     /* Support for "load $datablock" */
     if (calltype == 6 || calltype == 7)
-	datablock_input_line = get_datablock(name);
+	datablock_input_line = get_datablock(name)->data;
 
 #ifdef USE_FUNCTIONBLOCKS
     /* Support for function blocks */
     if (calltype == 8) {
 	functionblock = (udvt_entry *)(name);
-	datablock_input_line = functionblock->udv_value.v.functionblock.data_array;
+	datablock_input_line = functionblock->udv_value.v.functionblock.blockdata->data;
 	name = strdup(functionblock->udv_name);
     }
 #endif

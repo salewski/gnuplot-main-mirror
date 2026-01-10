@@ -1465,9 +1465,9 @@ df_open(const char *cmd_filename, int max_using, struct curve_points *plot)
 	    df_pseudodata = 2;
     } else if (df_filename[0] == '$') {
 	df_datablock = TRUE;
-	df_datablock_line = get_datablock(df_filename);
+	df_datablock_line = get_datablock(df_filename)->data;
 	/* Better safe than sorry. Check for inblock != outblock */
-	if (plot && table_var && table_var->udv_value.v.data_array == df_datablock_line)
+	if (plot && table_var && table_var->udv_value.v.blockdata->data == df_datablock_line)
 	    int_error(NO_CARET,"input and output datablock are the same");
     } else if (!strcmp(df_filename, "@@") && df_array) {
 	/* df_array was set in string_or_express() */

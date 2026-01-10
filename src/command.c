@@ -2303,7 +2303,7 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
 	    free_value(&print_out_var->udv_value);
 	    gpfree_vgrid(print_out_var);
 	    print_out_var->udv_value.type = DATABLOCK;
-	    print_out_var->udv_value.v.data_array = NULL;
+	    print_out_var->udv_value.v.blockdata = new_data_array();
 	}
     }
 
@@ -2378,11 +2378,11 @@ print_command()
 		    line++;
 		}
 		fprintf(print_out, ")\n");
-		line = block->udv_value.v.functionblock.data_array;
+		line = block->udv_value.v.functionblock.blockdata->data;
 	    } else
 #endif	/* USE_FUNCTIONBLOCKS */
 	    if (block->udv_value.type == DATABLOCK)
-		line = block->udv_value.v.data_array;
+		line = block->udv_value.v.blockdata->data;
 	    else
 		int_error(c_token, "%s is not printable", datablock_name);
 
@@ -2621,7 +2621,7 @@ replot_command()
     if (last_plot_was_multiplot && !in_multiplot) {
 	struct udvt_entry *datablock = get_udv_by_name("$GPVAL_LAST_MULTIPLOT");
 	if (!datablock || datablock->udv_value.type != DATABLOCK
-	||  datablock->udv_value.v.data_array == NULL) {
+	||  datablock->udv_value.v.blockdata == NULL) {
 	    last_plot_was_multiplot = FALSE;
 	    replotrequest();
 	} else {
@@ -2914,7 +2914,7 @@ $PALETTE u 1:2 t 'red' w l lt 1 lc rgb 'red',\
     datablock = add_udv_by_name("$PALETTE");
     free_value(&datablock->udv_value);
     datablock->udv_value.type = DATABLOCK;
-    datablock->udv_value.v.data_array = NULL;
+    datablock->udv_value.v.blockdata = new_data_array();
 
     /* Part of the purpose for writing these values into a datablock */
     /* is so that the user can read them back if desired.  But data  */

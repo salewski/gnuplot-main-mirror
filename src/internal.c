@@ -1639,7 +1639,7 @@ f_index(union argument *arg)
 	i--;	/* line numbers run from 1 to nlines */
 	if (i < 0 || i >= datablock_size(&array))
 	    int_error(NO_CARET, "datablock index out of range");
-	push( Gstring(&array, array.v.data_array[i]) );
+	push( Gstring(&array, array.v.blockdata->data[i]) );
     }
 
     else

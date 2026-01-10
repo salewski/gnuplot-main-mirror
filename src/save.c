@@ -116,7 +116,7 @@ save_all(FILE *fp)
 	if (last_plot_was_multiplot) {
 	    char **line;
 	    fprintf(fp, "## Last plot was a multiplot\n");
-	    line = get_datablock("$GPVAL_LAST_MULTIPLOT");
+	    line = get_datablock("$GPVAL_LAST_MULTIPLOT")->data;
 	    while (line && *line) {
 		fprintf(fp, "%s\n", *line);
 		line++;
@@ -136,7 +136,7 @@ save_datablocks(FILE *fp)
     while (udv) {
 	if ((udv->udv_value.type == DATABLOCK)
 	&&  (strncmp(udv->udv_name, "$GPVAL", 6) != 0)) {
-	    char **line = udv->udv_value.v.data_array;
+	    char **line = udv->udv_value.v.blockdata->data;
 	    fprintf(fp, "%s << EOD\n", udv->udv_name);
 	    while (line && *line) {
 		fprintf(fp, "%s\n", *line);
