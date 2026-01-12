@@ -138,6 +138,7 @@ typedef enum ifstate {IF_INITIAL=1, IF_TRUE, IF_FALSE} ifstate;
 /* static prototypes */
 static void command(void);
 static TBOOLEAN is_array_assignment(void);
+static TBOOLEAN is_datablock_assignment(void);
 static int changedir(char *path);
 static char* fgets_ipc(char* dest, int len);
 static char* gp_get_string(char *, size_t, const char *);
@@ -875,6 +876,8 @@ command()
 	define();
     else if (is_array_assignment())
 	;
+    else if (equals(c_token,"$") && is_datablock_assignment())
+	;
     else
 	(*lookup_ftable(&command_ftbl[0],c_token))();
 
@@ -1131,6 +1134,45 @@ is_array_assignment()
     return TRUE;
 }
 
+/*
+ * Check for command line beginning with
+ *    $DATABLOCK[<expr>] = <string-expression>
+ * This routine is modeled on command.c:define()
+ */
+TBOOLEAN
+is_datablock_assignment()
+{
+    struct data_array *datablock;
+    char *newstring;
+    int index;
+
+    if (!equals(c_token, "$") || !isletter(c_token+1) || !equals(c_token+2,"["))
+	return FALSE;
+
+    datablock = get_datablock(parse_datablock_name());
+
+    /* FIXME: datablocks are not protected by a refcount, but could be */
+
+    /* Evaluate index (line numbers run from 1 to nlines) */
+    c_token++;
+    index = int_expression();
+    if (index <= 0 || index > datablock->header.size)
+	int_error(c_token, "index out of range");
+    if (!equals(c_token, "]") || !equals(c_token+1, "="))
+	int_error(c_token, "Expecting $Datablock[<expr>] = <string expr>");
+    index--;
+
+    /* Evaluate right side of assignment */
+    c_token += 2;
+    newstring = try_to_get_string();
+    if (!newstring)
+	int_error(c_token, "Expecting $Datablock[<expr>] = <string expr>");
+
+    free(datablock->data[index]);
+    datablock->data[index] = newstring;
+
+    return TRUE;
+}
 
 
 #ifdef USE_MOUSE

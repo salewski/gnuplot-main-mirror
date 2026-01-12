@@ -3663,6 +3663,11 @@ C ... and restart the table:
  other types of persistent variables.  The end-of-data delimiter (EOD in the
  example) may be any sequence of alphanumeric characters.
 
+ A data block acts like an array of strings.  Any single line can be accessed
+ or replaced.  For example to replace the first line of an existing data block
+ with a comment
+      $Mydata[1] = "# Last plotted " . time("%d-%m-%Y %H:%M:%S")
+
  A data block definition cannot be placed inside the bracketed clause of an
  iteration or an if/else/while condition.
 
