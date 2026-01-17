@@ -2618,6 +2618,7 @@ void
 remultiplot_command()
 {
     c_token++;
+    do_string("load $GPVAL_PRE_MULTIPLOT");
     replay_multiplot();
 }
 
