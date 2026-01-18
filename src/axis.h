@@ -32,7 +32,9 @@
 #define GNUPLOT_AXIS_H
 
 /* Aug 2017 - unconditional support for nonlinear axes */
-# define nonlinear(axis) ((axis)->linked_to_primary != NULL && (axis)->link_udf->at != NULL)
+# define nonlinear(axis) ((axis)->linked_to_primary != NULL \
+                       && (axis)->link_udf != NULL \
+                       && (axis)->link_udf->at != NULL)
 # define invalid_coordinate(x,y) ((unsigned)(x)==intNaN || (unsigned)(y)==intNaN)
 
 #include "gp_types.h"		/* for TBOOLEAN */
