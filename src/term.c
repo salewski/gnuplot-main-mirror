@@ -172,6 +172,8 @@ const struct gen_table set_encoding_tbl[] =
     { "koi8$r", S_ENC_KOI8_R },
     { "koi8$u", S_ENC_KOI8_U },
     { "sj$is", S_ENC_SJIS },
+    { "EUC_JP", S_ENC_EUCJP },
+    { "eucjp", S_ENC_EUCJP },
     { NULL, S_ENC_INVALID }
 };
 
