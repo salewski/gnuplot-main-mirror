@@ -107,7 +107,6 @@ float surface_rot_z = 30.0;
 float surface_rot_x = 60.0;
 float surface_scale = 1.0;
 float surface_zscale = 1.0;
-float surface_lscale = 0.0;
 float mapview_scale = 1.0;
 float azimuth = 0.0;
 

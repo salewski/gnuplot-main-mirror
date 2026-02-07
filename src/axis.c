@@ -41,6 +41,7 @@
 #include "term_api.h"
 #include "gplocale.h"
 #include "mouse.h"	/* for inside_zoom() */
+#include "multiplot.h"	/* for multiplot_playback */
 
 /* HBB 20000725: gather all per-axis variables into a struct, and set
  * up a single large array of such structs. Next step might be to use
@@ -957,6 +958,8 @@ setup_tics(struct axis *this, int max)
     /* It is disconcerting when the response to pan or zoom is asymmetric */
     if (inside_zoom())
 	autoextend_min = autoextend_max = FALSE;
+    if (multiplot_playback)
+	autoextend_min = autoextend_max = FALSE;
 
     /* If an explicit stepsize was set, axis->timelevel wasn't defined,
      * leading to strange misbehaviours of minor tics on time axes.
@@ -1863,10 +1866,12 @@ void
 set_explicit_range(struct axis *this_axis, double newmin, double newmax)
 {
     this_axis->set_min = newmin;
+    this_axis->min = newmin;
     this_axis->set_autoscale &= ~AUTOSCALE_MIN;
     this_axis->min_constraint = CONSTRAINT_NONE;
 
     this_axis->set_max = newmax;
+    this_axis->max = newmax;
     this_axis->set_autoscale &= ~AUTOSCALE_MAX;
     this_axis->max_constraint = CONSTRAINT_NONE;
 

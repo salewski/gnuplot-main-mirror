@@ -5399,7 +5399,6 @@ set_view()
     surface_rot_z = local_vals[1];
     surface_scale = local_vals[2];
     surface_zscale = local_vals[3];
-    surface_lscale = log(surface_scale);
 }
 
 

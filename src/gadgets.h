@@ -388,11 +388,6 @@ typedef struct {
     int ytop;
 } BoundingBox;
 
-typedef struct {
-    float rot_x;
-    float rot_z;
-} view;
-
 /* EAM Feb 2003 - Move all global variables related to key into a */
 /* single structure. Eventually this will allow multiple keys.    */
 
@@ -618,14 +613,6 @@ extern TBOOLEAN reset_since_last_plot;
 /* initialization (called once on program entry */
 void init_gadgets(void);
 
-/* called by each 2D or 3D plot */
-void update_active_region(void);
-void set_panel_flag(unsigned int flag);
-
-/* bookkeeping for multiplot panels */
-void save_all_axis_mappings(void);
-void save_panel_view(void);
-
 /* moved here from util3d: */
 int draw_clip_line(int, int, int, int);
 void draw_clip_polygon(int , gpiPoint *);
@@ -756,7 +743,5 @@ extern struct iso_curve *mask_2Dpolygon_set;
 extern struct iso_curve *mask_3Dpolygon_set;
 extern void construct_2D_mask_set(struct coordinate *points, int p_count);
 extern TBOOLEAN masked(double x, double y, struct iso_curve *mask_polygon_set);
-
-
 
 #endif /* GNUPLOT_GADGETS_H */

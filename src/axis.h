@@ -317,6 +317,7 @@ typedef struct axis_mapping {
     TBOOLEAN nonlinear;		/* TRUE if set link or set nonlinear */
     TBOOLEAN active;		/* TRUE if TICS_ON() (report coords) */
     TBOOLEAN in_use;		/* TRUE if this mapping has been updated */
+    TBOOLEAN inverted;		/* special case y coords in splot_map */
 } axis_mapping;
 
 

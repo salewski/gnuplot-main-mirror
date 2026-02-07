@@ -1924,7 +1924,6 @@ unset_view()
     surface_rot_z = 30.0;
     surface_rot_x = 60.0;
     surface_scale = 1.0;
-    surface_lscale = 0.0;
     surface_zscale = 1.0;
     azimuth = 0.0;
 }

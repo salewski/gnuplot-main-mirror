@@ -35,6 +35,7 @@
 #include "alloc.h"
 #include "axis.h"
 #include "misc.h"
+#include "multiplot.h"
 #include "plot2d.h"
 #include "pm3d.h"	/* for is_plot_with_palette */
 

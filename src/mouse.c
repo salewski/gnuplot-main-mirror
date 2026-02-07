@@ -212,9 +212,10 @@ static int button = 0;
  */
 /* flag, TRUE while user is outlining the zoom region */
 static TBOOLEAN setting_zoom_region = FALSE;
-/* coordinates of the first corner of the zoom region, in the internal
- * coordinate system */
+/* first corner of the zoom region, in the internal coordinate system */
 static int setting_zoom_x, setting_zoom_y;
+/* the panel we are zooming */
+static int setting_zoom_panel = -1;
 
 /* flag to indicate that in-line axis ranges should be ignored
  * and zoom/pan range limits take precedence over auto-scaling
@@ -296,7 +297,6 @@ static void event_modifier(struct gp_event_t * ge);
 static void do_save_3dplot(struct surface_points *, int, REPLOT_TYPE);
 static void load_mouse_variables(double, double, TBOOLEAN, int);
 static TBOOLEAN mouse_is_outside_plot(void);
-static TBOOLEAN mouse_outside_active_region(void);
 static TBOOLEAN mouse_inside_panel(BoundingBox *panel);
 static int which_panel(int mx, int my);
 
@@ -422,12 +422,13 @@ mouse_from_saved_mapping(int pos, axis_mapping *map)
 
     frac = (double)(pos - map->term_lower)
 	  / (double)(map->term_upper - map->term_lower);
+    if (map->inverted)
+	frac = 1. - frac;
     if (map->log)
 	return exp( log(map->min) + frac * (log(map->max) - log(map->min)) );
     else
 	return map->min + frac * (map->max - map->min);
 }
-
 
 static void
 MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double *y2)
@@ -437,13 +438,30 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
     /*
      * 3D Plot
      */
+
     if (is_3d_plot_or_panel()) {
-	/* for 3D plots, we treat the mouse position as if it is
+
+	/* multiplot panel containing a "set view map" projection */
+	/* FIXME: y axis direction needs to be inverted */
+	if (last_plot_was_multiplot && splot_map_or_panel()) {
+	    int panel = which_panel( mouse_x, mouse_y );
+	    if (panel >= 0) {
+		*x  = mouse_from_saved_mapping(xx, &x_mapping[panel]);
+		*x2 = mouse_from_saved_mapping(xx, &x2_mapping[panel]);
+		*y  = mouse_from_saved_mapping(yy, &y_mapping[panel]);
+		*y2 = mouse_from_saved_mapping(yy, &y2_mapping[panel]);
+	    }
+	    return;
+	}
+
+	/* For 3D plots, we treat the mouse position as if it is
 	 * in the bottom plane, i.e., the plane of the x and y axis */
 	/* note: at present, this projection is only correct if
 	 * surface_rot_z is a multiple of 90 degrees! */
 	/* HBB 20010522: added protection against division by zero
 	 * for cases like 'set view 90,0' */
+	/* FIXME - this chunk of code is not valid for 3D multiplot panels!
+	 *         the current axis mappings may not match the panel state. */
 	xx -= axis3d_o_x;
 	yy -= axis3d_o_y;
 	if (abs(axis3d_x_dx) > abs(axis3d_x_dy)) {
@@ -464,7 +482,8 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
 		+ ((double) xx) / axis3d_y_dx * (axis_array[FIRST_Y_AXIS].max -
 						 axis_array[FIRST_Y_AXIS].min);
 	} else if (axis3d_y_dy != 0) {
-	    if (splot_map_or_panel())
+	    if (splot_map)
+		/* NB: min/max order is reversed! */
 		*y = axis_array[FIRST_Y_AXIS].max
 		    + ((double) yy) / axis3d_y_dy * (axis_array[FIRST_Y_AXIS].min -
 						     axis_array[FIRST_Y_AXIS].max);
@@ -484,6 +503,21 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
     /*
      * 2D Plot
      */
+
+    /* If this is a multiplot panel, we want the axis settings
+     * for the panel the mouse is in.
+     */
+    if (last_plot_was_multiplot) {
+	int panel = which_panel( mouse_x, mouse_y );
+	if (panel >= 0) {
+	    *x = mouse_from_saved_mapping(xx, &x_mapping[panel]);
+	    *y = mouse_from_saved_mapping(yy, &y_mapping[panel]);
+	    *x2 = mouse_from_saved_mapping(xx, &x2_mapping[panel]);
+	    *y2 = mouse_from_saved_mapping(yy, &y2_mapping[panel]);
+	}
+	return;
+    }
+
     /* Immediately after a reset command the axis ranges are no longer
      * valid but the mouse coordinates can still be tracked and reported
      * if we stored axis range information along with active_bounds.
@@ -889,6 +923,12 @@ apply_zoom(struct t_zoom *z)
     if (last_plot_was_multiplot && !multiplot_playback) {
 	FPRINTF((stderr, "queueing zoom request for panel %d", multiplot_event_panel));
 	FPRINTF((stderr, "\t x[%g:%g] y[%g:%g]\n", z->xmin, z->xmax, z->ymin, z->ymax));
+	if (x_mapping[multiplot_event_panel].nonlinear
+	||  y_mapping[multiplot_event_panel].nonlinear) {
+	    FPRINTF((stderr, "\t changed my mind - cannot zoom non-linear panel\n"));
+	    return;
+	}
+
 	queued_zoom_panel = multiplot_event_panel;
 	do_string("load $GPVAL_PRE_MULTIPLOT");
 	in_multiplot_zoom = TRUE;
@@ -954,19 +994,19 @@ apply_zoom(struct t_zoom *z)
 static void
 restore_saved_axis_structures()
 {
-    if (!multiplot_playback) {
-	for (int i = 0; i < AXIS_ARRAY_SIZE; i++) {
-	    axis_array_copy[i].label = axis_array[i].label;
-	    axis_array_copy[i].ticdef.def.user = axis_array[i].ticdef.def.user;
-	    axis_array_copy[i].ticdef.font = axis_array[i].ticdef.font;
-	    axis_array_copy[i].ticfmt = axis_array[i].ticfmt;
-	    axis_array_copy[i].formatstring = axis_array[i].formatstring;
-	}
-	memcpy(axis_array, axis_array_copy, sizeof(axis_array));
-	if (shadow_axis_array && shadow_axis_array_copy) {
-	    size_t shadowsize = NUMBER_OF_MAIN_VISIBLE_AXES * sizeof(AXIS);
-	    memcpy(shadow_axis_array, shadow_axis_array_copy, shadowsize);
-	}
+    if (multiplot_playback)
+	return;
+    for (int i = 0; i < AXIS_ARRAY_SIZE; i++) {
+	axis_array_copy[i].label = axis_array[i].label;
+	axis_array_copy[i].ticdef.def.user = axis_array[i].ticdef.def.user;
+	axis_array_copy[i].ticdef.font = axis_array[i].ticdef.font;
+	axis_array_copy[i].ticfmt = axis_array[i].ticfmt;
+	axis_array_copy[i].formatstring = axis_array[i].formatstring;
+    }
+    memcpy(axis_array, axis_array_copy, sizeof(axis_array));
+    if (shadow_axis_array && shadow_axis_array_copy) {
+	size_t shadowsize = NUMBER_OF_MAIN_VISIBLE_AXES * sizeof(AXIS);
+	memcpy(shadow_axis_array, shadow_axis_array_copy, shadowsize);
     }
 }
 
@@ -980,8 +1020,7 @@ do_zoom(double xmin, double ymin, double x2min, double y2min, double xmax, doubl
 {
     struct t_zoom *z;
 
-    /* Only one panel of a multiplot can be active for pan/zoom */
-    if (last_plot_was_multiplot && mouse_outside_active_region()) {
+    if (last_plot_was_multiplot && (which_panel(mouse_x, mouse_y) < 0)) {
 	if (display_ipc_commands())
 	    fprintf(stderr, "(ignored) ");
 	return;
@@ -1779,30 +1818,34 @@ event_keypress(struct gp_event_t *ge, TBOOLEAN current)
     if (multiplot_playback)
 	return;
 
-    /* During multiplot mousing some actions, e.g. pan and zoom, are intended
-     * only for the panel in which the keypress was detected.
+    /* During multiplot mousing, actions may depend on the panel in
+     * which the keypress was detected.
      */
-    if (last_plot_was_multiplot) {
+    if (last_plot_was_multiplot)
 	multiplot_event_panel = which_panel(ge->mx, ge->my);
-	FPRINTF((stderr, "responding to hotkey in panel %d\n",
-		multiplot_event_panel));
-    }
 
-    /* During multiplot mousing actions that will result in redrawing the
+    /* During multiplot mousing, actions that will result in redrawing the
      * entire multiplot probably want to restore the original state first.
      * Pan/zoom operations will take care of this later in apply_zoom()
      * or do_save_3dplot(), but that leaves other possible hotkey actions
-     * that would need it now.
-     * In this initial implementation we only check for 'e' = builtin-replot.
-     * or 'g' = toggle grid.
+     * that would need to restore the state now.
+     * In this initial implementation we only check for
+     *    'e' = builtin-replot.
+     *    'g' = toggle grid.
      * FIXME:
-     *  Other builtin hotkeys?
-     *  User-defined hotkeys?
+     *  Other builtin hotkeys might need special treatment?
+     *  What about user-defined hotkeys?
      */
-    if (last_plot_was_multiplot) {
+    if (last_plot_was_multiplot && ptr->builtin) {
 	if (ptr->builtin == builtin_replot
 	||  ptr->builtin == builtin_toggle_grid) {
 	    do_string("load $GPVAL_PRE_MULTIPLOT");
+	}
+	/* zoom/pan operations need coordinates for the current panel */
+	else {
+	    /* FIXME: Do not attempt to restore + rescale nonlinear axes! */
+	    restore_panel_axis_mappings(multiplot_event_panel);
+	    restore_panel_view(multiplot_event_panel);
 	}
     }
 
@@ -1826,6 +1869,14 @@ event_keypress(struct gp_event_t *ge, TBOOLEAN current)
 static void
 ChangeView(int x, int z)
 {
+
+    if (last_plot_was_multiplot
+    &&  (which_panel(mouse_x, mouse_y) < 0)) {
+	if (display_ipc_commands())
+	    fprintf(stderr, "(ignored) ");
+	return;
+    }
+
     if (modifier_mask & Mod_Shift) {
 	x *= 10;
 	z *= 10;
@@ -1912,16 +1963,6 @@ mouse_is_outside_plot(void)
         CHECK_AXIS_OUTSIDE(real_y2, SECOND_Y_AXIS);
 
 #undef CHECK_AXIS_OUTSIDE
-}
-
-static TBOOLEAN
-mouse_outside_active_region(void)
-{
-    if (mouse_x < active_bounds.xleft || mouse_x > active_bounds.xright
-    ||  mouse_y < active_bounds.ybot || mouse_y > active_bounds.ytop)
-	return TRUE;
-
-    return FALSE;
 }
 
 static TBOOLEAN
@@ -2342,6 +2383,15 @@ event_buttonpress(struct gp_event_t *ge)
 
     MousePosToGraphPosReal(mouse_x, mouse_y, &real_x, &real_y, &real_x2, &real_y2);
 
+    /* If this is a multiplot panel, we want the axis settings
+     * for the panel the mouse is in.
+     */
+    if (last_plot_was_multiplot) {
+	int panel = which_panel(mouse_x, mouse_y);
+	restore_panel_axis_mappings(panel);
+	restore_panel_view(panel);
+    }
+
     if ((b == 4 || b == 6) && /* 4 - wheel up, 6 - wheel left */
 	(!replot_disabled || (E_REFRESH_NOT_OK != refresh_ok))	/* Use refresh if available */
 	&& !(paused_for_mouse & PAUSE_BUTTON3)) {
@@ -2412,7 +2462,7 @@ event_buttonpress(struct gp_event_t *ge)
 	    if (3 == b &&
 	    	(!replot_disabled || (E_REFRESH_NOT_OK != refresh_ok))	/* Use refresh if available */
 		&& !(paused_for_mouse & PAUSE_BUTTON3)
-		&& !(last_plot_was_multiplot && mouse_outside_active_region())) {
+		&& !(last_plot_was_multiplot && which_panel(mouse_x, mouse_y) < 0)) {
 		/* start zoom; but ignore it when
 		 *   - replot is disabled, e.g. with inline data, or
 		 *   - during 'pause mouse'
@@ -2421,6 +2471,7 @@ event_buttonpress(struct gp_event_t *ge)
 		setting_zoom_x = mouse_x;
 		setting_zoom_y = mouse_y;
 		setting_zoom_region = TRUE;
+		setting_zoom_panel = which_panel(mouse_x, mouse_y);
 		if (term->set_cursor) {
 		    int mv_mouse_x, mv_mouse_y;
 		    if (mouse_setting.annotate_zoom_box && term->put_tmptext) {
@@ -2462,6 +2513,12 @@ event_buttonpress(struct gp_event_t *ge)
 	    double dist_x = setting_zoom_x - mouse_x;
 	    double dist_y = setting_zoom_y - mouse_y;
 	    double dist = sqrt((dist_x * dist_x + dist_y * dist_y));
+
+	    /* ensure that the zoom region does not span multiplot panels */
+	    if (setting_zoom_panel != which_panel(mouse_x, mouse_y)) {
+		fprintf(stderr, "zoom region must lie entirely in one panel\n");
+		return;
+	    }
 
 	    if (1 == b || 2 == b) {
 		/* zoom region is finished by the `wrong' button.
@@ -2509,6 +2566,7 @@ event_buttonpress(struct gp_event_t *ge)
 		}
 	    }
 	    setting_zoom_region = FALSE;
+	    setting_zoom_panel = -1;
 	}
     } else {
 	/* button 1 2 or 3 and not ALMOST2D */
@@ -2583,7 +2641,7 @@ event_buttonrelease(struct gp_event_t *ge)
 	}
 
 	if (b == 2) {
-	    if (last_plot_was_multiplot && mouse_outside_active_region())
+	    if (last_plot_was_multiplot && which_panel(mouse_x, mouse_y) < 0)
 		; /* nothing to do */
 	    else
 
@@ -2690,8 +2748,9 @@ event_motion(struct gp_event_t *ge)
 	    } else {
 
 		if (relx > rely) {
-		    surface_lscale += (mouse_x - start_x) * 2.0 / term->xmax;
-		    surface_scale = exp(surface_lscale);
+		    double lscale = log(surface_scale);
+		    lscale += (mouse_x - start_x) * 2.0 / term->xmax;
+		    surface_scale = exp(lscale);
 		    if (surface_scale < 0)
 			surface_scale = 0;
 		} else {
@@ -2710,7 +2769,7 @@ event_motion(struct gp_event_t *ge)
 	    start_y = mouse_y;
 	    redraw = TRUE;
 	} else if (button & (1 << 3)) {
-	    if (!(last_plot_was_multiplot && mouse_outside_active_region())) {
+	    if (!(last_plot_was_multiplot && (which_panel(mouse_x, mouse_y) < 0))) {
 		/* dragging with button 3 -> change azimuth */
 		ChangeAzimuth( (mouse_x - start_x) * 90.0 / term->xmax );
 		start_x = mouse_x;
@@ -3675,8 +3734,8 @@ check_for_queued_action()
 			queued_zoom_panel));
 	    apply_queued_zoom();
 	    action = TRUE;
-	} else {
-	    FPRINTF((stderr, "term_end_plot: not applying zoom to panel %d\n",
+	} else if (queued_zoom_panel >= 0) {
+	    FPRINTF((stderr, "term_end_plot: not applying queued zoom to panel %d\n",
 			multiplot_current_panel()));
 	}
     }
@@ -3689,6 +3748,8 @@ apply_queued_zoom()
     if (!zoom_now)
 	return;
 
+    FPRINTF((stderr, "Apply queued zoom [%g : %g] [%g : %g]\n",
+	zoom_now->xmin, zoom_now->xmax, zoom_now->ymin, zoom_now->ymax));
     /* New range on primary axes */
     set_explicit_range(&axis_array[FIRST_X_AXIS], zoom_now->xmin, zoom_now->xmax);
     set_explicit_range(&axis_array[FIRST_Y_AXIS], zoom_now->ymin, zoom_now->ymax);

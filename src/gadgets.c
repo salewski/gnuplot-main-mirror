@@ -35,7 +35,6 @@
 #include "command.h"
 #include "graph3d.h" /* for map3d_position_r() */
 #include "graphics.h"
-#include "multiplot.h" /* for multiplot mousing structures */
 #include "plot3d.h" /* For is_plot_with_palette() */
 #include "axis.h" /* For CB_AXIS */
 
@@ -1273,99 +1272,3 @@ construct_2D_mask_set( struct coordinate *points, int p_count )
 	    polygon++;
     }
 }
-
-#ifdef USE_MOUSE
-
-/* local prototype */
-static void save_axis_mapping(AXIS *axis, axis_mapping *map);
-
-/* Calculate the region on the canvas used by the current plot.
- * The mousing code tests for mouse_outside_active_region() to
- * determined whether zoom/pan/rotate events are accepted or
- * ignored.
- * If a change is made to handle all mousing operations from
- * all panels in a multiplot, this tracking mechanism can go away.
- */
-void
-update_active_region(void)
-{
-    int p;
-
-    if (in_multiplot) {
-	p = multiplot_current_panel();
-	active_bounds.xleft = panel_bounds[p].xleft;
-	active_bounds.xright = panel_bounds[p].xright;
-	active_bounds.ybot = panel_bounds[p].ybot;
-	active_bounds.ytop = panel_bounds[p].ytop;
-    } else {
-	p = 0;
-	active_bounds.xleft = term->xmax * xoffset;
-	active_bounds.xright = term->xmax * (xoffset + xsize);
-	active_bounds.ybot = term->ymax * yoffset;
-	active_bounds.ytop = term->ymax * (yoffset + ysize);
-    }
-    if (multiplot_highest_panel < p)
-	multiplot_highest_panel = p;
-
-    FPRINTF((stderr, "update_active_region for panel %d [%d %d %d %d]\n", p,
-		active_bounds.xleft, active_bounds.xright,
-		active_bounds.ybot, active_bounds.ytop));
-}
-
-static void
-save_axis_mapping(AXIS *axis, axis_mapping *map)
-{
-    map->in_use = TRUE;
-    map->min = axis->min;
-    map->max = axis->max;
-    map->term_lower = axis->term_lower;
-    map->term_upper = axis->term_upper;
-    map->log = axis->log;
-    if (axis->link_udf && axis->link_udf->at && !axis->log)
-	map->nonlinear = TRUE;
-    else
-	map->nonlinear = FALSE;
-    if ((axis->ticmode & TICS_MASK) == NO_TICS)
-	map->active = FALSE;
-    else
-	map->active = TRUE;
-}
-
-void
-save_all_axis_mappings()
-{
-    int p = multiplot_current_panel();
-    save_axis_mapping(&axis_array[FIRST_X_AXIS], &(x_mapping[p]));
-    save_axis_mapping(&axis_array[FIRST_Y_AXIS], &(y_mapping[p]));
-    save_axis_mapping(&axis_array[SECOND_X_AXIS], &(x2_mapping[p]));
-    save_axis_mapping(&axis_array[SECOND_Y_AXIS], &(y2_mapping[p]));
-    save_axis_mapping(&axis_array[POLAR_AXIS], &(r_mapping[p]));
-    r_mapping[p].active = polar;
-    theta_mapping[p].min = theta_origin;
-    theta_mapping[p].max = theta_direction;
-
-    FPRINTF((stderr, "Save axis mappings for panel %d:  x [%g:%g] y [%g:%g] \n", p,
-	    x_mapping[p].min, x_mapping[p].max, y_mapping[p].min, y_mapping[p].max));
-}
-
-void
-save_panel_view()
-{
-    int p = multiplot_current_panel();
-    panel_view[p].rot_x = surface_rot_x;
-    panel_view[p].rot_z = surface_rot_z;
-}
-
-void
-set_panel_flag(unsigned int flag)
-{
-    int panel = multiplot_current_panel();
-    panel_flags[panel] |= flag;
-}
-
-#else /* USE_MOUSE */
-
-void update_active_region(void) {}
-void set_panel_flag(unsigned int) {}
-
-#endif /* USE_MOUSE */
