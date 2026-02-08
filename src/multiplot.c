@@ -856,8 +856,6 @@ restore_panel_view(int p)
 	    surface_zscale = panel_view[p].zscale;
 	    surface_scale = panel_view[p].scale;
 	    xyplane.z = panel_view[p].xyplane_z;
-	    fprintf(stderr, "restore panel %d view angles %g %g\n",
-			p, surface_rot_x, surface_rot_z);
 	}
     }
 }

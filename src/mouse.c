@@ -216,6 +216,8 @@ static TBOOLEAN setting_zoom_region = FALSE;
 static int setting_zoom_x, setting_zoom_y;
 /* the panel we are zooming */
 static int setting_zoom_panel = -1;
+/* the panel we are rotating in */
+static int multiplot_rotation_panel = -1;
 
 /* flag to indicate that in-line axis ranges should be ignored
  * and zoom/pan range limits take precedence over auto-scaling
@@ -299,6 +301,7 @@ static void load_mouse_variables(double, double, TBOOLEAN, int);
 static TBOOLEAN mouse_is_outside_plot(void);
 static TBOOLEAN mouse_inside_panel(BoundingBox *panel);
 static int which_panel(int mx, int my);
+static void change_panel_view(int x, int z);
 
 static void do_zoom_in_around_mouse(void);
 static void do_zoom_out_around_mouse(void);
@@ -1870,10 +1873,8 @@ static void
 ChangeView(int x, int z)
 {
 
-    if (last_plot_was_multiplot
-    &&  (which_panel(mouse_x, mouse_y) < 0)) {
-	if (display_ipc_commands())
-	    fprintf(stderr, "(ignored) ");
+    if (last_plot_was_multiplot) {
+	change_panel_view(x, z);
 	return;
     }
 
@@ -1914,6 +1915,44 @@ ChangeView(int x, int z)
 	    return;
 	recalc_statusline();
     }
+}
+
+static void
+change_panel_view(int x, int z)
+{
+    int panel = which_panel(mouse_x, mouse_y);
+
+    if (panel < 0)
+	return;
+
+    if (modifier_mask & Mod_Shift) {
+	x *= 10;
+	z *= 10;
+    }
+
+    if (x) {
+	panel_view[panel].rot_x += x;
+	if (panel_view[panel].rot_x < 0)
+	    panel_view[panel].rot_x += 360;
+	if (panel_view[panel].rot_x > 360)
+	    panel_view[panel].rot_x -= 360;
+    }
+    if (z) {
+	panel_view[panel].rot_z += z;
+	if (panel_view[panel].rot_z < 0)
+	    panel_view[panel].rot_z += 360;
+	if (panel_view[panel].rot_z > 360)
+	    panel_view[panel].rot_z -= 360;
+    }
+
+    if (display_ipc_commands()) {
+	fprintf(stderr, "changing panel %d view to %f, %f.\n",
+		panel, panel_view[panel].rot_x, panel_view[panel].rot_z);
+    }
+
+    do_string("load $GPVAL_PRE_MULTIPLOT");
+    replay_multiplot();
+    return;
 }
 
 static void
@@ -2381,6 +2420,10 @@ event_buttonpress(struct gp_event_t *ge)
 
     FPRINTF((stderr, "(event_buttonpress) mouse_x = %d\tmouse_y = %d\n", mouse_x, mouse_y));
 
+    /* Ignore mouse buttons while a multiplot is in the process of being redrawn */
+    if (multiplot_playback)
+	return;
+
     MousePosToGraphPosReal(mouse_x, mouse_y, &real_x, &real_y, &real_x2, &real_y2);
 
     /* If this is a multiplot panel, we want the axis settings
@@ -2390,6 +2433,9 @@ event_buttonpress(struct gp_event_t *ge)
 	int panel = which_panel(mouse_x, mouse_y);
 	restore_panel_axis_mappings(panel);
 	restore_panel_view(panel);
+	zero_rot_z = panel_view[panel].rot_z + 360.0 * mouse_x / term->xmax;
+	zero_rot_x = panel_view[panel].rot_x - 360.0 * mouse_y / term->ymax;
+	multiplot_rotation_panel = panel;	/* remember which panel we are rotating in */
     }
 
     if ((b == 4 || b == 6) && /* 4 - wheel up, 6 - wheel left */
@@ -2579,9 +2625,10 @@ event_buttonpress(struct gp_event_t *ge)
     }
     start_x = mouse_x;
     start_y = mouse_y;
-    zero_rot_z = surface_rot_z + 360.0 * mouse_x / term->xmax;
-    /* zero_rot_x = surface_rot_x - 180.0 * mouse_y / term->ymax; */
-    zero_rot_x = surface_rot_x - 360.0 * mouse_y / term->ymax;
+    if (!last_plot_was_multiplot) {
+	zero_rot_z = surface_rot_z + 360.0 * mouse_x / term->xmax;
+	zero_rot_x = surface_rot_x - 360.0 * mouse_y / term->ymax;
+    }
 }
 
 
@@ -2609,6 +2656,10 @@ event_buttonrelease(struct gp_event_t *ge)
 	trap_release = FALSE;
 	return;
     }
+
+    /* Ignore mouse buttons while a multiplot is in the process of being redrawn */
+    if (multiplot_playback)
+	return;
 
     /* binding takes precedence over default action */
     if (b == 1 || b == 2 || b == 3) {
@@ -2674,7 +2725,7 @@ event_buttonrelease(struct gp_event_t *ge)
 	    }
 	}
     }
-    if (last_plot_was_multiplot && splot_map_or_panel()) {
+    if (last_plot_was_multiplot && is_3d_plot_or_panel()) {
 	/* do nothing - but maybe mouse wheel would be OK? */
     } else if (is_3d_plot_or_panel() && (b == 1 || b == 2 || b == 3)) {
 	if (!!(modifier_mask & Mod_Ctrl) && !needreplot) {
@@ -2712,6 +2763,10 @@ event_motion(struct gp_event_t *ge)
 	/* Rotate the surface if it is 3D graph but not "set view map". */
 	TBOOLEAN redraw = FALSE;
 
+	/* Ignore mouse events while a multiplot is in the process of being redrawn */
+	if (multiplot_playback)
+	    return;
+
 	/* Allow for multiplot mousing */
 	if (last_plot_was_multiplot) {
 	    UpdateStatusline();
@@ -2724,29 +2779,53 @@ event_motion(struct gp_event_t *ge)
 	}
 
 	if (button & (1 << 1)) {
-	    /* dragging with button 1 -> rotate */
-	    surface_rot_x = floor(0.5 + fmod(zero_rot_x + 360.0 * mouse_y / term->ymax, 360));
-	    if (surface_rot_x < 0)
-		surface_rot_x += 360;
-	    if (surface_rot_x > 360)
-		surface_rot_x -= 360;
-	    surface_rot_z = floor(0.5 + fmod(zero_rot_z - 360.0 * mouse_x / term->xmax, 360));
-	    if (surface_rot_z < 0)
-		surface_rot_z += 360;
-	    redraw = TRUE;
+	    /* dragging with button 1 -> rotate
+	     * zero_rot_x and z were set when the mouse button was pressed.
+	     */
+	    float new_rot_x = floor(0.5 + fmod(zero_rot_x + 360.0 * mouse_y / term->ymax, 360));
+	    float new_rot_z = floor(0.5 + fmod(zero_rot_z - 360.0 * mouse_x / term->xmax, 360));
+	    if (last_plot_was_multiplot) {
+		view *panel_surface;
+		if (multiplot_rotation_panel < 0)
+		    return;
+		panel_surface = & panel_view[multiplot_rotation_panel];
+		panel_surface->rot_x = new_rot_x;
+		if (panel_surface->rot_x < 0)
+		    panel_surface->rot_x += 360;
+		if (panel_surface->rot_x > 360)
+		    panel_surface->rot_x -= 360;
+		panel_surface->rot_z = new_rot_z;
+		if (panel_surface->rot_z < 0)
+		    panel_surface->rot_z += 360;
+		do_string("load $GPVAL_PRE_MULTIPLOT");
+		replay_multiplot();
+		return;
+	    } else {
+		surface_rot_x = new_rot_x;
+		if (surface_rot_x < 0)
+		    surface_rot_x += 360;
+		if (surface_rot_x > 360)
+		    surface_rot_x -= 360;
+		surface_rot_z = new_rot_z;
+		if (surface_rot_z < 0)
+		    surface_rot_z += 360;
+		redraw = TRUE;
+	    }
 	} else if (button & (1 << 2)) {
 	    /* dragging with button 2 -> scale or changing ticslevel.
-	     * we compare the movement in x and y direction, and
-	     * change either scale or zscale */
-	    double relx, rely;
-	    relx = (double)abs(mouse_x - start_x) / (double)term->h_tic;
-	    rely = (double)abs(mouse_y - start_y) / (double)term->v_tic;
+	     * Compare the movement in x and y direction, and change either scale or zscale.
+	     * Not supported inside a multiplot panel.
+	     */
+	    double relx = (double)abs(mouse_x - start_x) / (double)term->h_tic;
+	    double rely = (double)abs(mouse_y - start_y) / (double)term->v_tic;
+
+	    if (last_plot_was_multiplot)
+		return;
 
 	    if (modifier_mask & Mod_Shift) {
 		xyplane.z += (1 + fabs(xyplane.z))
 		    * (mouse_y - start_y) * 2.0 / term->ymax;
 	    } else {
-
 		if (relx > rely) {
 		    double lscale = log(surface_scale);
 		    lscale += (mouse_x - start_x) * 2.0 / term->xmax;
@@ -2769,12 +2848,14 @@ event_motion(struct gp_event_t *ge)
 	    start_y = mouse_y;
 	    redraw = TRUE;
 	} else if (button & (1 << 3)) {
-	    if (!(last_plot_was_multiplot && (which_panel(mouse_x, mouse_y) < 0))) {
-		/* dragging with button 3 -> change azimuth */
-		ChangeAzimuth( (mouse_x - start_x) * 90.0 / term->xmax );
-		start_x = mouse_x;
-		redraw = TRUE;
-	    }
+	    /* dragging with button 3 -> change azimuth
+	     * Not supported inside a multiplot.
+	     */
+	    if (last_plot_was_multiplot)
+		return;
+	    ChangeAzimuth( (mouse_x - start_x) * 90.0 / term->xmax );
+	    start_x = mouse_x;
+	    redraw = TRUE;
 	}
 
 	turn_ruler_off();

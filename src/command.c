@@ -624,7 +624,7 @@ void
 do_string_and_free(char *cmdline)
 {
 #ifdef USE_MOUSE
-    if (display_ipc_commands())
+    if (display_ipc_commands() && !(multiplot_playback))
 	fprintf(stderr, "%s\n", cmdline);
 #endif
 
