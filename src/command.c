@@ -624,7 +624,7 @@ void
 do_string_and_free(char *cmdline)
 {
 #ifdef USE_MOUSE
-    if (display_ipc_commands() && !(multiplot_playback))
+    if (display_ipc_commands() && !multiplot_playback)
 	fprintf(stderr, "%s\n", cmdline);
 #endif
 
@@ -1305,7 +1305,6 @@ clear_command()
 		    panel_bounds[p].ytop - panel_bounds[p].ybot);
 	panel_flags[p] = 0;
     }
-    update_active_region();
     term_end_plot();
 
     screen_ok = FALSE;
@@ -3911,10 +3910,11 @@ gp_get_string(char * buffer, size_t len, const char * prompt)
     else
 	return fgets_ipc(buffer, len);
 # else
+    char *line;
     if (interactive)
 	PUT_STRING(prompt);
 
-    char *line = GET_STRING(buffer, len);
+    line = GET_STRING(buffer, len);
 
     if (interactive && line) {
 	line[strcspn(line, "\n")] = '\0';

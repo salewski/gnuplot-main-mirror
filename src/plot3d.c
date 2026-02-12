@@ -49,7 +49,6 @@
 #include "interpol.h"
 #include "misc.h"
 #include "mouse.h"	/* for inside_zoom() */
-#include "multiplot.h"	/* for multiplot_playback */
 #include "parse.h"
 #include "pm3d.h"
 #include "setshow.h"

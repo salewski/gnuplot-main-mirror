@@ -445,7 +445,6 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
     if (is_3d_plot_or_panel()) {
 
 	/* multiplot panel containing a "set view map" projection */
-	/* FIXME: y axis direction needs to be inverted */
 	if (last_plot_was_multiplot && splot_map_or_panel()) {
 	    int panel = which_panel( mouse_x, mouse_y );
 	    if (panel >= 0) {
@@ -523,9 +522,8 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
 
     /* Immediately after a reset command the axis ranges are no longer
      * valid but the mouse coordinates can still be tracked and reported
-     * if we stored axis range information along with active_bounds.
-     * FIXME:
-     * - Nonlinear axes cannot be handled this way, should we emit a warning?
+     * if we stored axis range information.
+     * Nonlinear axes cannot be handled this way, should we emit a warning?
      */
     if (reset_since_last_plot) {
 	int panel = 0;
@@ -1846,7 +1844,6 @@ event_keypress(struct gp_event_t *ge, TBOOLEAN current)
 	}
 	/* zoom/pan operations need coordinates for the current panel */
 	else {
-	    /* FIXME: Do not attempt to restore + rescale nonlinear axes! */
 	    restore_panel_axis_mappings(multiplot_event_panel);
 	    restore_panel_view(multiplot_event_panel);
 	}
@@ -2039,7 +2036,7 @@ which_panel(int mx, int my)
  * is_3d_plot_or_panel() and splot_map_or_panel().
  * A similar issue exists with ALMOST2D, which has been replaced by
  * almost2d().
- * These routine assume that mouse_x and mouse_y have been updated.
+ * These routines assume that mouse_x and mouse_y have been updated.
  */
 static TBOOLEAN
 is_3d_plot_or_panel()
@@ -2668,10 +2665,6 @@ event_buttonrelease(struct gp_event_t *ge)
     }
 
     MousePosToGraphPosReal(mouse_x, mouse_y, &real_x, &real_y, &real_x2, &real_y2);
-
-    FPRINTF((stderr, "MOUSE.C: doublclick=%i, set=%i, motion=%i, almost2d()=%i\n",
-		(int) doubleclick, (int) mouse_setting.doubleclick,
-		(int) motion, (int) almost2d()));
 
     if (almost2d()) {
 	char s0[256];
@@ -3829,8 +3822,6 @@ apply_queued_zoom()
     if (!zoom_now)
 	return;
 
-    FPRINTF((stderr, "Apply queued zoom [%g : %g] [%g : %g]\n",
-	zoom_now->xmin, zoom_now->xmax, zoom_now->ymin, zoom_now->ymax));
     /* New range on primary axes */
     set_explicit_range(&axis_array[FIRST_X_AXIS], zoom_now->xmin, zoom_now->xmax);
     set_explicit_range(&axis_array[FIRST_Y_AXIS], zoom_now->ymin, zoom_now->ymax);
@@ -3844,6 +3835,5 @@ apply_queued_zoom()
     && (zoom_now->y2min < VERYLARGE && zoom_now->y2max > -VERYLARGE))
 	set_explicit_range(&axis_array[SECOND_Y_AXIS], zoom_now->y2min, zoom_now->y2max);
 }
-
 
 #endif /* USE_MOUSE */

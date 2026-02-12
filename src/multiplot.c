@@ -535,12 +535,6 @@ multiplot_start()
     if (!multiplot_playback)
 	reset_axis_flags();
 #endif
-
-    /* FIXME:  This makes the whole screen mousable at the start.
-     * However the active region will be recalculated in boundary()
-     * or boundary3d() so it may well be unnecessary.
-     */
-    update_active_region();
 }
 
 void
@@ -665,9 +659,6 @@ mp_layout_size_and_offset(void)
     panel_bounds[p].xright = (xoffset + xsize) * term->xmax;
     panel_bounds[p].ybot = yoffset * term->ymax;
     panel_bounds[p].ytop = (yoffset + ysize) * term->ymax;
-    FPRINTF((stderr, "next multiplot panel %d\t%d\t%d\t%d\t%d\n", p,
-	    panel_bounds[p].xleft, panel_bounds[p].xright,
-	    panel_bounds[p].ybot, panel_bounds[p].ytop));
 }
 
 /* Helper function for multiplot auto layout to set the explicit plot margins,
@@ -740,9 +731,6 @@ mp_layout_margins_and_spacing(void)
     panel_bounds[p].xright = panel_bounds[p].xleft + term->xmax / mp_layout.num_cols;
     panel_bounds[p].ytop = term->ymax - mp_layout.act_row * term->ymax / mp_layout.num_rows;
     panel_bounds[p].ybot = panel_bounds[p].ytop - term->ymax / mp_layout.num_rows;
-    FPRINTF((stderr, "next multiplot panel %d:\t%d\t%d\t%d\t%d\n", p,
-	    panel_bounds[p].xleft, panel_bounds[p].xright,
-	    panel_bounds[p].ybot, panel_bounds[p].ytop));
 }
 
 static void
@@ -860,39 +848,6 @@ restore_panel_view(int p)
     }
 }
 
-/* Calculate the region on the canvas used by the current plot.
- * The mousing code tests for mouse_outside_active_region() to
- * determined whether zoom/pan/rotate events are accepted or
- * ignored.
- * If a change is made to handle all mousing operations from
- * all panels in a multiplot, this tracking mechanism can go away.
- */
-void
-update_active_region(void)
-{
-    int p;
-
-    if (in_multiplot) {
-	p = multiplot_current_panel();
-	active_bounds.xleft = panel_bounds[p].xleft;
-	active_bounds.xright = panel_bounds[p].xright;
-	active_bounds.ybot = panel_bounds[p].ybot;
-	active_bounds.ytop = panel_bounds[p].ytop;
-    } else {
-	p = 0;
-	active_bounds.xleft = term->xmax * xoffset;
-	active_bounds.xright = term->xmax * (xoffset + xsize);
-	active_bounds.ybot = term->ymax * yoffset;
-	active_bounds.ytop = term->ymax * (yoffset + ysize);
-    }
-    if (multiplot_highest_panel < p)
-	multiplot_highest_panel = p;
-
-    FPRINTF((stderr, "update_active_region for panel %d [%d %d %d %d]\n", p,
-		active_bounds.xleft, active_bounds.xright,
-		active_bounds.ybot, active_bounds.ytop));
-}
-
 static void
 save_axis_mapping(AXIS *axis, axis_mapping *map)
 {
@@ -935,11 +890,6 @@ save_all_axis_mappings()
 	y_mapping[p].inverted = FALSE;
 	y2_mapping[p].inverted = FALSE;
     }
-
-    FPRINTF((stderr, "Save axis mappings for panel %d:  x [%g:%g] y [%g:%g] %s %s\n", p,
-	    x_mapping[p].min, x_mapping[p].max, y_mapping[p].min, y_mapping[p].max,
-	    x_mapping[p].log ? "log x" : "linear x",
-	    y_mapping[p].log ? "log y" : "linear y"));
 }
 
 void
@@ -958,6 +908,8 @@ set_panel_flag(unsigned int flag)
 {
     int panel = multiplot_current_panel();
     panel_flags[panel] |= flag;
+    if (multiplot_highest_panel < panel)
+	multiplot_highest_panel = panel;
 }
 
 static void
@@ -1023,16 +975,10 @@ restore_panel_axis_mappings(int p)
 
     if (panel_flags[p] & PANEL_SPLOT)
 	splot_map = TRUE;
-
-    FPRINTF((stderr, "Restore axis mappings for panel %d:  x [%g:%g] y [%g:%g] %s %s\n", p,
-	    x_mapping[p].min, x_mapping[p].max, y_mapping[p].min, y_mapping[p].max,
-	    x_mapping[p].log ? "log x" : "linear x",
-	    y_mapping[p].log ? "log y" : "linear y"));
 }
 
 #else /* USE_MOUSE */
 
-void update_active_region(void) {}
 void set_panel_flag(unsigned int) {}
 void restore_panel_axis_mappings() {}
 

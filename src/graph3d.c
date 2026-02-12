@@ -594,8 +594,6 @@ boundary3d(struct surface_points *plots, int count)
     else
 	clip_area = &canvas;
 
-    /* mark the entire region as available for mousing */
-    update_active_region();
     set_panel_flag(PANEL_3D);
 }
 
@@ -889,7 +887,6 @@ do_3dplot(
 	map3d_xy(X->max, Y->max, Z->min, &xr, &yt);
 	axis_set_scale_and_range(X, xl, xr);
 	axis_set_scale_and_range(Y, yb, yt);
-	update_active_region();
 	set_panel_flag(PANEL_SPLOT);
     }
 

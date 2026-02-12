@@ -62,9 +62,6 @@ BoundingBox plot_bounds;
 /* The bounding box for 3D plots prior to applying view transformations */
 BoundingBox page_bounds;
 
-/* The region within a multiplot belonging to the current plot */
-BoundingBox active_bounds;
-
 /* The bounding box for the entire drawable area  of current terminal */
 BoundingBox canvas;
 

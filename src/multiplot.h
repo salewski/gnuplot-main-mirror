@@ -8,7 +8,6 @@ void multiplot_reset_after_error(void);
 void multiplot_use_size_and_origin(void);
 
 /* called by each 2D or 3D plot */
-void update_active_region(void);
 void set_panel_flag(unsigned int flag);
 
 /* bookkeeping for multiplot panels */
