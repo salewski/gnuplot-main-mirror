@@ -195,6 +195,9 @@ multiplot_next()
 		}
 	    }
 	}
+	/* FIXME: If (multiplot_playback && (mp_layout.current_panel == 0))
+	 *	    reset is not necessary and might even be detrimental
+	 */
 	multiplot_reset();
     }
 }
@@ -859,8 +862,8 @@ save_axis_mapping(AXIS *axis, axis_mapping *map)
     map->log = axis->log;
     if (axis->link_udf && axis->link_udf->at && !axis->log) {
 	map->nonlinear = TRUE;
-	fprintf(stderr, "marking %s as nonlinear in panel %d\n",
-		axis_name(axis->index), multiplot_current_panel());
+	FPRINTF((stderr, "flagging %s as nonlinear in panel %d\n",
+		axis_name(axis->index), multiplot_current_panel()));
     } else
 	map->nonlinear = FALSE;
     if ((axis->ticmode & TICS_MASK) == NO_TICS)
@@ -915,6 +918,19 @@ set_panel_flag(unsigned int flag)
 static void
 restore_axis_mapping(AXIS *axis, axis_mapping *map)
 {
+    /* This axis is currently nonlinear. Clear it first. */
+    if (axis->link_udf && axis->link_udf->at && !axis->log) {
+	static char command[64];
+	sprintf(command, "unset nonlinear %s", axis_name(axis->index));
+	do_string(command);
+    }
+
+    /* Panel contains a non-linear axis; we cannot handle that */
+    if (map->nonlinear) {
+	FPRINTF((stderr, "warning: Cannot restore nonlinear mapping of %s axis in panel %d\n",
+		axis_name(axis->index), panel));
+    }
+
     /* Load set_min/set_max so that zoomed min/max value persist across
      * axis_init() when called from plot2d or plot3d during a multiplot replay.
      */
@@ -935,17 +951,6 @@ restore_axis_mapping(AXIS *axis, axis_mapping *map)
 	}
 	return;
     }
-
-    /* axis is currently nonlinear or linked. Be careful here!
-     * This is a subset of free_axis_struct().
-     * Maybe do_string("unset nonlinear") would be better
-     */
-    if (axis->link_udf) {
-        free(axis->link_udf->at);
-        free(axis->link_udf->definition);
-        free(axis->link_udf);
-    }
-    axis->link_udf = NULL;
 
     if (map->log) {
 	static char command[64];
