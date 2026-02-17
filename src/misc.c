@@ -251,10 +251,18 @@ load_file(FILE *fp, char *name, int calltype)
     udvt_entry *gpval_lineno = NULL;
     char **datablock_input_line = NULL;
     udvt_entry *functionblock = NULL;
+    TBOOLEAN playback_state_on_entry = multiplot_playback;
 
     /* Support for "load $datablock" */
-    if (calltype == 6 || calltype == 7)
+    if (calltype == 6 || calltype == 7) {
 	datablock_input_line = get_datablock(name);
+	/* Prevent attempt to recursively load $GPVAL_LAST_MULTIPLOT */
+	if (!strcmp(name, "$GPVAL_LAST_MULTIPLOT")) {
+	    if (in_multiplot)
+		return;
+	    multiplot_playback = TRUE;
+	}
+    }
 
 #ifdef USE_FUNCTIONBLOCKS
     /* Support for function blocks */
@@ -396,7 +404,8 @@ load_file(FILE *fp, char *name, int calltype)
     }
 
     /* pop state */
-    (void) lf_pop();		/* also closes file fp */
+    lf_pop();		/* also closes file fp */
+    multiplot_playback = playback_state_on_entry;
 }
 
 /* pop from load_file state stack
