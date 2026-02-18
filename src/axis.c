@@ -1162,6 +1162,7 @@ gen_tics(struct axis *this, tic_callback callback)
 		if (def->def.series.end <= 0 || def->def.series.incr <= 0)
 		    return;	/* just quietly ignore */
 		step = def->def.series.incr;
+
 		if (def->def.series.start <= 0)	/* includes case 'undefined, i.e. -VERYLARGE */
 		    start = step * floor(lmin / step);
 		else
@@ -1185,6 +1186,7 @@ gen_tics(struct axis *this, tic_callback callback)
 		    end   = eval_link_function(primary, end);
 		    lmin = primary->min;
 		    lmax = primary->max;
+		    reorder_if_necessary(lmin, lmax);
 		}
 	    } else {
 		start = def->def.series.start;
@@ -2119,14 +2121,18 @@ sanity_check_log_tics( int axis_index )
     }
 }
 
-/* this callback increments axis_tic_count for each tic placed */
+/* This callback increments axis_tic_count for each tic placed.
+ * It is called only for logscale axes, and only for the primary (linear)
+ * member of the axis pair.
+ */
 void
 tic_count_callback(struct axis *this_axis, double place, char *text,
     int ticlevel, struct lp_style_type grid, struct ticmark *userlabels)
 {
+    double eps = SIGNIF;
     if (ticlevel != 0)
 	return;
-    if (inrange(place, this_axis->min, this_axis->max))
+    if (inrange(place, this_axis->min - eps, this_axis->max + eps))
 	axis_tic_count++;
 }
 
