@@ -2217,9 +2217,10 @@ plot3d_points(struct surface_points *plot)
 		    &&  plot->lp_properties.p_size == PTSZ_VARIABLE)
 			(*t->pointsize)(pointsize * point->CRD_PTSIZE);
 
-		    /* We could dummy up circles as a point of type 7, but this way */
-		    /* the radius can use x-axis coordinates rather than pointsize. */
-		    /* FIXME: if no radius given, pull it from "set style circle".  */
+		    /* We could dummy up circles as a point of type 7, but this way
+		     * the radius can use x-axis coordinates rather than pointsize.
+		     * If no radius is given, pull it from "set style circle".
+		     */
 		    if (plot->plot_style == CIRCLES) {
 			struct fill_style_type *fillstyle = &plot->fill_properties;
 			double radius = point->CRD_PTSIZE * radius_scaler;
@@ -2705,11 +2706,6 @@ draw_3d_graphbox(struct surface_points *plot, int plot_num, WHICHGRID whichgrid,
 		depth[0][0] = depth[0][1]
 		    = depth[1][0] = depth[1][1] = base_z;
 
-		/* FIXME HBB 20000617: this method contains the
-		 * assumption that the topological corners of the
-		 * surface mesh(es) are also the geometrical ones of
-		 * their xy projections. This is only true for
-		 * 'explicit' surface datasets, i.e. z(x,y) */
 		if (cornerpoles) {
 		    for (; --plot_num >= 0; plot = plot->next_sp) {
 			struct iso_curve *curve = plot->iso_crvs;

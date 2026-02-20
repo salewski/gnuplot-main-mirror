@@ -6229,7 +6229,6 @@ spidertick_callback(struct axis *axis, double place, char *text, int ticlevel,
 			axis->ticdef.font);
 	ignore_enhanced(FALSE);
 
-	/* FIXME:  the plan is to have a separate lp for spiderplot tics */
 	if (axis->ticdef.textcolor.type != TC_DEFAULT)
 	    term_apply_lp_properties(&border_lp);
     }

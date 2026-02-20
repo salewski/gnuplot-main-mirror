@@ -503,7 +503,7 @@ MousePosToGraphPosReal(int xx, int yy, double *x, double *y, double *x2, double 
     FPRINTF((stderr, "POS: xx=%i, yy=%i  =>  x=%g  y=%g\n", xx, yy, *x, *y));
 
     /* If x2 or y2 is linked to a primary axis via mapping function, apply it now */
-    /* FIXME:  this triggers on both linked x1/x2 and on nonlinear x2 */
+    /* This triggers on both linked x1/x2 and on nonlinear x2 */
     secondary = &axis_array[SECOND_X_AXIS];
     if (nonlinear(secondary))
 	*x2 = eval_link_function(secondary, *x);
@@ -2170,7 +2170,6 @@ event_buttonpress(struct gp_event_t *ge)
     FPRINTF((stderr, "(event_buttonpress) mouse_x = %d\tmouse_y = %d\n", mouse_x, mouse_y));
 
     MousePosToGraphPosReal(mouse_x, mouse_y, &real_x, &real_y, &real_x2, &real_y2);
-
 
     if ((b == 4 || b == 6) && /* 4 - wheel up, 6 - wheel left */
 	(!replot_disabled || (E_REFRESH_NOT_OK != refresh_ok))	/* Use refresh if available */

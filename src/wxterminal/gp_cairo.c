@@ -128,7 +128,8 @@ static double box_origin_y;
 static TBOOLEAN in_textbox = FALSE;
 
 /* array of colors
- * FIXME could be shared with all gnuplot terminals */
+ * FIXME could be shared with all gnuplot terminals
+ */
 static rgb_color gp_cairo_colorlist[12] = {
 {1,1,1}, /* white */
 {0,0,0}, /* black */

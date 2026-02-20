@@ -2282,7 +2282,7 @@ f_assign(union argument *arg)
 	if (b.type == ARRAY)
 	    int_error(NO_CARET, "cannot nest arrays");
 	if (dest->type != ARRAY) {
-	    /* FIXME: this does not detect an array replaced by a difference array */
+	    /* FIXME: this does not detect an array replaced by a different array */
 	    int_error(NO_CARET, "array %s was corrupted", udv->udv_name);
 	}
 	pop(&index);

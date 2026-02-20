@@ -1032,8 +1032,7 @@ gen_tics(struct axis *this, tic_callback callback)
     if (! this->gridminor)
 	mgrd.l_type = LT_NODRAW;
 
-    /* EAM FIXME - This really shouldn't happen, but it triggers for instance */
-    /* if x2tics or y2tics are autoscaled but there is no corresponding data. */
+    /* This triggers if x2tics or y2tics are autoscaled but there is no corresponding data. */
     if (this->min >= VERYLARGE || this->max <= -VERYLARGE)
 	return;
 
@@ -1425,7 +1424,7 @@ gen_tics(struct axis *this, tic_callback callback)
 			    internal = polar_radius(user);
 			    gprintf(label, sizeof(label), this->ticfmt, log10_base, tic);
 			} else if (this->index >= PARALLEL_AXES) {
-			    /* FIXME: needed because ticfmt is not maintained for parallel axes */
+			    /* needed because ticfmt is not maintained for parallel axes */
 			    gprintf(label, sizeof(label), this->formatstring,
 				    log10_base, user);
 			} else {
@@ -1516,7 +1515,6 @@ gen_tics(struct axis *this, tic_callback callback)
 			mtic_user = mplace;
 			mtic_internal = mtic_user;	/* It isn't really but this makes the range checks work */
 		    } else if (nonlinear(this) && this->log) {
-			/* FIXME - not sure this is correct. Fall through instead? */
 			mtic_user = internal + mplace;
 			mtic_internal = eval_link_function(this->linked_to_primary, mtic_user);
 		    } else {

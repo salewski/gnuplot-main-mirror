@@ -1672,9 +1672,6 @@ do_command()
 }
 
 /* process commands of the form 'while (foo) {...}' */
-/* FIXME:  For consistency there should be an iterator associated
- * with this statement.
- */
 void
 while_command()
 {

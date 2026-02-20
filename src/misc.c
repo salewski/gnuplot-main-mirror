@@ -108,7 +108,7 @@ prepare_call(int calltype, udvt_entry *functionblock)
 		    const_express(&a);
 		    argval[call_argc] = a;
 		    switch(a.type) {
-			case CMPLX: /* FIXME: More precision? Some way to provide a format? */
+			case CMPLX:
 				sprintf(val_as_string, "%g", a.v.cmplx_val.real);
 				call_args[call_argc] = gp_strdup(val_as_string);
 				break;
