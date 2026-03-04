@@ -353,7 +353,7 @@ AC_CHECK_FUNCS(atexit memcpy memmove memset \
   erf erfc gamma lgamma tgamma \
   getcwd poll pclose popen fdopen select sleep stpcpy strlcpy \
   strcspn strdup strndup strnlen strcasecmp stricmp strncasecmp strnicmp \
-  sysinfo tcgetattr vfprintf doprnt uname usleep system \
+  sysinfo tcgetattr vfprintf doprnt uname usleep system nanosleep \
   cbrt jn
 )
 

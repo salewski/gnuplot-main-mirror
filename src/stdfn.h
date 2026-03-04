@@ -336,16 +336,27 @@ void usleep(unsigned long microseconds);
 #endif
 
 /* sleep delay time, where delay is a double value */
-#if defined(HAVE_USLEEP) && !defined(_WIN32)
+#if defined(HAVE_NANOSLEEP)
+#  define GP_SLEEP(delay) \
+    do { \
+       struct timespec ts; \
+	ts.tv_sec = floor(delay); \
+	ts.tv_nsec = (delay - ts.tv_sec) * 1.e09; \
+	nanosleep(&ts, NULL); \
+    } while (0)
+#
+#elif defined(HAVE_USLEEP) && !defined(_WIN32)
 #  define GP_SLEEP(delay) usleep((unsigned int) ((delay)*1e6))
 #  ifndef HAVE_SLEEP
 #    define HAVE_SLEEP
 #  endif
+#
 #elif defined(__EMX__)
 #  define GP_SLEEP(delay) _sleep2((unsigned int) ((delay)*1e3))
 #  ifndef HAVE_SLEEP
 #    define HAVE_SLEEP
 #  endif
+#
 #elif defined(_WIN32)
 #  define GP_SLEEP(delay) win_sleep((DWORD) 1000*delay)
 #  ifndef HAVE_SLEEP

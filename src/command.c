@@ -2013,17 +2013,25 @@ local_command()
 }
 
 /* helper routine to multiplex mouse event handling with a timed pause command */
+/* sleep_time is given in seconds.
+ * Mar 2026:
+ *	usleep has been deprecated in POSIX due to cross-platform incompatibility
+ *	nanosleep is in POSIX since 1993
+ *	MSVC still fails to provide either as of 2025
+ */
 static void
 timed_pause(double sleep_time)
 {
-#if defined(HAVE_USLEEP) && defined(USE_MOUSE) && !defined(_WIN32)
+#if defined (HAVE_NANOSLEEP) && defined(USE_MOUSE) && !defined(_WIN32)
+    struct timespec ts = { .tv_sec = 0, .tv_nsec = (long)(0.05 * 1.e09)  };
     if (term->waitforinput)		/* If the terminal supports it */
 	while (sleep_time > 0.05) {	/* we poll 20 times a second */
-	    usleep(50000);		/* Sleep for 50 msec */
+	    nanosleep(&ts, NULL);
 	    check_for_mouse_events();
 	    sleep_time -= 0.05;
 	}
-    usleep((useconds_t)(sleep_time * 1e6));
+    ts.tv_nsec = sleep_time * 1.e09;
+    nanosleep(&ts, NULL);
     check_for_mouse_events();
 #else
     GP_SLEEP(sleep_time);
