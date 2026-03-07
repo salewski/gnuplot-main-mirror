@@ -370,6 +370,39 @@ typedef RETSIGTYPE (*sigfunc) (void);
 
 #define TBOOLEAN bool
 
+/* WASI/WASM support
+ * temp files must be memory-backed rather than using tmpfile().
+ * These are macros rather than subroutine calls because the buffer pointers
+ * must be local to the calling routine.
+ *	FILE *f
+ *	gp_open_tempfile(f);
+ *	gp_rewind_tempfile(f);
+ *	gp_free_tempfile(f);
+ */
+#ifdef __wasi__		/* memory-backed tempfile handling */
+#  define gp_open_tempfile(f) \
+	static char *fbuf = NULL; \
+	size_t fbuf_len; \
+	free(fbuf); \
+	f = open_memstream(&fbuf, &fbuf_len);
+#  define gp_rewind_tempfile(f) \
+	do { \
+	    fclose(f); \
+	    f = fmemopen(fbuf, fbuf_len, "r"); \
+	} while (0);
+#  define gp_free_tempfile(f) \
+	free(fbuf); \
+	fbuf = NULL;
+
+#else 			/* generic tempfile handling */
+#  define gp_open_tempfile(f) \
+	f = tmpfile()
+#  define gp_rewind_tempfile(f) \
+	rewind(f)
+#  define gp_free_tempfile(f) \
+	/* nothing */
+#endif
+
 #if defined(READLINE) || defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDITLINE) || defined(HAVE_WINEDITLINE)
 # ifndef USE_READLINE
 #  define USE_READLINE

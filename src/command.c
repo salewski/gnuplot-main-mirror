@@ -2933,14 +2933,8 @@ $PALETTE u 1:2 t 'red' w l lt 1 lc rgb 'red',\
 '' u 1:5 t 'NTSC' w l lt 1 lc rgb 'black'\
 \n";
 
-#ifdef __wasi__
-    /* tmpfile() is not supported by WASI */
-    char *fbuf;
-    size_t fbuf_len;
-    FILE *f = open_memstream(&fbuf, &fbuf_len);
-#else
-    FILE *f = tmpfile();
-#endif
+    FILE *f;
+    gp_open_tempfile(f);	/* syscfg macro! */
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
     /* On Vista/Windows 7 tmpfile() fails. */
@@ -2998,16 +2992,9 @@ $PALETTE u 1:2 t 'red' w l lt 1 lc rgb 'red',\
     save_pixmaps(f);
 
     /* execute all commands from the temporary file */
-#ifdef __wasi__
-    fclose(f);
-    f = fmemopen(fbuf, fbuf_len, "r");
-#else
-    rewind(f);
-#endif
+    gp_rewind_tempfile(f);
     load_file(f, NULL, 1); /* note: it does fclose(f) */
-#ifdef __wasi__
-    free(fbuf);
-#endif
+    gp_free_tempfile(f);
 
     /* enable reset_palette() and restore replot line */
     enable_reset_palette = 1;
