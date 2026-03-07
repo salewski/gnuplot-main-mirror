@@ -21,6 +21,7 @@ _$*
 *.obj
 *.so
 *.exe
+*.wasm
 *.Z
 *.elc
 *.ln

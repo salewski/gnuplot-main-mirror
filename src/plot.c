@@ -801,7 +801,7 @@ init_session()
 	load_rcfile(2);		/* ~/.gnuplot */
 	load_rcfile(3);		/* ~/.config/gnuplot/gnuplotrc */
 
-#if !defined(WIN32) && !defined(OS2) && !defined(MSDOS)
+#if !defined(WIN32) && !defined(OS2) && !defined(MSDOS) && !defined(__wasm__)
 	/* Save initial state variables to a file so that later
 	 * "save changes" can use them to determine what has changed.
 	 */
@@ -886,6 +886,7 @@ get_user_env()
 	else if (interactive)
 	    int_warn(NO_CARET, "no HOME found");
     }
+#ifndef __wasm__
     if (user_shell == NULL) {
 	const char *env_shell;
 
@@ -897,6 +898,7 @@ get_user_env()
 
 	user_shell = (const char *) gp_strdup(env_shell);
     }
+#endif
 }
 
 /* expand tilde in path

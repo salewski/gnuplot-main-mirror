@@ -33,7 +33,7 @@ GNUPLOT_SHARE_DIR=$(pkgdatadir)/$(VERSION_MAJOR)
 
 # There is probably no need to edit anything below this line
 
-bin_PROGRAMS = gnuplot
+bin_PROGRAMS = gnuplot$(EXEEXT)
 noinst_PROGRAMS = bf_test
 binonly: $(bin_PROGRAMS)
 

@@ -416,7 +416,14 @@ append_multiline_to_datablock(struct value *datablock_value, const char *lines)
 void
 save_set_to_datablock(char *datablock_name)
 {
+#ifdef __wasi__
+    char *fbuf;
+    size_t fbuf_len;
+
+    FILE *fp = open_memstream(&fbuf, &fbuf_len);
+#else
     FILE *fp = tmpfile();
+#endif
     struct udvt_entry *datablock;
     char line[256];
 
@@ -437,7 +444,12 @@ save_set_to_datablock(char *datablock_name)
 
     /* Save to temp file */
     save_set_all(fp);
+#ifdef __wasi__
+    fclose(fp);
+    fp = fmemopen(fbuf, fbuf_len, "r");
+#else
     rewind(fp);
+#endif
 
     /* Read back from temp file into a datablock */
     datablock = add_udv_by_name(datablock_name);
@@ -453,6 +465,9 @@ save_set_to_datablock(char *datablock_name)
     }
 
     fclose(fp);
+#ifdef __wasi__
+    free(fbuf);
+#endif
 }
 
 

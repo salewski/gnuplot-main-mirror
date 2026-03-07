@@ -2128,7 +2128,7 @@ save_contourfill(FILE *fp)
 }
 
 /* Internal implementation of contributed script "gpsavediff".
- * Not supported on Windows because it shuffles output via
+ * Not supported on Windows and Wasm because it shuffles output via
  * /dev/fd/ a.k.a. /proc/self/fd
  * to access the initial state that was saved to stream savefp=tmpfile()
  * when the program was started and another tmpfile opened here.
@@ -2139,7 +2139,7 @@ FILE *savefp = NULL;	/* tmpfile used by "save changes" */
 void
 save_changes(FILE *outfp, TBOOLEAN ispipe)
 {
-#if !defined(WIN32) && !defined(OS2) && !defined(MSDOS)
+#if !defined(WIN32) && !defined(OS2) && !defined(MSDOS) && !defined(__wasm__)
     FILE *currentfp;
     char command[1024];
     char *output;	/* text returned by do_system_func() */
