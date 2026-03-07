@@ -378,6 +378,9 @@ term_set_output(char *dest)
 	    else
 		output_pipe_open = TRUE;
 	} else {
+#else	/* no PIPES */
+	if (*dest == '|')
+	    int_error(c_token-1, "this copy of gnuplot does not support piped output");
 #endif /* PIPES */
 
 #ifdef _WIN32
