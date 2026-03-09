@@ -1020,9 +1020,13 @@ if test "$with_gd" = no && test "$with_cairo" = no; then
     AC_CHECK_LIB(stbi, stbi_load_from_file,
        [AC_DEFINE(HAVE_STBI,1,[ Define to use libstbi as a fallback for reading image data])
         with_stbi=yes && TERMLIBS="$TERMLIBS -lstbi"
-        AC_CHECK_HEADERS(stb_image.h,,
-            AC_MSG_WARN([please add path to stb_image.h to CPPFLAGS in Makefile]))
     ])
+    if test "$with_stbi" != yes; then
+        AC_CHECK_HEADERS(stb_image.h,
+            [AC_MSG_RESULT([Will include libstbi routines via stb_image.h])
+            AC_DEFINE(HAVE_STBI,1,,[ Define to use stbi routines for reading image data])
+            ],)
+    fi
 fi
 dnl end check for libstbi
 
@@ -1491,6 +1495,8 @@ elif test "$with_cairo" = yes; then
   AC_MSG_RESULT([  Support for image file input:                    yes (using cairo)])
 elif test "$with_stbi" = yes; then
   AC_MSG_RESULT([  Support for image file input:                    yes (using libstbi)])
+elif test "x$ac_cv_header_stb_image_h" = xyes; then
+  AC_MSG_RESULT([  Support for image file input:                    yes (using stb_image.h)])
 elif test "$with_gd" = no; then
   AC_MSG_RESULT([  Support for image file input:                    no])
 fi
