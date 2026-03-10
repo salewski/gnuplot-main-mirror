@@ -494,6 +494,15 @@ D viridis 1
 ## plots and perform incremental pan/zoom steps for 2D plots.
 #end
 
+3 WebAssembly + WASI platform support
+?WASI
+?WebAssembly
+ The configure script now has an option to cross-compile gnuplot into
+ machine-independent WebAssembly byte code (Wasm) with hooks to communicate to
+ the runtime environment using the WASI API protocol.
+      ./configure --host=wasm32-wasi --with-wasi-sysroot=${WASI}
+ See the INSTALL file for more guidance.
+
 3 Watchpoints
 ?new watchpoints
  Watchpoints are target values associated with individual plots in a graph.
