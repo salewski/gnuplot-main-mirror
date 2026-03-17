@@ -1,3 +1,24 @@
+Changes in 6.0.5
+=================
+
+* NEW	 allow "string"[i] as shorthand for "string"[i:i]
+* NEW	 New function     prod [<var> = <start> : <end>] <expression>
+	 Implements the sequential product operation
+	     prod [i=a:b] f(i)   =   f(a) * f(a+1) * ... * f(b)
+* CHANGE sixeltek: transparency and background options
+* CHANGE Rework Unicode escape sequences  \U+xxxx
+	 expand escape sequences in "noenhanced" strings
+	 expand escape sequences during substring evaluation
+	 expand escape sequences in string functions strstrt() and strlen()
+* CHANGE octal escape sequences must conform to the documented form \ooo
+	 e.g. \7 or \0106 or \456 or \0 are now rejected
+* CHANGE interactive mousing remains active after ^C or "reset"
+* FIX	 gd: Revise font handling to match libgd 2.4.0 and libraqm 0.10.3
+	 resolves long-standing font problems but requires newer library versions
+* FIX	 "plot with labels" accepts the "noenhanced" keyword
+* FIX	 z-axis settings were lost when using mouse to x/y shift a 3D plot
+* FIX	 bad tickmark placement on logscale axis that spans exactly two decades
+* FIX	 revise 6.0.4 change that broke axis range parsing in parametric mode
 
 Changes in 6.0.4
 =================
