@@ -59,6 +59,9 @@
 ]*/
 
 #include "gp_types.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "alloc.h"
 #include "command.h"
 #include "datablock.h"
@@ -426,10 +429,9 @@ save_set_to_datablock(char *datablock_name)
     if (!fp) {
 	char tempname[PATH_MAX];
 	/* We really want the "ANSI" version */
-	GetTempPathA(sizeof(tempname), buf);
-	strcat(buf, "gnuplot-save.tmp");
-	fp = fopen(tempname, "wt+, ccs=UTF-8");
-	fp = fopen(buf, "w+");
+	GetTempPathA(sizeof(tempname), tempname);
+	strcat(tempname, "gnuplot-save.tmp");
+	fp = fopen(tempname, "w+");
     }
 #endif
 
