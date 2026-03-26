@@ -36,6 +36,7 @@
 #include "contour.h"
 #include "datafile.h"
 #include "datablock.h"
+#include "encoding.h"
 #include "eval.h"
 #include "filters.h"
 #include "fit.h"
@@ -591,14 +592,12 @@ save_set_all(FILE *fp)
 
     save_offsets(fp, "set offsets");
 
-    fprintf(fp, "\
-set pointsize %g\n\
-set pointintervalbox %g\n\
-set encoding %s\n\
-%sset parametric\n",
-	    pointsize, pointintervalbox,
-	    encoding_names[encoding],
-	    (parametric) ? "" : "un");
+    fprintf(fp, "set pointsize %g\n", pointsize);
+    fprintf(fp, "set pointintervalbox %g\n", pointintervalbox);
+
+    save_encoding(fp);
+
+    fprintf(fp, "%sset parametric\n", (parametric) ? "" : "un");
 
     if (polar) {
 	fprintf(fp, "set polar\n");
