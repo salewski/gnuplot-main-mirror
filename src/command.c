@@ -1742,6 +1742,7 @@ link_command()
 	/* Clear previous log status */
 	secondary_axis->log = FALSE;
 	secondary_axis->ticdef.logscaling = FALSE;
+	secondary_axis->ticdef.force_linear_tics = FALSE;
 
     /*
      * "set link" applies to either x|x2 or y|y2
