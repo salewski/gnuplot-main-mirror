@@ -131,6 +131,9 @@ cp_alloc(int num)
     cp = (struct curve_points *) gp_alloc(sizeof(struct curve_points), "curve");
     memset(cp, 0, sizeof(struct curve_points));
 
+    free_at(df_plot_title_at);
+    df_plot_title_at = NULL;
+
     cp->p_max = (num >= 0 ? num : 0);
     if (num > 0) {
 	cp->points = (struct coordinate *)
