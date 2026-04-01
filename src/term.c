@@ -260,7 +260,6 @@ static size_units parse_term_size(float *xsize, float *ysize, size_units def_uni
 
 
 # define FOPEN_BINARY(file) fopen(file, "wb")
-# define fflush_binary()
 
 #if defined(MSDOS) || defined(_WIN32)
 # if defined(__DJGPP__)
