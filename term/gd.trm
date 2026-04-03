@@ -266,7 +266,6 @@ static struct {
     int       loop_count;	/* Number of times to repeat sequence */
     int       frame_count;	/* Number of frames in animation */
     int       frame_delay;	/* Time between frames in .01 seconds */
-    TBOOLEAN  frame_optimization;
     gdImagePtr previous_image;	/* Needed to encode animation as a series of deltas */
     /* Alpha layer for overlap-free semi-transparent line rendering */
     gdImagePtr alpha_layer;	/* offscreen buffer (NULL when not allocated) */
@@ -1507,7 +1506,6 @@ PNG_options()
 	    gdImageDestroy(png_state.previous_image);
 	png_state.animate = FALSE;
 	png_state.previous_image = NULL;
-	png_state.frame_optimization = FALSE;
 	png_state.loop_count = 0;
 	/* And default font size */
 	term->h_char = PNG_HCHAR;
@@ -1769,7 +1767,6 @@ PNG_options()
 	    png_state.animate = TRUE;
 	    png_state.frame_count = 0;
 	    png_state.frame_delay = 10;
-	    png_state.frame_optimization = FALSE;
 	    break;
 	case GIF_DELAY:
 	    if (strncmp("gif",term->name,3))
@@ -1787,21 +1784,9 @@ PNG_options()
 	    png_state.loop_count = int_expression();
 	    gif_anim_option = 1;
 	    break;
-	case GIF_NOOPT:
-	    if (strncmp("gif",term->name,3))
-		int_warn(c_token,"This terminal does not support animation");
-	    c_token++;
-	    png_state.frame_optimization = FALSE;
-	    gif_anim_option = 1;
-	    break;
+	case GIF_NOOPT:	/* Deprecated (gif optimization never worked) */
 	case GIF_OPT:
-	    if (strncmp("gif",term->name,3))
-		int_warn(c_token,"This terminal does not support animation");
-	    c_token++;
-	    png_state.frame_optimization = TRUE;
-	    gif_anim_option = 1;
 	    break;
-
 	case PNG_BUTT:
 	    png_state.linecap = BUTT;
 	    c_token++;
@@ -1972,9 +1957,8 @@ PNG_options()
 
     if (png_state.animate) {
 	sprintf(term_options + strlen(term_options),
-	    "animate delay %d loop %d %soptimize ",
-	    png_state.frame_delay, png_state.loop_count,
-	    png_state.frame_optimization ? "" : "no");
+	    "animate delay %d loop %d ",
+	    png_state.frame_delay, png_state.loop_count);
     }
 
     sprintf(term_options + strlen(term_options),
@@ -2009,12 +1993,6 @@ PNG_options()
 	strcat(term_options,"giant ");
 	break;
     }
-    /* Oct 2020:  'animate optimize' is deprecated */
-    if (png_state.animate && png_state.frame_optimization) {
-	strcat(term_options,
-		"\n\tWarning: the 'optimize' option to gif animation is deprecated");
-    }
-
 }
 
 
@@ -2399,10 +2377,6 @@ PNG_graphics()
 	png_state.color_table[i] =
 	    gdImageColorAllocate(png_state.image, (rgb >> 16) & 0xff,
 				 (rgb >> 8) & 0xff, rgb & 0xff);
-    }
-
-    if ( png_state.frame_optimization && ( png_state.frame_count > 0 ) && png_state.previous_image ) {
-         gdImagePaletteCopy(png_state.image, png_state.previous_image);
     }
 
     if (png_state.flags & PNG_USE_TRANSPARENT)
@@ -3821,15 +3795,12 @@ GIF_text()
 		png_state.loop_count );
 	}
 	gdImageGifAnimAdd(png_state.image, gpoutfile,
-	    png_state.frame_optimization ? 0  /* use global map  */
-	                                 : 1, /* use private map */
+	    1, /* use private map */
 	    0, 0 /* No offset */,
 	    png_state.frame_delay,
 	    (png_state.flags & PNG_USE_TRANSPARENT)
 			? gdDisposalRestorePrevious
-			: gdDisposalNone,
-	    (png_state.frame_optimization && !(png_state.flags & PNG_USE_TRANSPARENT))
-	    ? png_state.previous_image : NULL);
+			: gdDisposalNone, NULL);
 	png_state.frame_count++;
 	if (png_state.previous_image)
 	    gdImageDestroy(png_state.previous_image);
@@ -3901,7 +3872,7 @@ START_HELP(gif)
 "              {font \"<face> {,<pointsize>}\"} {fontscale <scale>}",
 "              {size <x>,<y>} {{no}crop}",
 "              {background <rgb_color>}",
-"              {animate {delay <d>} {loop <n>} {optimize}}",
+"              {animate {delay <d>} {loop <n>}}",
 "",
 " PNG, JPEG and GIF images are created using the external library libgd.",
 " GIF plots may be viewed interactively by piping the output to the",
@@ -3934,7 +3905,7 @@ START_HELP(gif)
 "?term gif animate",
 "?gif animate",
 "",
-"       set term gif animate {delay <d>} {loop <n>} {{no}optimize}}",
+"       set term gif animate {delay <d>} {loop <n>}",
 "",
 " The gif terminal `animate` option creates a single gif file containing",
 " multiple frames. The delay between display of successive frames may be",
@@ -3954,11 +3925,6 @@ START_HELP(gif)
 "          splot f(x,y) with pm3d",
 "      }",
 "      unset output",
-"",
-" The `optimize` option [DEPRECATED] is passed to the gd library when the",
-" output file is opened. It attempts to reduce the size of the output file",
-" by saving incremental changes rather than full frames.",
-" Caveat: The implementation is known to be buggy. Do not use.",
 "",
 "2 fonts",
 "?set term gif fonts",
