@@ -2010,7 +2010,7 @@ C 4 zeta
 ?expressions functions erfi
 ?erfi
 %erfi(x)@real@imaginary error function erfi(x) = -i * erf(ix)
-#erfi(x)&real&~&imaginary error function $erf(x) = -i * erf(ix)$ \\
+#erfi(x)&real&~&imaginary error function $erfi(x) = -i * erf(ix)$ \\
  Imaginary error function erfi(x) = -i * erf(ix)
  Requires external library libcerf.
 ??
