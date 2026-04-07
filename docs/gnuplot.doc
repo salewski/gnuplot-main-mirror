@@ -2051,7 +2051,7 @@ C 4 zeta
 ?expressions functions erfi
 ?erfi
 %erfi(x)@real@imaginary error function erfi(x) = -i * erf(ix)
-#erfi(x)&real&~&imaginary error function $erf(x) = -i * erf(ix)$ \\
+#erfi(x)&real&~&imaginary error function $erfi(x) = -i * erf(ix)$ \\
  Imaginary error function erfi(x) = -i * erf(ix)
  `erfi(x)` returns the imaginary error function of a real argument.
  If the argument is a complex value, the imaginary component is ignored.
