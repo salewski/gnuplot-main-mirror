@@ -68,9 +68,27 @@ C
                   Gershon Elber and many others.
                Gnuplot 4.0 and subsequent releases:
                   See list of contributors at head of this document.
+2 Overview
+?overview
+?
+ This documentation describes Gnuplot 6.1, the development branch of gnuplot.
+ It covers all features present in the current stable release 6.0 as well as
+ new features and changes that are still being worked on. Features marked
+ EXPERIMENTAL may change prior to inclusion in a stable release.
+
+ For new features in version 6, see `new`.
+
+ For features being developed in version 6.1, see `development`.
+
+ In sessions with an interactive plot window you can hit 'h' anywhere on the
+ plot for help about `hotkeys` and `mousing` features.
+
+ For in help on any topic from the gnuplot command prompt, type `help` followed
+ by the name of the topic or `help ?` to get a menu of available topics.
+
 2 Introduction
 ?introduction
-?
+?overview introduction
  `Gnuplot` is a portable command-line driven graphing utility for Linux, OS/2,
  MS Windows, macOS, and many other platforms. The source code is copyrighted
  but freely distributed (i.e., you don't have to pay for it). It was originally
@@ -118,9 +136,6 @@ C
  omitted, but these cases are not always denoted with braces around the angle
  brackets.
 
- For built-in help on any topic, type `help` followed by the name of the topic
- or `help ?` to get a menu of available topics.
-
  A large set of demo plots is available on the web page
 ^ <a href="http://www.gnuplot.info/demo/">
            http://www.gnuplot.info/demo/
@@ -139,8 +154,6 @@ C
  See `command-line-options` for more details, or type
        gnuplot --help
 
- In sessions with an interactive plot window you can hit 'h' anywhere on the
- plot for help about `hotkeys` and `mousing` features.
 2 Seeking-assistance / Bugs
 ?help-desk
 ?faq
@@ -188,6 +201,7 @@ C
 ?new version_6
 ?new
 ?version
+?overview new
  Version 6 is the latest major release in a history of gnuplot development
  dating back to 1986.  It follows major version 5 (2015) and subsequent
  minor version releases 5.2 (2017) and 5.4 (2020).  Development continues
@@ -329,10 +343,10 @@ D rank_sequence 1
 ## new filter `convexhull`.  A path-smoothed bounding curve can be plotted
 ## as a filled area using "convexhull smooth path with filledcurves".
 ## See `convexhull`.
-#b An alternative experimental filter `concavehull` generates a bounding
-## polygon that is not necessarily convex; instead it forms a χ-shape
-## determined by a characteristic length parameter that controls the degree
-## of concavity.  This essentially draws a blob around the data points.
+#b An alternative filter `concavehull` generates a bounding polygon that is
+## not necessarily convex; instead it forms a χ-shape determined by a
+## characteristic length parameter that controls the degree of concavity.
+## This essentially draws a blob around the data points.
 ## See `concavehull`.
 #b A convex hull or other polygon can be used as a mask to display only
 ## selected portions of a pm3d surface or an image plot.
@@ -667,6 +681,8 @@ D epi_data 1
 
 2 Development branch (version 6.1)
 ?development
+?overview 6.1
+?6.1
  Version 6.0 is the most recent gnuplot stable release.  Development of new
  features and potentially disruptive code revision is carried out in a separate
  branch that self-identifies as version 6.1.  Since the development branch code
@@ -731,6 +747,7 @@ D epi_data 1
 ?demos
 ?online examples
 ?examples
+?overview examples
  The `gnuplot` distribution contains a collection of examples in the `demo`
  directory. You can browse on-line versions of these examples produced by the
  png, svg, and canvas terminals at
@@ -743,6 +760,7 @@ D epi_data 1
 
 2 Batch/Interactive Operation
 ?batch/interactive
+?overview batch/interactive
  `Gnuplot` may be executed in either batch or interactive modes, and the two
  may even be mixed together.
 
@@ -798,6 +816,7 @@ D epi_data 1
 ?canvas size
 ?canvas
 ?set term size
+?overview canvas size
 
  This documentation uses the term "canvas" to mean the full drawing area
  available for positioning the plot and associated elements like labels,
@@ -830,6 +849,7 @@ D epi_data 1
 ?line-editing
 ?editing
 ?command-line-editing
+?overview command-editing
  Command-line editing and command history are supported using either an
  external gnu readline library, an external BSD libedit library,  or a
  built-in equivalent.  This choice is a configuration option at the time
@@ -939,8 +959,15 @@ D epi_data 1
 ^<tr>    <td><tt>^R</tt></td>    <td>starts a backward-search.</td></tr>
 ^</tbody>
 ^</table>
+
+ When a command line to gnuplot is first read, i.e. before it is interpreted
+ or executed, two forms of lexical substitution are performed. Text to be
+ replaced is either placed in backquotes or preceded by @.
+ See `substitution`.
+
 2 Comments
 ?comments
+?overview comments
  The comment character `#` may appear almost anywhere in a command line, and
  `gnuplot` will ignore the rest of that line. A `#` does not have this effect
  inside a quoted string. Note that if a commented line ends in '\' then the
@@ -950,6 +977,7 @@ D epi_data 1
  data files.
 2 Coordinates
 ?coordinates
+?overview coordinates
 =axes
  The commands `set arrow`, `set key`, `set label` and `set object` allow you
  to draw something at an arbitrary position on the graph.  This position is
@@ -995,6 +1023,7 @@ D epi_data 1
  expression, which will be interpreted as seconds relative to 1 January 1970.
 2 Datastrings
 ?datastrings
+?overview datastrings
  Data files may contain string data consisting of either an arbitrary string
  of printable characters containing no whitespace or an arbitrary string of
  characters, possibly including whitespace, delimited by double quotes.
@@ -1042,6 +1071,7 @@ D epi_data 1
 ?markup
 ?bold
 ?italic
+?overview markup
  Many terminal types support an enhanced text mode in which additional
  formatting information can be embedded in the text string.  For example, "x^2"
  will write x-squared as we are used to seeing it, with a superscript 2.
@@ -1221,6 +1251,7 @@ C  need @ in table, so end and restart the table !
 
 2 Environment
 ?environment
+?overview environment
  A number of shell environment variables are understood by `gnuplot`.
  None of these are required.
 
@@ -1268,6 +1299,7 @@ C  need @ in table, so end and restart the table !
 2 Expressions
 ?expressions
 ?division
+?overview expressions
  In general, any mathematical expression accepted by C, FORTRAN, Pascal, or
  BASIC is valid.  The precedence of these operators is determined by the
  specifications of the C programming language.  White space (spaces and tabs)
@@ -3546,6 +3578,7 @@ C ... and restart the table:
 
 2 Fonts
 ?fonts
+?overview fonts
  Gnuplot does not provide any fonts of its own. It relies on external font
  handling, the details of which unfortunately vary from one terminal type to
  another. Brief documentation of font mechanisms that apply to more than one
@@ -3580,9 +3613,9 @@ C ... and restart the table:
       set term pdfcairo font "Times-New-Roman,12"
 
 3 gd (png, gif, jpeg, sixel terminals)
-?gd
 ?fonts gd
 =fonts
+=libgd
 =png
 =jpeg
 =gif
@@ -3678,6 +3711,7 @@ C ... and restart the table:
 ?data inline
 ?datablocks
 ?data datablocks
+?overview inline data
  There are two mechanisms for embedding data into a stream of gnuplot commands.
  If the special filename '-' appears in a plot command, then the lines
  immediately following the plot command are interpreted as inline data.
@@ -3716,6 +3750,7 @@ C ... and restart the table:
 2 iteration
 ?iteration
 ?iterate
+?overview iteration
 Ffigure_newsyntax
  gnuplot supports command iteration and block-structured if/else/while/do
  constructs.  See `if`, `while`, and `do`.
@@ -3761,6 +3796,7 @@ Ffigure_newsyntax
 2 linetypes, colors, and styles
 ?linetypes
 ?colors
+?overview linetypes
  In very old gnuplot versions, each terminal type provided a set of distinct
  "linetypes" that could differ in color, in thickness, in dot/dash pattern, or
  in some combination of color and dot/dash.  These colors and patterns were not
@@ -4061,6 +4097,7 @@ Ffigure_newsyntax
 ?behind
 ?front
 ?back
+?overview layers
  A gnuplot plot is built up by drawing its various components in a fixed order.
  This order can be modified by assigning some components to a specific layer
  using the keywords `behind`, `back`, or `front`. For example, to replace the
@@ -4091,6 +4128,7 @@ Ffigure_newsyntax
 #TeX \newpage
 2 marks
 ?marks
+?overview marks
  Version 6.1 introduces a new class of objects called `marks`. These are
  user-defined shapes composed of lines and polygons.  Marks can be placed
  individually by `set object mark`, analogous to existing object types such
@@ -4461,6 +4499,7 @@ Ffigure_parametric_marks
 #TeX \newpage
 2 mouse input
 ?mouse input
+?overview mouse
  Many terminals allow interaction with the current plot using the mouse. Some
  also support the definition of hotkeys to activate pre-defined functions by
  hitting a single key while the mouse focus is in the active plot window.
@@ -4593,6 +4632,7 @@ Ffigure_parametric_marks
  GPVAL_X_MAX, GPVAL_Y_MIN, and GPVAL_Y_MAX, see `gnuplot-defined variables`.
 2 Persist
 ?persist
+?overview persist
  Many gnuplot terminals (aqua, pm, qt, x11, windows, wxt, ...) open separate
  display windows on the screen into which plots are drawn.  The `persist` option
  tells gnuplot to leave these windows open when the main program exits.
@@ -4616,6 +4656,7 @@ Ffigure_parametric_marks
 
 2 Plotting
 ?plotting
+?overview plotting
  There are four `gnuplot` commands which actually create a plot: `plot`,
  `splot`, `replot`, and `refresh`.  Other commands control the layout, style,
  and content of the plot that will eventually be created.
@@ -4661,6 +4702,7 @@ Ffigure_parametric_marks
  is possible only for pseudo-2D plots created using `set view map`.
 2 Plugins
 ?plugins
+?overview plugins
  The set of functions available for plotting or for evaluating expressions
  can be extended through a plugin mechanism that imports executable functions
  from a shared library.  For example, gnuplot versions through 5.4 did not
@@ -4691,6 +4733,7 @@ Ffigure_parametric_marks
 2 Scope of variables
 ?scope
 ?variables local
+?overview scope
 =local
 =global
  Gnuplot variables are global except in the special cases listed below.
@@ -4733,6 +4776,7 @@ Ffigure_parametric_marks
 ?initialization
 ?.gnuplot
 ?gnuplotrc
+?overview startup
  When gnuplot is run, it first looks for a system-wide initialization file
  `gnuplotrc`.  The location of this file is determined when the program is built
  and is reported by `show loadpath`.  The program then looks in the user's HOME
@@ -4744,6 +4788,7 @@ Ffigure_parametric_marks
 2 String constants, string variables, and string functions
 ?string
 ?strings
+?overview strings
  In addition to string constants, most gnuplot commands also accept a string
  variable, a string expression, or a function that returns a string.
  For example, the following four methods of creating a plot all result in the
@@ -4928,6 +4973,7 @@ Ffigure_parametric_marks
 ?syntax
 ?specify
 ?punctuation
+?overview syntax
  Options and any accompanying parameters are separated by spaces whereas lists
  and coordinates are separated by commas.  Ranges are separated by colons and
  enclosed in brackets [], text and file names are enclosed in quotes, and a
@@ -4994,6 +5040,7 @@ Ffigure_parametric_marks
  command line.  See `substitution`.
 2 Time/Date data
 ?time/date
+?overview time/date
  `gnuplot` supports the use of time and/or date information as input data.
  This feature is activated by the commands `set xdata time`, `set ydata time`,
  etc.
@@ -5066,6 +5113,7 @@ Ffigure_parametric_marks
 2 Watchpoints
 ?watchpoints
 ?watch
+?overview watchpoints
  Support for watchpoints is present only if your copy of gnuplot was built
  with configuration option --enable-watchpoints. This feature is EXPERIMENTAL
  [details may change in subsequent versions].
@@ -11682,9 +11730,9 @@ Ffigure_smooth_path
  `set boxdepth square` will try to choose a y extent that gives the appearance
  of a square cross section independent of the axis scales on x and y.
 3 chi_shapes
-?command set chi_shapes
+?commands set chi_shapes
 ?set chi_shapes
-?command unset chi_shapes
+?commands unset chi_shapes
 ?unset chi_shapes
 ?chi_shapes
       set chi_shapes fraction <value>
@@ -12165,7 +12213,7 @@ Ffigure_colornames
  user defined contour levels (discrete.dem).
 ^ </a>
 3 cornerpoles
-?command set cornerpoles
+?commands set cornerpoles
 ?set cornerpoles
 ?cornerpoles
  By default splot draws a vertical line from each corner of a 3D surface to the

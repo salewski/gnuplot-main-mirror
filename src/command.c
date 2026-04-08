@@ -3369,6 +3369,7 @@ help_command()
     TBOOLEAN more_help;
     TBOOLEAN only;		/* TRUE if only printing subtopics */
     TBOOLEAN subtopics;		/* 0 if no subtopics for this topic */
+    TBOOLEAN overview = FALSE;
     int start;			/* starting token of help string */
     char *help_ptr;		/* name of help file */
 # if defined(SHELFIND)
@@ -3446,14 +3447,32 @@ help_command()
 	only = FALSE;
     }
 
+   /* A bare "help" command is reinterpreted as "help overview" so that
+    * it dumps general information and a suggestion to type "help ?".
+    * However the "subtopics" for overview are really topics in their
+    * own right, so we need to promote them to be the leading keyword.
+    */
+    if (len == 0) {
+	strcpy(helpbuf, "overview");
+	len = strlen(helpbuf);
+	overview = TRUE;
+    }
+    if ((len > 8) && !strncmp(helpbuf, "overview", 8) && helpbuf[9] != '?') {
+	memmove(helpbuf, &helpbuf[9], strlen(helpbuf)-8);
+	len = base = strlen(helpbuf);
+    }
+
     switch (help(helpbuf, help_ptr, &subtopics)) {
     case H_FOUND:{
 	    /* already printed the help info */
 	    /* subtopics now is true if there were any subtopics */
 	    screen_ok = FALSE;
-
 	    do {
 		if (subtopics && !only) {
+		    if (overview) {
+			strcpy(helpbuf,"overview");
+			len = 8;
+		    }
 		    /* prompt for subtopic with current help string */
 		    if (len > 0) {
 			strcpy (prompt, "Subtopic of ");
