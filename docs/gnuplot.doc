@@ -119,9 +119,6 @@ C
  omitted, but these cases are not always denoted with braces around the angle
  brackets.
 
- For built-in help on any topic, type `help` followed by the name of the topic
- or `help ?` to get a menu of available topics.
-
  A large set of demo plots is available on the web page
 ^ <a href="http://www.gnuplot.info/demo/">
            http://www.gnuplot.info/demo/
@@ -142,6 +139,10 @@ C
 
  In sessions with an interactive plot window you can hit 'h' anywhere on the
  plot for help about `hotkeys` and `mousing` features.
+
+ For built-in help on any topic, type `help` followed by the name of the topic
+ or `help ?` to get a menu of available topics.
+
 2 Seeking-assistance / Bugs
 ?help-desk
 ?faq
@@ -898,6 +899,12 @@ D epi_data 1
 ^<tr>    <td><tt>^R</tt></td>    <td>starts a backward-search.</td></tr>
 ^</tbody>
 ^</table>
+
+ When a command line to gnuplot is first read, i.e. before it is interpreted
+ or executed, two forms of lexical substitution are performed. Text to be
+ replaced is either placed in backquotes or preceded by @.
+ See `substitution`.
+
 2 Comments
 ?comments
  The comment character `#` may appear almost anywhere in a command line, and
@@ -3535,9 +3542,9 @@ C ... and restart the table:
       set term pdfcairo font "Times-New-Roman,12"
 
 3 gd (png, gif, jpeg, sixel terminals)
-?gd
-?fonts gd
+?fonts libgd
 =fonts
+=libgd
 =png
 =jpeg
 =gif
@@ -11095,9 +11102,9 @@ Ffigure_smooth_path
  `set boxdepth square` will try to choose a y extent that gives the appearance
  of a square cross section independent of the axis scales on x and y.
 3 chi_shapes
-?command set chi_shapes
+?commands set chi_shapes
 ?set chi_shapes
-?command unset chi_shapes
+?commands unset chi_shapes
 ?unset chi_shapes
 ?chi_shapes
       set chi_shapes fraction <value>
@@ -11577,7 +11584,7 @@ Ffigure_colornames
  user defined contour levels (discrete.dem).
 ^ </a>
 3 cornerpoles
-?command set cornerpoles
+?commands set cornerpoles
 ?set cornerpoles
 ?cornerpoles
  By default splot draws a vertical line from each corner of a 3D surface to the

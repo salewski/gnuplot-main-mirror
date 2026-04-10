@@ -2968,7 +2968,7 @@ START_HELP(gif)
 "?set term gif fonts",
 "",
 " The details of font selection are complicated.",
-" For more information please see the separate section under `fonts gd`.",
+" For more information please see the separate section under `fonts libgd`.",
 "",
 " Examples:",
 "",
