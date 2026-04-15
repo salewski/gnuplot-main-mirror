@@ -5,6 +5,15 @@ Changes in 6.0.5
 * NEW	 New function     prod [<var> = <start> : <end>] <expression>
 	 Implements the sequential product operation
 	     prod [i=a:b] f(i)   =   f(a) * f(a+1) * ... * f(b)
+* NEW	 Process character strings in EUC-JP encoding using
+	 "set encoding locale" or "set encoding eucjp"
+* NEW	 Full mousing support for multiplots
+	 - all panels report mouse coordinates
+	 - all panels respond to pan/zoom/rotate mouse movement and hotkeys
+	 - "replot" reexecutes multiplot commands starting from current state
+	 - "remultiplot" restores original state before reexecuting multiplot
+* NEW	 coloring option for contourfill
+	    set contourfill defined [zmin1:zmax1] color1, [zmin2:zmax2] color2, ...
 * CHANGE sixeltek: transparency and background options
 * CHANGE Rework Unicode escape sequences  \U+xxxx
 	 expand escape sequences in "noenhanced" strings
@@ -13,12 +22,21 @@ Changes in 6.0.5
 * CHANGE octal escape sequences must conform to the documented form \ooo
 	 e.g. \7 or \0106 or \456 or \0 are now rejected
 * CHANGE interactive mousing remains active after ^C or "reset"
-* FIX	 gd: Revise font handling to match libgd 2.4.0 and libraqm 0.10.3
-	 resolves long-standing font problems but requires newer library versions
-* FIX	 "plot with labels" accepts the "noenhanced" keyword
-* FIX	 z-axis settings were lost when using mouse to x/y shift a 3D plot
-* FIX	 bad tickmark placement on logscale axis that spans exactly two decades
-* FIX	 revise 6.0.4 change that broke axis range parsing in parametric mode
+* CHANGE cairo: cleaner end joins on closed polygons
+* FIX	 gd: Revise font handling to resolve long-standing problems.	Bug 2819
+	 Requires recent library versions (libgd 2.4.0 libraqm 0.10.3)
+* FIX	 axis range parsing in parametric mode broken by change in 6.0.4
+* FIX	 "plot with labels" now accepts the "noenhanced" keyword	Bug 2852
+* FIX	 z-axis settings lost when using mouse to pan 3D plot on x/y
+* FIX	 bad tic placement on logscale axis spanning two decades        Bug 2856
+* FIX	 always clear previous plot title before a new plot is started  Bug 2865
+* FIX	 Rework logic for extending the command buffer incrementally
+	 on input.  Long input lines with backslash continuation could
+	 lead to corruption of the command string if encountered early
+	 in program execution.
+* FIX	 A bare "help" command should yield something useful		Bug 2866
+* FIX	 qt: Slow font initialization on Windows			Bug 2316 2476
+
 
 Changes in 6.0.4
 =================
