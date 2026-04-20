@@ -1247,23 +1247,23 @@ ifdef DLLS
 ifdef MINGW64
 ifndef M32
 ifdef QT
-	ldd gnuplot.exe gnuplot_qt.exe | cut -d " " -f 3 | grep "^/mingw64/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
+	ldd gnuplot.exe wgnuplot.exe wgnuplot_pipes.exe gnuplot_qt.exe | cut -d " " -f 3 | grep "^/mingw64/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
 else
-	ldd gnuplot.exe | cut -d " " -f 3 | grep "^/mingw64/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
+	ldd gnuplot.exe wgnuplot.exe wgnuplot_pipes.exe | cut -d " " -f 3 | grep "^/mingw64/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
 endif # QT
 else # !M32
 ifdef QT
-	ldd gnuplot.exe gnuplot_qt.exe | cut -d " " -f 3 | grep "^/mingw32/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
+	ldd gnuplot.exe wgnuplot.exe wgnuplot_pipes.exe gnuplot_qt.exe | cut -d " " -f 3 | grep "^/mingw32/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
 else
-	ldd gnuplot.exe | cut -d " " -f 3 | grep "^/mingw32/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
+	ldd gnuplot.exe wgnuplot.exe wgnuplot_pipes.exe | cut -d " " -f 3 | grep "^/mingw32/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
 endif # QT
 endif # M32
 endif # MINGW64
 ifdef CLANG64
 ifdef QT
-	ldd gnuplot.exe gnuplot_qt.exe | cut -d " " -f 3 | grep "^/clang64/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
+	ldd gnuplot.exe wgnuplot.exe wgnuplot_pipes.exe gnuplot_qt.exe | cut -d " " -f 3 | grep "^/clang64/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
 else
-	ldd gnuplot.exe | cut -d " " -f 3 | grep "^/clang64/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
+	ldd gnuplot.exe wgnuplot.exe wgnuplot_pipes.exe | cut -d " " -f 3 | grep "^/clang64/bin" | sort | uniq | xargs -t -i cp {} $(DESTDIR)/bin
 endif # QT
 endif
 ifdef QT
