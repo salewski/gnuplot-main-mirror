@@ -201,6 +201,7 @@ void gp_cairo_initialize_plot(plot_struct *plot)
 	plot->cr = NULL;
 
 	plot->polygon_path_last = NULL;
+	plot->close_path = FALSE;
 
 	plot->interrupt = FALSE;
 
@@ -616,6 +617,13 @@ void gp_cairo_stroke(plot_struct *plot)
 
 	/* add last point */
 	cairo_line_to (plot->cr, plot->current_x, plot->current_y);
+
+	/* If closepath was requested, close the subpath so that the
+	 * closing corner is rendered as a line join, not two butt caps. */
+	if (plot->close_path) {
+		cairo_close_path(plot->cr);
+		plot->close_path = FALSE;
+	}
 
 
 	cairo_save(plot->cr);
