@@ -15,6 +15,7 @@ set border lw 1.2
 set tics nomirror
 set y2tics 0.25
 set link y2
+set xrange [0:125]
 
 set multiplot
 set title "Use watchpoints to find threshold values on a smoothed curve"
