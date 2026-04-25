@@ -112,6 +112,7 @@
  *        including butt/rounded/squared linecaps by introducing custom SDF
  *        thick-line antialiased rasterizer, coord. oversampling and off-screen
  *        alpha layer with MAX compositing.
+ *        Add PNG_path().
  */
 
 #define GD_DEFINED_COLORS	96	/* Must not exceed size of pm3d_color_names_tbl[] */
@@ -166,6 +167,7 @@ TERM_PUBLIC void ENHGD_FLUSH(void);
 TERM_PUBLIC void ENHGD_boxed_text(unsigned int, unsigned int, int);
 
 TERM_PUBLIC void PNG_dashtype(int type, t_dashtype *custom_dash_pattern);
+TERM_PUBLIC void PNG_path(int p);
 
 #include <gd.h>
 /* Include files for bitmap fonts */
@@ -405,6 +407,18 @@ static double PNG_prev_seg_dy = 0.0;
 /* Previous sub-segment direction within dash walker (pixel space) */
 static double PNG_prev_dash_dx = 0.0;
 static double PNG_prev_dash_dy = 0.0;
+
+/* Closed-path state for join disc at the closing corner.
+ * newpath marks the path as open and clears the saved state; the
+ * first PNG_vector() call records the start position and the first
+ * segment's direction; closepath draws a join disc between the last
+ * and first segments.
+ */
+static TBOOLEAN PNG_path_is_open = FALSE;
+static double PNG_path_start_x = 0.0;
+static double PNG_path_start_y = 0.0;
+static double PNG_path_first_dx = 0.0;
+static double PNG_path_first_dy = 0.0;
 
 /* Endcap types for PNG_draw_aa_thick_line() */
 enum {
@@ -1377,6 +1391,17 @@ done:
     /* Save current direction for next segment's join disc logic */
     PNG_prev_dash_dx = dx;
     PNG_prev_dash_dy = dy;
+
+    /* For closed paths, save the first segment's pixel-space direction
+     * and start position (x1,y1 is the path start in pixel coords).
+     */
+    if (PNG_path_is_open
+    &&  PNG_path_first_dx == 0.0 && PNG_path_first_dy == 0.0) {
+	PNG_path_first_dx = dx;
+	PNG_path_first_dy = dy;
+	PNG_path_start_x = x1;
+	PNG_path_start_y = y1;
+    }
 }
 
 static void
@@ -3494,6 +3519,56 @@ gd_iconv(char **string)
 #endif /* HAVE_ICONV */
 }
 
+/*
+ * PNG_path - Handle newpath/closepath for proper closed-path corners.
+ * On closepath, flush the deferred endcap and draw a join disc at the
+ * closing corner so that the junction between the last and first
+ * segments is rendered as a line join rather than two butt caps.
+ */
+TERM_PUBLIC void
+PNG_path(int p)
+{
+    switch (p) {
+    case 0: /* newpath */
+	PNG_path_is_open = TRUE;
+	PNG_path_start_x = 0.0;
+	PNG_path_start_y = 0.0;
+	PNG_path_first_dx = 0.0;
+	PNG_path_first_dy = 0.0;
+	break;
+    case 1: /* closepath */
+	if (PNG_path_is_open
+	&&  (PNG_path_first_dx != 0.0 || PNG_path_first_dy != 0.0)) {
+	    double half_w = (double)png_state.linewidth / 2.0;
+	    double prev_len, first_len;
+
+	    /* Flush the deferred endcap from the last segment */
+	    PNG_flush_pending_endcap();
+	    if (png_state.alpha_layer_active)
+		PNG_alpha_layer_composite();
+
+	    /* Normalize the direction vectors (they are raw pixel deltas) */
+	    prev_len = sqrt(PNG_prev_dash_dx*PNG_prev_dash_dx
+			  + PNG_prev_dash_dy*PNG_prev_dash_dy);
+	    first_len = sqrt(PNG_path_first_dx*PNG_path_first_dx
+			   + PNG_path_first_dy*PNG_path_first_dy);
+
+	    if (prev_len > 0.0 && first_len > 0.0) {
+		/* Draw a join disc connecting last->first segment */
+		PNG_draw_join_disc(
+		    PNG_path_start_x, PNG_path_start_y, half_w,
+		    PNG_prev_dash_dx / prev_len,
+		    PNG_prev_dash_dy / prev_len,
+		    PNG_path_first_dx / first_len,
+		    PNG_path_first_dy / first_len,
+		    png_state.color);
+	    }
+	}
+	PNG_path_is_open = FALSE;
+	break;
+    }
+}
+
 #undef MAXLINEWIDTH
 #undef Y
 
@@ -3522,7 +3597,7 @@ TERM_TABLE_START(png_driver)
     , PNG_image
     , ENHGD_OPEN, ENHGD_FLUSH, do_enh_writec
     , NULL		/* layering */
-    , NULL		/* path */
+    , PNG_path		/* path */
     , (double)GD_OVERSAMPLE	/* tscale */
     , NULL		/* hypertext */
     , ENHGD_boxed_text
@@ -3684,7 +3759,7 @@ TERM_TABLE_START(jpeg_driver)
     , PNG_image
     , ENHGD_OPEN, ENHGD_FLUSH, do_enh_writec
     , NULL		/* layering */
-    , NULL		/* path */
+    , PNG_path		/* path */
     , (double)GD_OVERSAMPLE	/* tscale */
     , NULL		/* hypertext */
     , ENHGD_boxed_text
@@ -3839,7 +3914,7 @@ TERM_TABLE_START(gif_driver)
     , PNG_image
     , ENHGD_OPEN, ENHGD_FLUSH, do_enh_writec
     , NULL		/* layering */
-    , NULL		/* path */
+    , PNG_path		/* path */
     , (double)GD_OVERSAMPLE	/* tscale */
     , NULL		/* hypertext */
     , ENHGD_boxed_text
@@ -4023,7 +4098,7 @@ TERM_TABLE_START(sixelgd_driver)
     PNG_image,
     ENHGD_OPEN, ENHGD_FLUSH, do_enh_writec,
     NULL,		/* layering */
-    NULL,		/* path */
+    PNG_path,		/* path */
     (double)GD_OVERSAMPLE,	/* tscale */
     NULL		/* hypertext */
     , ENHGD_boxed_text
@@ -4202,7 +4277,7 @@ TERM_TABLE_START(kittygd_driver)
     PNG_image,
     ENHGD_OPEN, ENHGD_FLUSH, do_enh_writec,
     NULL,		/* layering */
-    NULL,		/* path */
+    PNG_path,		/* path */
     (double)GD_OVERSAMPLE,	/* tscale */
     NULL		/* hypertext */
     , ENHGD_boxed_text
