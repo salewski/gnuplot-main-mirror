@@ -1069,21 +1069,12 @@ PNG_flush_pending_endcap(void)
 	double eps = 0.5;
 	double ax = PNG_pending_endcap.ex - eps * PNG_pending_endcap.ux;
 	double ay = PNG_pending_endcap.ey - eps * PNG_pending_endcap.uy;
-	int save_cx1, save_cy1, save_cx2, save_cy2;
 
-	/* Apply plot-area clipping so endcaps don't overshoot borders */
-	gdImageGetClip(png_state.image, &save_cx1, &save_cy1, &save_cx2, &save_cy2);
-	if (clip_area) {
-	    gdImageSetClip(png_state.image,
-			   GD_PX(clip_area->xleft),  GD_Y(clip_area->ytop),
-			   GD_PX(clip_area->xright), GD_Y(clip_area->ybot));
-	}
 	PNG_draw_aa_thick_line(ax, ay,
 			       PNG_pending_endcap.ex, PNG_pending_endcap.ey,
 			       PNG_pending_endcap.thick,
 			       PNG_pending_endcap.color,
 			       PNG_CAP_HARD, cap);
-	gdImageSetClip(png_state.image, save_cx1, save_cy1, save_cx2, save_cy2);
     }
     PNG_pending_endcap.active = 0;
 }
@@ -2547,7 +2538,6 @@ PNG_vector(unsigned int x, unsigned int y)
 	       || (png_state.TrueColor && png_state.linewidth > 1)) {
 	float *pattern = NULL;
 	double scale = 0.0;
-	int save_cx1, save_cy1, save_cx2, save_cy2;
 	int color = png_state.color;
 
 	/* Activate alpha layer for semi-transparent lines to avoid
@@ -2574,23 +2564,10 @@ PNG_vector(unsigned int x, unsigned int y)
 	}
 	if (pattern && scale < 0.1) scale = 0.1;
 
-	/* Clip drawing to the current gnuplot plot area so that thick
-	 * endcaps do not overshoot the graph border.
-	 */
-	gdImageGetClip(png_state.image, &save_cx1, &save_cy1, &save_cx2, &save_cy2);
-	if (clip_area) {
-	    gdImageSetClip(png_state.image,
-			   GD_PX(clip_area->xleft),  GD_Y(clip_area->ytop),
-			   GD_PX(clip_area->xright), GD_Y(clip_area->ybot));
-	}
-
 	PNG_draw_aa_vector(
 	    GD_PXF(png_state.x), GD_YF(png_state.y),
 	    GD_PXF(x),           GD_YF(y),
 	    pattern, scale, png_state.linewidth, color);
-
-	/* Restore previous clip region */
-	gdImageSetClip(png_state.image, save_cx1, save_cy1, save_cx2, save_cy2);
 
     /* All other (not dashed, not thick TrueColor) vectors */
     } else {
