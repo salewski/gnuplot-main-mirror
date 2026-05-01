@@ -202,6 +202,7 @@ void gp_cairo_initialize_plot(plot_struct *plot)
 	plot->cr = NULL;
 
 	plot->polygon_path_last = NULL;
+	plot->close_path = FALSE;
 
 	plot->interrupt = FALSE;
 
