@@ -1,76 +1,76 @@
-		Gnuplot Version 6.0.4 Release Notes
+		Gnuplot Version 6.0.5 Release Notes
 		===================================
 
-This is the fourth incremental release for gnuplot stable version 6.0.
-It contains several new features and improvements back-ported from the
-development version. Builds for Windows now support ARM 64-bit architectures.
+This is the fifth incremental release for gnuplot stable version 6.0.
+Apart from the usual minor bug fixes, it contains several new features
+and improvements back-ported from the development version.
+Builds for Windows now support ARM 64-bit architectures.
+Notably, support for mousing, replotting, and save/restore of multiplots
+is now fully functional.  
 
-Changes in 6.0.4
+Changes in 6.0.5
 =================
 
-NEW (back-ported from development version)
-------------------------------------------
-* variable Inf is pre-set to floating point INFINITY
-* "sharpen" filter handles vertical edges in a step function
-* gprintf format specifiers %C and %Ci
-  - %C  formats a complex value as {a, b}
-      This is the format used by the gnuplot "print" command
-  - %Ci formats a complex value as a + bi
-      Both the real and imaginary parts are printed using libc format %g
-      with optional width and precision
-* Support for Windows on ARM 64-bit architectures
-  - mingw: optionally use the MSYS2/CLANG64 environment
-  - Cross-compilation for Windows on ARM is possible using MSYS2/CLANG64/CLANGARM64
+New features
+------------
 
-CHANGES
--------
-* better adherence to c23 standard
-* splot with pm3d fillcolor <x> generates a matching key sample
-* gprintf %H format is distinct from %h in utf8 context
-  - %H uses dot operator between mantissa and exponent
-* kitty, sixel: default size to 100% width, 75% height of terminal window
-* Partially deprecate the "sample" keyword for plot commands.
-  The plot command accepts axis ranges as the first thing after "plot".
-  If present, they update the primary axis ranges x y x2 y2.
-  However if this is preced by the keyword "sample" it refers to a sampling range
-  rather than an axis range.  If a second colon is found in the range,
-  as in [t=min:max:increment], this is unambiguously a sample range so the
-  "sample" keyword is not required.
-* Do not break contour lines into 100-segment fragments.
-  - This fixes a bug when saved contour lines are used as polygons.
-  - To maintain previous placement of contour labels along long contours, use
-  "set cntrlabl interval 100".
+* Full mousing support for multiplots
+  - all panels report mouse coordinates
+  - all panels respond to pan/zoom/rotate mouse movement and hotkeys
+  - "replot" reexecutes multiplot commands starting from current state
+  - "remultiplot" restores the original state before reexecuting multiplot
+  - interactive mousing remains active after ^C or "reset"
 
-FIXES
------
-* sixel: improved support for a transparent background
-* kitty: support animation on a transparent background
-* webp:  support animation on a transparent background
-* backport fixes for color assignment to pm3d surfaces
-  - "set pm3d implicit" + "with lines" treated the same as "with pm3d"
-  - adds support for "fc background"
-  - pm3d interpolate > 1 inherits rgb color assignments from the parent tile
-* fill style of colorbox should match fill style of pm3d surface
-* svg: fillstyle solid <frac> was incorrectly treated as transparent
-* transparent fill color in 3D boxes and polygons
-* alpha channel colors on ARM platforms
-* resolve ambiguous syntax in "set dashtype i (n,m)"
-* svg: font size changes within a text fragment could be lost
-* "reset session" must terminate multiplot mode
-* determination of above/below in polar mode filledcurves
-* always flush cached lines from hidden3d if any are present
-* incorrect evaluation of a**b for integer a, integer b < 0
-  in the case that overflow handling has been set to "NaN" or "undefined"
-* loss of precision in some ranges for asin acos asinh acosh
+* Unicode escape sequences \U+xxxx are accepted in more contexts
+  - escape sequences are expanded in "noenhanced" strings
+  - escape sequences are expanded during substring evaluation
+  - escape sequences are expanded in string functions strstrt() and strlen()
+
+* New built-in function prod [<var> = <start> : <end>] <expression>
+  - implements the sequential product operation
+	     prod [i=a:b] f(i)   =   f(a) * f(a+1) * ... * f(b)
+
+* Data files in EUC-JP encoding can be processed from other environments
+  - If running in a EUC-JP locale, use "set encoding locale"
+  - If running in a different locale, use "set encoding eucjp"
+  - In either case, this affects only input data.  It does not change
+    the encoding (usually UTF-8) written to plots on output.
+
+* New coloring option for contourfill
+  - Arbitrary discrete color ranges can be define without using a special palette
+	set contourfill defined [zmin1:zmax1] color1, [zmin2:zmax2] color2, ...
+
+* Allow "string"[i] as shorthand for "string"[i:i]
+
+Changed behaviour
+-----------------
+
+* Trailing whitespace on the command line is now ignored on input.
+  This means that the line-continuation character '\' is effective even
+  if it is followed by an unintentional blank.
+
+* Octal escape sequences must conform to the documented form \ooo
+  - E.g. \7 or \0106 or \456 or \0 are now rejected
+
+* "plot with labels" now accepts the "noenhanced" keyword
+
+Bug fixes (for complete list see NEWS)
+--------------------------------------
+
+* qt: Slow font initialization on Windows			#Bug# 2316 2476
+* gd: Resolved long-standing font handling problems.		#Bug# 2819
+  - requires recent library versions (libgd 2.4.0 libraqm 0.10.3)
+* Better tic placement on logscale axis spanning two decades	#Bug# 2856
+* Always clear previous plot title before a new plot is started #Bug# 2865
+* Endpoint errors due to floating point precision		#Bug# 2768
+* Repaired axis range parsing in parametric mode broken by change in 6.0.4
+* Reworked logic for extending the command buffer incrementally on input.
+  Long input lines with backslash continuation could lead to corruption
+  of the command string if encountered early in program execution.
 
 
 KNOWN ISSUES
 ------------
-
-- Recent releases of gcc version 15 default to -std=c23 but the gnuplot
-  source is not fully compliant with c23.  You may need to add a compiler flag
-  before running ./configure and building the program.
-	CFLAGS="-std=gnu17" (the previous default). 
 
 - Font handling by the cairo/pango libraries supporting some gnuplot terminals
   (pdf, png, wxt, ...) on both Windows and MacOS are sensitive to the
@@ -86,14 +86,12 @@ KNOWN ISSUES
 	- libgd   version 2.4.0     (libgd.so.3)
 	- libraqm version 0.10.3 
 
-- Support for replot and pan/zoom mouse operations in multiplot mode is still
-  incomplete. Expect further improvement in subsequent releases.
-
-- TeXLive2024 pdflatex does not like some of the UTF-8 characters in the user manual.
-  The distribution includes a pre-built copy of gnuplot.pdf but if you want
-  to rebuild it from the source in docs/gnuplot.doc please use lualatex instead.
-  You can either replace the definition PDFLATEX=pdflatex with PDFLATEX=lualatex
-  in the Makefile or provide this in the environment during configuration
+- Recent TeXLive pdflatex binaries do not like some of the UTF-8 characters in
+  the user manual.  The distribution includes a pre-built copy of gnuplot.pdf
+  but if you want to rebuild it from the source in docs/gnuplot.doc please use
+  lualatex instead.  You can either replace the definition
+  PDFLATEX=pdflatex with PDFLATEX=lualatex in the Makefile or provide this in
+  the environment during configuration
 	PDFLATEX=lualatex ./configure
 
 Gnuplot development is tracked in a git repository on SourceForge.
@@ -105,7 +103,57 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  21 December 2025
+Release Notes date:  20 June 2026
+
+
+			Changes in 6.0.4
+			=================
+
+* NEW	 variable Inf is pre-set to floating point INFINITY
+* NEW	 "sharpen" filter handles vertical edges in a step function
+* NEW	 gprintf format specifiers %C and %Ci
+	 %C  formats a complex value as {a, b}
+	     This is the format used by the gnuplot "print" command
+	 %Ci formats a complex value as a + bi
+	     Both the real and imaginary parts are printed using libc format %g
+	     with optional width and precision
+* NEW	 Allow installation of 64bit version on Windows on ARM systems
+* NEW	 mingw: optionally use the MSYS2/CLANG64 environment
+	 Support for cross-compilation for Windows on ARM
+* CHANGE update configure and headers for better compatibility with c23/gcc15
+* CHANGE splot with pm3d fillcolor <x> generates a matching key sample
+* CHANGE gprintf %H format is distinct from %h in utf8 context
+         %H uses dot operator between mantissa and exponent
+* CHANGE kitty, sixel: default size to 100% width, 75% height of terminal window
+* CHANGE partially deprecate the "sample" keyword for plot commands
+	 The plot command accepts axis ranges as the first thing after "plot".
+	 If present, they update the primary axis ranges x y x2 y2.
+	 If a second colon is found in the range, as in [t=min:max:increment],
+	 this is unambiguously a sample range rather than an axis range so
+	 the "sample" keyword is not required.                          Bug 2666
+* CHANGE do not break contour lines into 100-segment fragments
+	 This fixes a bug when saved contour lines are used as polygons.
+	 To maintain previous placement of contour labels, use
+	 "set cntrlabl interval 100".
+* FIX	 sixel: improved support for a transparent background           Bug 2828
+* FIX	 kitty: support animation on a transparent background
+* FIX	 webp:  support animation on a transparent background
+* FIX	 backport fixes for color assignment to pm3d surfaces
+	 "set pm3d implicit" + "with lines" treated the same as "with pm3d"
+	 adds support for "fc background"
+	 pm3d interpolate > 1 inherits rgb color assignments from the parent tile
+* FIX	 fill style of colorbox should match fill style of pm3d surface
+* FIX	 svg: fillstyle solid <frac> was incorrectly treated as transparent
+* FIX	 transparent fill color in 3D boxes and polygons                Bug 2812
+* FIX	 alpha channel colors on ARM platforms                          Bug 2812
+* FIX	 resolve ambiguous syntax in "set dashtype i (n,m)"             Bug 2814
+* FIX	 svg: font size changes within a text fragment could be lost    Bug 2816
+* FIX	 "reset session" must terminate multiplot mode
+* FIX	 determination of above/below in polar mode filledcurves        Bug 2825
+* FIX	 always flush hidden3d line cache if present                    Bug 2836
+* FIX	 incorrect evaluation of a**b for integer a, integer b < 0
+	 in the case of "set overflow NaN" or "set overflow undefined"
+* FIX	 loss of precision in some ranges for asin acos asinh acosh     Bug 2839
 
 
 			Changes in 6.0.3
@@ -380,7 +428,7 @@ file of the source package; the short version for linux/unix-like
 systems is to unpack the tarball and then
 <PRE>
 build it:
-      cd gnuplot-6.0.4 ; ./configure ; make
+      cd gnuplot-6.0.5 ; ./configure ; make
 test it:
       make check
 install it:

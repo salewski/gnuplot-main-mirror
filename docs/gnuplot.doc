@@ -12917,7 +12917,6 @@ D hidden 6
 #\verb~   ~ & A+Bi & default \\
 #\verb~"\imath"~ & {$A+B\imath$} & may or may not be necessary for LaTeX output \\
 #\verb~"{/:Italic i}"~ & A + B{\emph i} & gnuplot enhanced text markup \\
-#\verb~"\U+2148"~ & A + Bⅈ & Unicode DOUBLE-STRUCK ITALIC SMALL I \\
 #\verb~"\U+1D456"~ & A + B$i$ & Unicode MATHEMATICAL ITALIC SMALL I \\
 #\verb~"im"~ & A + Bim & Julia \\
 #\verb~"j"~ & A + Bj & Numpy \\
