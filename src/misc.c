@@ -337,6 +337,9 @@ load_file(FILE *fp, char *name, int calltype)
 		    }
 		    safe_strncpy(&(gp_input_line[start]), *datablock_input_line, left);
 		    len = strlen(gp_input_line);
+		    /* strip trailing whitespace */
+		    while (len > 0 && isblank(gp_input_line[len-1]))
+			gp_input_line[--len] = '\0';
 		    left = gp_input_line_len - len;
 		    datablock_input_line++;
 		}
@@ -352,9 +355,14 @@ load_file(FILE *fp, char *name, int calltype)
 		--len;
 		if (gp_input_line[len] == '\n') {	/* remove any newline */
 		    gp_input_line[len--] = '\0';
+		    if (len <= 0)
+			continue;
 		    if (gp_input_line[len] == '\r') {	/* remove any carriage return */
 			gp_input_line[len--] = '\0';
 		    }
+		    /* Remove trailing whitespace leading up to the newline */
+		    while (len > 0 && isblank(gp_input_line[len]))
+			gp_input_line[len--] = '\0';
 		}
 		start = len+1;
 		left = gp_input_line_len - start;

@@ -103,13 +103,12 @@ C
        set title "My First Plot";  plot 'data';  print "all done!"
 
  Commands may extend over several input lines by ending each line but the last
- with a backslash (\).  The backslash must be the _last_ character on each
- line.  The effect is as if the backslash and newline were not there.  That
- is, no white space is implied, nor is a comment terminated.  Therefore,
- commenting out a continued line comments out the entire command
- (see `comments`).  But note that if an error occurs somewhere on a multi-line
- command, the parser may not be able to locate precisely where the error is
- and in that case will not necessarily point to the correct line.
+ with a backslash (\).  The backslash must be the last non-whitespace character
+ on each line.  The effect is as if the backslash and newline were not there.
+ A backslash does not terminate a comment. Therefore commenting out a continued
+ line comments out the entire command (see `comments`). Note that if an error
+ occurs from a multi-line command, the line number reported in the error
+ message may correspond to the initial line.
 
  In this document, curly braces ({}) denote optional arguments and a vertical
  bar (|) separates mutually exclusive choices.  `Gnuplot` keywords or `help`
