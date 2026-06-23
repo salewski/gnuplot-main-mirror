@@ -1212,6 +1212,14 @@ bind_command()
     bind_process(lhs, rhs, allwindows);
 
 }
+#else  /* USE_MOUSE */
+void
+bind_command()
+{
+    /* ignore bind command if there is no mouse support */
+    while (!END_OF_COMMAND) c_token++;
+}
+
 #endif /* USE_MOUSE */
 
 /*
