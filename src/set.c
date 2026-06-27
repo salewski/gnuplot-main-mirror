@@ -5051,6 +5051,14 @@ set_termoptions()
 	    c_token++;
 	    real_expression();   /* Silently ignore the request */
 	}
+    } else if (equals(c_token,"scale")) {
+	num_tokens = GPMIN(num_tokens,c_token+2);
+	if (term->flags & TERM_GLOBALSCALE)
+	    ok_to_call_terminal = TRUE;
+	else {
+	    c_token++;
+	    real_expression();   /* Silently ignore the request */
+	}
     } else if (almost_equals(c_token,"dash$ed") || equals(c_token,"solid")) {
 	/* Silently ignore the request */
 	num_tokens = GPMIN(num_tokens,++c_token);

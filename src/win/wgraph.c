@@ -383,6 +383,7 @@ GraphInitStruct(LPGW lpgw)
 		lpgw->fontscale = 1.;
 		lpgw->linewidth = 1.;
 		lpgw->pointscale = 1.;
+		lpgw->scale = 1.;
 		lpgw->color = TRUE;
 		lpgw->dashed = FALSE;
 		lpgw->IniSection = TEXT("WGNUPLOT");
@@ -908,14 +909,14 @@ MakePens(LPGW lpgw, HDC hdc)
 
 	if ((GetDeviceCaps(hdc, NUMCOLORS) == 2) || !lpgw->color) {
 		pen = lpgw->monopen[1];
-		pen.lopnWidth.x *= lpgw->linewidth;
+		pen.lopnWidth.x *= lpgw->linewidth * lpgw->scale;
 		lpgw->hapen = CreatePenIndirect(&pen); 	/* axis */
 		lpgw->hbrush = CreateSolidBrush(lpgw->background);
 		for (i = 0; i < WGNUMPENS + 2; i++)
 			lpgw->colorbrush[i] = CreateSolidBrush(lpgw->monopen[i].lopnColor);
 	} else {
 		pen = lpgw->colorpen[1];
-		pen.lopnWidth.x *= lpgw->linewidth;
+		pen.lopnWidth.x *= lpgw->linewidth * lpgw->scale;
 		lpgw->hapen = CreatePenIndirect(&pen); 	/* axis */
 		lpgw->hbrush = CreateSolidBrush(lpgw->background);
 		for (i = 0; i < WGNUMPENS + 2; i++)
@@ -1099,7 +1100,7 @@ MakeFonts(LPGW lpgw, LPRECT lprect, HDC hdc)
 	lpgw->rotate = FALSE;
 	memset(&(lpgw->lf), 0, sizeof(LOGFONT));
 	_tcsncpy(lpgw->lf.lfFaceName, lpgw->fontname, LF_FACESIZE);
-	lpgw->lf.lfHeight = -MulDiv(lpgw->fontsize * lpgw->fontscale, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+	lpgw->lf.lfHeight = -MulDiv(lpgw->fontsize * lpgw->fontscale * lpgw->scale, GetDeviceCaps(hdc, LOGPIXELSY), 72);
 	lpgw->lf.lfCharSet = DEFAULT_CHARSET;
 	if (((p = _tcsstr(lpgw->fontname, TEXT(" Italic"))) != NULL) ||
 	    ((p = _tcsstr(lpgw->fontname, TEXT(":Italic"))) != NULL)) {
@@ -1506,6 +1507,7 @@ GraphEnhancedOpen(char *fontname, double fontsize, double base,
 		   results. */
 		enhstate.base = win_scale * base *
 		                enhstate.lpgw->fontscale *
+		                enhstate.lpgw->scale *
 		                enhstate.res_scale;
 	}
 }
@@ -1979,7 +1981,7 @@ drawgraph(LPGW lpgw, HDC hdc, LPRECT rect)
 	double alpha_c = 1.;		/* alpha for transparency */
 
 	/* lines */
-	double line_width = lpgw->linewidth;	/* current line width */
+	double line_width = lpgw->linewidth * lpgw->scale;	/* current line width */
 	double lw_scale = 1.;
 	LOGPEN cur_penstruct;		/* current pen settings */
 
@@ -2713,7 +2715,7 @@ drawgraph(LPGW lpgw, HDC hdc, LPRECT rect)
 			 * that linewidth is exactly 1 iff it's in default
 			 * state */
 			line_width = curptr->x == 100 ? 1 : (curptr->x / 100.0);
-			line_width *= lpgw->linewidth * lw_scale;
+			line_width *= lpgw->linewidth * lw_scale * lpgw->scale;
 			/* invalidate point symbol cache */
 			last_symbol = W_invalid_pointtype;
 			break;

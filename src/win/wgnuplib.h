@@ -394,6 +394,7 @@ typedef struct tagGW {
 
 	/* fonts */
 	double	fontscale;	/* scale factor for font sizes */
+	double	scale;		/* global element scale (fonts, lines, points, tics) */
 	TCHAR	deffontname[MAXFONTNAME]; /* default font name */
 	int	deffontsize;	/* default font size */
 	TCHAR	fontname[MAXFONTNAME];	/* current font name */

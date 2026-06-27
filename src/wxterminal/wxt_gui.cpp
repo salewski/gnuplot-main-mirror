@@ -2303,13 +2303,13 @@ int wxt_set_font (const char *font)
 	/* Reset the term variables (hchar, vchar, h_tic, v_tic)
 	 * so that the core code can use them in subsequent plot commands.
 	 */
-	gp_cairo_set_font(wxt_current_plot, fontname, fontsize * wxt_set_fontscale);
+	gp_cairo_set_font(wxt_current_plot, fontname, fontsize * wxt_set_fontscale * wxt_scale);
 	gp_cairo_set_termvar(wxt_current_plot, &(term->v_char), &(term->h_char));
 
 	/* Push the equivalent command onto the wxt display list */
 	temp_command.string = new char[strlen(fontname)+1];
 	strcpy(temp_command.string, fontname);
-	temp_command.double_value = fontsize * wxt_set_fontscale;
+	temp_command.double_value = fontsize * wxt_set_fontscale * wxt_scale;
 	wxt_command_push(temp_command);
 
 	/* Enhanced text processing needs to know the new font also */
@@ -2370,7 +2370,7 @@ void wxt_pointsize(double ptsize)
 
 	gp_command temp_command;
 	temp_command.command = command_pointsize;
-	temp_command.double_value = ptsize;
+	temp_command.double_value = ptsize * wxt_scale;
 
 	wxt_command_push(temp_command);
 }
@@ -2383,7 +2383,7 @@ void wxt_linewidth(double lw)
 	gp_command temp_command;
 
 	temp_command.command = command_linewidth;
-	temp_command.double_value = lw * wxt_lw;
+	temp_command.double_value = lw * wxt_lw * wxt_scale;
 
 	wxt_command_push(temp_command);
 }

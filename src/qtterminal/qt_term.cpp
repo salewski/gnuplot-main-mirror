@@ -182,6 +182,7 @@ static int  qt_optionHeight   = 480;
 static double qt_optionFontSize = 10.0;
 static double qt_optionDashLength = 1.0;
 static double qt_optionLineWidth = 1.0;
+static double qt_optionScale     = 1.0;	// global element-size multiplier (fonts, lines, points, tics)
 
 static int qt_optionctrlq = -1;	         // tristate -1 = not set 0 = false 1 = true
 static int qt_optionrounded = -1;	 // tristate -1 = not set 0 = false 1 = true
@@ -509,9 +510,9 @@ void qt_init()
 // Send a "Set font" event to the GUI, and wait for the font metrics answer
 void qt_sendFont()
 {
-	qt->out << GESetFont << qt->currentFontName << qt->currentFontSize;
+	qt->out << GESetFont << qt->currentFontName << qt->currentFontSize * qt_optionScale;
 
-	QPair<QString, double> currentFont(qt->currentFontName, qt->currentFontSize);
+	QPair<QString, double> currentFont(qt->currentFontName, qt->currentFontSize * qt_optionScale);
 	quint32 requestId;
 
 	// The font has not changed
@@ -835,7 +836,7 @@ void qt_put_text(unsigned int x, unsigned int y, const char* string)
 	// closing brace in the string. We increment past it (else we get stuck
 	// in an infinite loop) and try again.
 	while (*(string = enhanced_recursion((char*)string, TRUE, qt->currentFontName.toUtf8().data(),
-			qt->currentFontSize, 0.0, TRUE, TRUE, 0)))
+			qt->currentFontSize * qt_optionScale, 0.0, TRUE, TRUE, 0)))
 	{
 		qt_enhanced_flush();
 		enh_err_check(string); // we can only get here if *str == '}'
@@ -963,12 +964,12 @@ void qt_point(unsigned int x, unsigned int y, int pointstyle)
 void qt_pointsize(double ptsize)
 {
 	if (ptsize < 0.) ptsize = 1.; // same behaviour as x11 terminal
-	qt->out << GEPointSize << ptsize;
+	qt->out << GEPointSize << ptsize * qt_optionScale;
 }
 
 void qt_linewidth(double lw)
 {
-	qt->out << GELineWidth << lw * qt_optionLineWidth;
+	qt->out << GELineWidth << lw * qt_optionLineWidth * qt_optionScale;
 }
 
 int qt_text_angle(float angle)
@@ -1410,6 +1411,7 @@ enum QT_id {
 	QT_DASHLENGTH,
 	QT_SOLID,
 	QT_LINEWIDTH,
+	QT_SCALE,
 	QT_OTHER,
 	QT_ROUNDED,
 	QT_NOROUNDED,
@@ -1446,6 +1448,7 @@ static struct gen_table qt_opts[] = {
 	{"solid",       QT_SOLID},
 	{"line$width",  QT_LINEWIDTH},
 	{"lw",          QT_LINEWIDTH},
+	{"scale",       QT_SCALE},
 	{NULL,          QT_OTHER}
 };
 
@@ -1469,6 +1472,7 @@ void qt_options()
 	bool set_dash = false;
 	bool set_dashlength = false;
 	bool set_linewidth = false;
+	bool set_scale = false;
 	bool set_rounded = false;
 	bool set_antialias = false;
 	bool set_replotonresize = false;
@@ -1618,6 +1622,12 @@ void qt_options()
 			SETCHECKDUP(set_linewidth);
 			qt_optionLineWidth = real_expression();
 			break;
+		case QT_SCALE:
+			SETCHECKDUP(set_scale);
+			qt_optionScale = real_expression();
+			if (qt_optionScale <= 0)
+				qt_optionScale = 1.0;
+			break;
 		case QT_OTHER:
 		default:
 			qt_optionWindowId = int_expression();
@@ -1670,6 +1680,7 @@ void qt_options()
 
 	if (set_enhanced) termOptions += qt_optionEnhanced ? " enhanced" : " noenhanced";
 	if (set_linewidth) termOptions += " linewidth " + QString::number(qt_optionLineWidth);
+	if (set_scale) termOptions += " scale " + QString::number(qt_optionScale);
 	if (set_dashlength) termOptions += " dashlength " + QString::number(qt_optionDashLength);
 	if (set_widget)   termOptions += " widget \"" + qt_option->Widget + '"';
 	if (set_persist)  termOptions += qt_optionPersist ? " persist" : " nopersist";
