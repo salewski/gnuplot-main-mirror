@@ -476,7 +476,7 @@ D viridis 1
 
 #start
 #b Certain saved commands that would be problematic during replay
-## are not reexecuted.  This include `reset`, `pause`, and the definition
+## are not reexecuted.  These include `reset`, `pause`, and the definition
 ## of new data blocks.
 #b The saved per-panel data is not sufficient to interpret non-linear
 ## axis mappings. The plot should display correctly but mouse tracking
@@ -485,6 +485,8 @@ D viridis 1
 ## If the multiplot contains more than 16 panels the additional panels will
 ## display correctly but are not mouseable.
 ## This limit may be removed in the future.
+#b Toggle plot on/off from the command line does not work for plots
+## in a multiplot.
 #end
 
 3 New terminals and terminal options
@@ -723,24 +725,24 @@ D epi_data 1
 #b New gprintf format specifiers %C and %Ci to output complex values.
 ## See `gprintf complex` and `imaginary_i`. (in 6.0.4)
 #b The program offers predefined variables I, Inf, and NaN (in 6.0.4)
-#b "linestyle variable"
-#b pm3d coloring for 3D polygons (e.g. Delaunay tessellation of surfaces).
-## See `delaunay`.
-#b Alternatives to gdlib for handling image files as data
-#b Deprecation of the "sample" keyword
 #b New numerical operation "prod" (cumulative product). See `product`. (in 6.0.5)
 #TeX \newline
 ## Example:     N! can be expressed as prod [i=1:N] i 
-#b New category of graphical objects called "marks" that allow definition
-## of complex symbols used in plots.  See `marks`.
 #b See `escape sequences`.
 ## Unicode escape sequences are accepted in both "enhanced" and "noenhanced" text.
 ## Unicode escape sequences are expanded during substring evaluation.
 ## Octal escape sequences are required to contain exactly three digits. (in 6.0.5)
-#b Named palette "magma" from the viridis family of palettes
 #b Multiplot mousing.  Mouse coordinate readout is provided for all panels of
 ## a multiplot.  Pan/zoom/rotate mouse operations can be applied to any panel.
-## See `new multiplots`.
+## See `new multiplots`. (in 6.0.5)
+#b pm3d coloring for 3D polygons (e.g. Delaunay tessellation of surfaces).
+## See `delaunay`.
+#b Alternatives to gdlib for handling image files as data
+#b "linestyle variable"
+#b Named palette "magma" from the viridis family of palettes
+#b Deprecation of the "sample" keyword
+#b New category of graphical objects called "marks" that allow definition
+## of complex symbols used in plots.  See `marks`.
 #end
 
 2 Demos and Online Examples
@@ -19187,6 +19189,7 @@ Ffigure_walls
        current_time = system("date")
 
 2 show
+?
  Most `set` commands have a corresponding show command with no special options.
  For example
       show linetype 3
