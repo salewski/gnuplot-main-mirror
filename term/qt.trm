@@ -154,6 +154,11 @@ START_HELP(qt)
 " smaller annotation relative to a fixed canvas. The default is 1.0; values",
 " must be greater than zero. It may also be changed with `set termoption scale`.",
 "",
+" The terminal configuration dialog contains a `Change terminal scale on resize`",
+" checkbox. When it is enabled, dragging the window to a new size multiplies the",
+" current `scale` factor by the corresponding change in window size (e.g.",
+" doubling the window size doubles the scale).",
+"",
 #if (QTVER == 4)
 " The Qt rendering speed is affected strongly by the rendering mode used.",
 " In Qt version 4 this can be controlled by the environmental",

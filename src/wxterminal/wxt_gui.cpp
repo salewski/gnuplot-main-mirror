@@ -93,6 +93,7 @@
 /* #define DEBUG */
 
 #include "wxt_gui.h"
+#include <cmath>
 
 /* frame icon composed of three icons of different resolutions */
 #include "bitmaps/xpm/icon16x16.xpm"
@@ -163,6 +164,13 @@ int wxt_max_anchors = 0;
 TBOOLEAN pending_href = FALSE;
 const char *wxt_display_hypertext = NULL;
 wxtAnchorPoint wxt_display_anchor = {0,0,0};
+
+/* When true (the default), resizing the plot window rescales the whole plot to
+ * fit the new window, and multiplies the global scale factor (wxt_scale) by the
+ * change in window size so that the adjustment persists across 'replot'. When
+ * false, resizing does not rescale the plot elements; the plot is instead
+ * replotted at native element size to fill the new window. */
+bool wxt_scale_on_resize = true;
 char * wxt_hypertext_fontname = NULL;
 double wxt_hypertext_fontsize = 10;
 int    wxt_hypertext_fontstyle = 10;
@@ -862,7 +870,11 @@ void wxtFrame::OnSize( wxSizeEvent& event )
 	/* Note: On some platforms OnSize() might get called before
 	 * settings have been initialized in wxt_init().
 	 */
-	if (wxt_redraw == yes && term_initialised)
+	/* Replot when replotonresize is set, or when "scale on resize" is off so
+	 * that the plot is re-rendered at native element size to fill the new
+	 * window (matching the qt terminal). When "scale on resize" is on, the
+	 * panel stretches the current rendering for smooth live feedback instead. */
+	if ((wxt_redraw == yes || !wxt_scale_on_resize) && term_initialised)
 		wxt_exec_event(GE_replot, 0, 0, 0 , 0, this->GetId());
 }
 
@@ -1143,8 +1155,35 @@ void wxtPanel::OnSize( wxSizeEvent& event )
 	if (plot.xmax == 0 || plot.ymax == 0)
 		return;
 
+	/* Capture the previous device size before it is overwritten below. */
+	int old_device_xmax = plot.device_xmax;
+	int old_device_ymax = plot.device_ymax;
+
 	/* update window size, and scaling variables */
 	GetSize(&(plot.device_xmax),&(plot.device_ymax));
+
+	if (!wxt_scale_on_resize) {
+		/* "Scale on resize" is off: do not rescale the plot elements.
+		 * Render at native size; wxtFrame::OnSize triggers a replot so the
+		 * plot fills the new window (like the qt terminal). */
+		plot.xscale = 1.0;
+		plot.yscale = 1.0;
+		wxt_cairo_create_context();
+		wxt_cairo_refresh();
+		return;
+	}
+
+	/* "Scale on resize" is on (default): multiply the persistent global scale
+	 * factor by the change in window size (geometric mean of the width and
+	 * height ratios) so that the adjustment survives a later 'replot'. */
+	if (old_device_xmax > 0 && old_device_ymax > 0
+	&&  plot.device_xmax > 0 && plot.device_ymax > 0) {
+		double ratio = sqrt(
+		    ((double) plot.device_xmax / (double) old_device_xmax)
+		  * ((double) plot.device_ymax / (double) old_device_ymax));
+		if (ratio > 0.)
+			wxt_scale *= ratio;
+	}
 
 	double new_xscale, new_yscale;
 
@@ -1631,6 +1670,7 @@ void wxtConfigDialog::OnButton( wxCommandEvent& event )
 		wxt_ctrl = ctrl_setting?yes:no;
 		wxt_toggle = toggle_setting?yes:no;
 		wxt_redraw = redraw_setting?yes:no;
+		wxt_scale_on_resize = scaleonresize_setting;
 
 		switch (rendering_setting) {
 		case 0 :
@@ -1663,6 +1703,8 @@ void wxtConfigDialog::OnButton( wxCommandEvent& event )
 			wxLogError(wxT("Cannot write toggle"));
 		if (!pConfig->Write(wxT("redraw"), redraw_setting))
 			wxLogError(wxT("Cannot write redraw_setting"));
+		if (!pConfig->Write(wxT("scaleonresize"), scaleonresize_setting))
+			wxLogError(wxT("Cannot write scaleonresize_setting"));
 		if (!pConfig->Write(wxT("rendering"), rendering_setting))
 			wxLogError(wxT("Cannot write rendering_setting"));
 		if (!pConfig->Write(wxT("hinting"), hinting_setting))
@@ -1695,6 +1737,7 @@ wxtConfigDialog::wxtConfigDialog(wxWindow* parent)
 	pConfig->Read(wxT("ctrl"),&ctrl_setting);
 	pConfig->Read(wxT("toggle"),&toggle_setting);
 	pConfig->Read(wxT("redraw"),&redraw_setting);
+	pConfig->Read(wxT("scaleonresize"),&scaleonresize_setting);
 	pConfig->Read(wxT("rendering"),&rendering_setting);
 	pConfig->Read(wxT("hinting"),&hinting_setting);
 
@@ -1715,6 +1758,10 @@ wxtConfigDialog::wxtConfigDialog(wxWindow* parent)
 	wxCheckBox *check5 = new wxCheckBox (this, wxID_ANY,
 		wxT("Redraw continuously as plot is resized"),
 		wxDefaultPosition, wxDefaultSize, 0, wxGenericValidator(&redraw_setting));
+
+	wxCheckBox *check6 = new wxCheckBox (this, wxID_ANY,
+		wxT("Change terminal scale on resize"),
+		wxDefaultPosition, wxDefaultSize, 0, wxGenericValidator(&scaleonresize_setting));
 
 	wxString choices[3];
 	choices[0] = wxT("No antialiasing");
@@ -1762,6 +1809,7 @@ wxtConfigDialog::wxtConfigDialog(wxWindow* parent)
 	vsizer->Add(check3,wxSizerFlags().Align(0).Expand().Border(wxALL));
 	vsizer->Add(check4,wxSizerFlags().Align(0).Expand().Border(wxALL));
 	vsizer->Add(check5,wxSizerFlags().Align(0).Expand().Border(wxALL));
+	vsizer->Add(check6,wxSizerFlags().Align(0).Expand().Border(wxALL));
 	vsizer->Add(box_sizer2,wxSizerFlags().Align(0).Expand().Border(wxALL));
 	/*vsizer->Add(CreateButtonSizer(wxOK|wxCANCEL),wxSizerFlags().Align(0).Expand().Border(wxALL));*/
 	vsizer->Add(hsizer,wxSizerFlags().Align(0).Expand().Border(wxALL));
@@ -1881,6 +1929,7 @@ void wxt_init()
 	bool ctrl_setting;
 	bool toggle_setting;
 	bool redraw_setting;
+	bool scaleonresize_setting;
 	int rendering_setting;
 	int hinting_setting;
 
@@ -1918,6 +1967,12 @@ void wxt_init()
 	}
 	if (wxt_redraw==UNSET)
 		wxt_redraw = redraw_setting?yes:no;
+
+	if (!pConfig->Read(wxT("scaleonresize"), &scaleonresize_setting)) {
+		pConfig->Write(wxT("scaleonresize"), wxt_scale_on_resize);
+		scaleonresize_setting = wxt_scale_on_resize;
+	}
+	wxt_scale_on_resize = scaleonresize_setting;
 
 	if (!pConfig->Read(wxT("rendering"), &rendering_setting)) {
 		pConfig->Write(wxT("rendering"), 2);

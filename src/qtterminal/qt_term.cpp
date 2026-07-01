@@ -51,6 +51,7 @@
 #include <QtCore>
 #include <QtGui>
 #include <QtNetwork>
+#include <cmath>
 
 extern "C" {
 	#include "plot.h"      // for interactive
@@ -427,7 +428,17 @@ bool qt_processTermEvent(gp_event_t* event)
 			}
 			return false;
 		}
-		// This is a resize event
+		// This is a resize event.
+		// If the toolbox "scale on resize" toggle is active, the GUI sets
+		// par1 > 0 to ask that the global scale factor track the change in
+		// window size, using the geometric mean of the width/height ratios.
+		// (e.g. dragging the window to twice the size multiplies scale by ~2.)
+		if ((event->par1 > 0) && (qt_setWidth > 0) && (qt_setHeight > 0)) {
+			double ratio = std::sqrt((double(event->mx) / double(qt_setWidth))
+			                       * (double(event->my) / double(qt_setHeight)));
+			if (ratio > 0.)
+				qt_optionScale *= ratio;
+		}
 		qt_setSize   = true;
 		qt_setWidth  = event->mx;
 		qt_setHeight = event->my;
