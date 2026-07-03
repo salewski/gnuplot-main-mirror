@@ -258,9 +258,9 @@ void QtGnuplotWidget::resizeEvent(QResizeEvent* event)
 		// Show immediate smooth feedback by stretching the current rendering
 		// to fit the new window.
 		m_view->fitInView(m_scene->sceneRect(), Qt::KeepAspectRatio);
-		// If replot-on-resize is enabled, defer the (expensive) replot until
-		// resizing pauses so that interactive resizing stays smooth.
-		if (m_replotOnResize && isActive())
+		// If replot-on-resize or scale-on-resize is enabled, defer the follow-up
+		// action until resizing pauses so that interactive resizing stays smooth.
+		if ((m_replotOnResize || m_scaleOnResize) && isActive())
 			m_resizeTimer->start();
 	}
 
@@ -269,8 +269,13 @@ void QtGnuplotWidget::resizeEvent(QResizeEvent* event)
 
 void QtGnuplotWidget::deferredReplot()
 {
-	// Called once interactive resizing has paused (see resizeEvent): now issue
-	// the actual replot so the plot is re-rendered at the new size.
+	// Called once interactive resizing has paused (see resizeEvent).
+	// If scale-on-resize is active, refresh the core's cached term_options so
+	// that 'show terminal' and 'save' reflect the new global scale factor.
+	if (m_scaleOnResize && isActive())
+		m_eventHandler->postTermEvent(GE_scale, 0, 0, 0, 0, this);
+	// If replot-on-resize is active, now issue the actual replot so the plot
+	// is re-rendered at the new size.
 	if (m_replotOnResize && isActive())
 		m_eventHandler->postTermEvent(GE_replot, 0, 0, 0, 0, this);
 }

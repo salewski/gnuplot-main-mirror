@@ -1205,6 +1205,14 @@ void wxtPanel::OnSize( wxSizeEvent& event )
 	wxt_cairo_create_context();
 	/* redraw the plot with the new scaling */
 	wxt_cairo_refresh();
+
+#ifdef USE_MOUSE
+	/* Push the updated global scale factor through the core so that the cached
+	 * term_options string (used by 'show terminal' and 'save') stays in sync
+	 * with the live value. */
+	if (term_initialised)
+		wxt_exec_event(GE_scale, 0, 0, 0, 0, this->GetId());
+#endif
 }
 
 #ifdef USE_MOUSE
@@ -3629,6 +3637,17 @@ JMP_BUF *wxt_env = NULL;
 
 #ifdef USE_MOUSE
 
+/* A resize with "scale on resize" active has changed the global scale factor.
+ * Push the new value through the core (set termoption scale) so that the cached
+ * term_options string (used by 'show terminal' and 'save') stays in sync with
+ * the live value used for drawing. */
+static void wxt_refresh_scale_option()
+{
+	char cmd[64];
+	snprintf(cmd, sizeof(cmd), "set termoption scale %g", wxt_scale);
+	do_string(cmd);
+}
+
 /* process one event, returns true if it ends the pause */
 bool wxt_process_one_event(struct gp_event_t *event)
 {
@@ -3652,13 +3671,19 @@ bool wxt_process_one_event(struct gp_event_t *event)
 	}
 	wxt_event_processing = TRUE;
 
-	do_event( event );
+	if (event->type == GE_scale)
+		wxt_refresh_scale_option();
+	else
+		do_event( event );
 
 	/* Cancel exception handling */
 	wxt_event_processing = FALSE;
 	wxt_env = NULL;
 #else
-	do_event( event );
+	if (event->type == GE_scale)
+		wxt_refresh_scale_option();
+	else
+		do_event( event );
 #endif
 
 	if (event->type == GE_buttonrelease && (paused_for_mouse & PAUSE_CLICK)) {

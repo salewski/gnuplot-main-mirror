@@ -413,6 +413,17 @@ bool qt_processTermEvent(gp_event_t* event)
 	// remember initial state (the original gets cleared by do_event())
 	TBOOLEAN was_paused_for_mouse = paused_for_mouse;
 
+	// A resize with "scale on resize" active has settled: push the new global
+	// scale factor through the core (set termoption scale) so that the cached
+	// term_options string (used by 'show terminal' and 'save') stays in sync
+	// with the live value used for drawing.
+	if (event->type == GE_scale)
+	{
+		QString cmd = "set termoption scale " + QString::number(qt_optionScale);
+		do_string(cmd.toUtf8().constData());
+		return false;
+	}
+
 	// Intercepts resize event
 	if (event->type == GE_fontprops)
 	{
