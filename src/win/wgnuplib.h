@@ -358,6 +358,7 @@ typedef struct tagGW {
 	BOOL	antialiasing;	/* anti-aliasing? */
 	BOOL	polyaa;		/* anti-aliasing for polygons ? */
 	BOOL	fastrotation;	/* rotate without anti-aliasing? */
+	BOOL	scale_on_resize;	/* adjust global scale factor when the window is resized? */
 	COLORREF background;	/* background color */
 
 	/* plot properties */

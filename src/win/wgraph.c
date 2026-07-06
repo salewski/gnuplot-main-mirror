@@ -58,6 +58,7 @@
 #include <commctrl.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include <direct.h>           /* for _chdir */
 #include <tchar.h>
 #include <wchar.h>
@@ -384,6 +385,7 @@ GraphInitStruct(LPGW lpgw)
 		lpgw->linewidth = 1.;
 		lpgw->pointscale = 1.;
 		lpgw->scale = 1.;
+		lpgw->scale_on_resize = FALSE;
 		lpgw->color = TRUE;
 		lpgw->dashed = FALSE;
 		lpgw->IniSection = TEXT("WGNUPLOT");
@@ -586,6 +588,8 @@ GraphInit(LPGW lpgw)
 		M_GRAPH_TO_TOP, TEXT("Bring to &Top"));
 	AppendMenu(lpgw->hPopMenu, MF_STRING | (lpgw->color ? MF_CHECKED : MF_UNCHECKED),
 		M_COLOR, TEXT("C&olor"));
+	AppendMenu(lpgw->hPopMenu, MF_STRING | (lpgw->scale_on_resize ? MF_CHECKED : MF_UNCHECKED),
+		M_SCALE_ON_RESIZE, TEXT("Change scale on &resize"));
 	AppendMenu(lpgw->hPopMenu, MF_SEPARATOR, 0, NULL);
 #ifdef USE_WINGDI
 	AppendMenu(lpgw->hPopMenu, MF_STRING | (lpgw->gdiplus ? MF_CHECKED : MF_UNCHECKED),
@@ -3562,6 +3566,8 @@ WriteGraphIni(LPGW lpgw)
 	WritePrivateProfileString(section, TEXT("GraphColor"), profile, file);
 	wsprintf(profile, TEXT("%d"), lpgw->graphtotop);
 	WritePrivateProfileString(section, TEXT("GraphToTop"), profile, file);
+	wsprintf(profile, TEXT("%d"), lpgw->scale_on_resize);
+	WritePrivateProfileString(section, TEXT("GraphScaleOnResize"), profile, file);
 	wsprintf(profile, TEXT("%d"), lpgw->oversample);
 	WritePrivateProfileString(section, TEXT("GraphGDI+Oversampling"), profile, file);
 	wsprintf(profile, TEXT("%d"), lpgw->gdiplus);
@@ -3691,6 +3697,11 @@ ReadGraphIni(LPGW lpgw)
 		GetPrivateProfileString(section, TEXT("GraphToTop"), TEXT(""), profile, 80, file);
 	if ((p = GetInt(profile, (LPINT)&lpgw->graphtotop)) == NULL)
 		lpgw->graphtotop = TRUE;
+
+	if (bOKINI)
+		GetPrivateProfileString(section, TEXT("GraphScaleOnResize"), TEXT(""), profile, 80, file);
+	if ((p = GetInt(profile, (LPINT)&lpgw->scale_on_resize)) == NULL)
+		lpgw->scale_on_resize = FALSE;
 
 	if (bOKINI)
 		GetPrivateProfileString(section, TEXT("GraphGDI+Oversampling"), TEXT(""), profile, 80, file);
@@ -4253,6 +4264,8 @@ GraphUpdateMenu(LPGW lpgw)
 #endif
 	CheckMenuItem(lpgw->hPopMenu, M_GRAPH_TO_TOP, MF_BYCOMMAND |
 				(lpgw->graphtotop ? MF_CHECKED : MF_UNCHECKED));
+	CheckMenuItem(lpgw->hPopMenu, M_SCALE_ON_RESIZE, MF_BYCOMMAND |
+				(lpgw->scale_on_resize ? MF_CHECKED : MF_UNCHECKED));
 }
 
 
@@ -4292,6 +4305,27 @@ WndGraphParentProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				height = rect.bottom - rect.top;
 				/* Ignore minimize / de-minimize */
 				if ((lpgw->Size.x != width) || (lpgw->Size.y != height)) {
+					/* When "change scale on resize" is enabled, multiply the
+					 * global element scale factor by the change in window size
+					 * (geometric mean of the width and height ratios) so that
+					 * fonts, lines, points and tics grow or shrink with the
+					 * window and the adjustment survives a later 'replot'. */
+					if (lpgw->scale_on_resize
+					&&  (lpgw->Size.x != CW_USEDEFAULT)
+					&&  (lpgw->Size.x > 0) && (lpgw->Size.y > 0)
+					&&  (width > 0) && (height > 0)) {
+						double ratio = sqrt(
+						    ((double) width  / (double) lpgw->Size.x)
+						  * ((double) height / (double) lpgw->Size.y));
+						if (ratio > 0.) {
+							lpgw->scale *= ratio;
+							/* keep the cached term_options in sync so that
+							 * 'show terminal' and 'save' reflect the new scale */
+							if ((lpgw == graphwin) && (term != NULL)
+							&&  (strcmp(term->name, "windows") == 0))
+								WIN_update_options();
+						}
+					}
 					lpgw->Size.x = width;
 					lpgw->Size.y = height;
 					rebuild = TRUE;
@@ -4334,6 +4368,7 @@ WndGraphParentProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			switch (LOWORD(wParam)) {
 				case M_GRAPH_TO_TOP:
 				case M_COLOR:
+				case M_SCALE_ON_RESIZE:
 				case M_OVERSAMPLE:
 				case M_GDI:
 				case M_GDIPLUS:
@@ -4766,6 +4801,10 @@ WndGraphProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				case M_GRAPH_TO_TOP:
 					lpgw->graphtotop = !lpgw->graphtotop;
 					SendMessage(hwnd, WM_COMMAND, M_REBUILDTOOLS, 0L);
+					return 0;
+				case M_SCALE_ON_RESIZE:
+					lpgw->scale_on_resize = !lpgw->scale_on_resize;
+					GraphUpdateMenu(lpgw);
 					return 0;
 				case M_COLOR:
 					lpgw->color = !lpgw->color;
