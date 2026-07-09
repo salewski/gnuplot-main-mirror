@@ -2,11 +2,9 @@
 		===================================
 
 This is the fifth incremental release for gnuplot stable version 6.0.
-Apart from the usual minor bug fixes, it contains several new features
-and improvements back-ported from the development version.
-Builds for Windows now support ARM 64-bit architectures.
-Notably, support for mousing, replotting, and save/restore of multiplots
-is now fully functional.  
+It contains more than the usual number of new features and improvements
+back-ported from the development version.  Notably, support for mousing,
+replotting, and save/restore of multiplots is now fully functional.
 
 Changes in 6.0.5
 =================
@@ -54,8 +52,8 @@ Changed behaviour
 
 * "plot with labels" now accepts the "noenhanced" keyword
 
-Bug fixes (for complete list see NEWS)
---------------------------------------
+Bug fixes
+---------
 
 * qt: Slow font initialization on Windows			#Bug# 2316 2476
 * gd: Resolved long-standing font handling problems.		#Bug# 2819
@@ -89,7 +87,7 @@ KNOWN ISSUES
 - Recent TeXLive pdflatex binaries do not like some of the UTF-8 characters in
   the user manual.  The distribution includes a pre-built copy of gnuplot.pdf
   but if you want to rebuild it from the source in docs/gnuplot.doc please use
-  lualatex instead.  You can either replace the definition
+  lualatex or xelatex instead.  You can either replace the definition
   PDFLATEX=pdflatex with PDFLATEX=lualatex in the Makefile or provide this in
   the environment during configuration
 	PDFLATEX=lualatex ./configure
@@ -103,7 +101,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  20 June 2026
+Release Notes date:  9 July 2026
 
 
 			Changes in 6.0.4
