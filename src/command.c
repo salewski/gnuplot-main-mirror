@@ -1102,9 +1102,13 @@ is_array_assignment()
     if (!looks_OK)
 	return FALSE;
 
+    if (type_udv(c_token) != ARRAY) {
+	int_error(c_token,
+	    (type_udv(c_token) == STRING)
+		? "Substring replacement not supported"
+		: "Not a known array");
+    }
     udv = add_udv(c_token);
-    if (udv->udv_value.type != ARRAY)
-	int_error(c_token, "Not a known array");
 
     /* array reference count > 0 disallows an assignment operation that would clobber it */
     udv->udv_refcount++;
