@@ -379,10 +379,6 @@ TERM_PUBLIC void wxt_options()
 	}
 
 	if (set_size) {
-		char tmp_term_options[MAX_LINE_LEN+1] = "";
-		snprintf(tmp_term_options, sizeof(tmp_term_options),
-			  " size %d, %d", wxt_width, wxt_height);
-		strncat(term_options, tmp_term_options, sizeof(term_options)-strlen(term_options)-1);
 		wxt_update_size(wxt_window_number);
 	}
 
@@ -414,12 +410,6 @@ TERM_PUBLIC void wxt_options()
 		strncat(term_options, tmp_term_options, sizeof(term_options)-strlen(term_options)-1);
 	}
 
-	if (wxt_scale != 1.0) {
-		char tmp_term_options[MAX_LINE_LEN+1] = "";
-		snprintf(tmp_term_options,sizeof(tmp_term_options), " scale %g", wxt_scale);
-		strncat(term_options, tmp_term_options, sizeof(term_options)-strlen(term_options)-1);
-	}
-
 	if (set_capjoin)
 		strncat(term_options,
 			wxt_linecap == ROUNDED ? " rounded"
@@ -441,6 +431,19 @@ TERM_PUBLIC void wxt_options()
 		strncat(term_options,
 			(wxt_ctrl==yes) ? " ctrl" : " noctrl",
 			sizeof(term_options)-strlen(term_options)-1);
+
+	/* Always report size and scale.
+	 * These value may be changed interactively by mouse actions in the display window.
+	 */
+	if (1) {
+		char tmp_term_options[MAX_LINE_LEN+1] = "";
+		snprintf(tmp_term_options, sizeof(tmp_term_options),
+			  " size %d, %d", wxt_width, wxt_height);
+		strncat(term_options, tmp_term_options, sizeof(term_options)-strlen(term_options)-1);
+		snprintf(tmp_term_options,sizeof(tmp_term_options), " scale %g", wxt_scale);
+		strncat(term_options, tmp_term_options, sizeof(term_options)-strlen(term_options)-1);
+	}
+
 
 	if (set_close)
 		wxt_close_terminal_window(wxt_window_number);

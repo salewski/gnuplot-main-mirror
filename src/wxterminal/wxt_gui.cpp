@@ -1185,6 +1185,12 @@ void wxtPanel::OnSize( wxSizeEvent& event )
 			wxt_scale *= ratio;
 	}
 
+	/* Update the terminal window size in wxt.trm to match actual size
+	 * of the window on the screen if/when the user changes it.
+	 */
+	wxt_width = plot.device_xmax;
+	wxt_height = plot.device_ymax;
+
 	double new_xscale, new_yscale;
 
 	new_xscale = ((double) plot.device_xmax)*plot.oversampling_scale/((double) plot.xmax);

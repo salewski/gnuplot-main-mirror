@@ -1682,15 +1682,6 @@ void qt_options()
 		termOptions += " title \"" + qt_option->Title + '"';
 	}
 
-	if (set_size)
-	{
-		termOptions += " size " + QString::number(qt_optionWidth) + ", "
-		                        + QString::number(qt_optionHeight);
-		qt_setSize   = true;
-		qt_setWidth  = qt_optionWidth;
-		qt_setHeight = qt_optionHeight;
-	}
-
 	if (set_position)
 	{
 		termOptions += " position " + QString::number(qt_option->position.x()) + ", "
@@ -1702,7 +1693,6 @@ void qt_options()
 
 	if (set_enhanced) termOptions += qt_optionEnhanced ? " enhanced" : " noenhanced";
 	if (set_linewidth) termOptions += " linewidth " + QString::number(qt_optionLineWidth);
-	if (set_scale) termOptions += " scale " + QString::number(qt_optionScale);
 	if (set_dashlength) termOptions += " dashlength " + QString::number(qt_optionDashLength);
 	if (set_widget)   termOptions += " widget \"" + qt_option->Widget + '"';
 	if (set_persist)  termOptions += qt_optionPersist ? " persist" : " nopersist";
@@ -1728,6 +1718,18 @@ void qt_options()
 	if (set_replotonresize)
 	  qt_optionreplotonresize = qt_optionReplotOnResize;
 
+	// Always report size and scale.
+	// Place them last so that they are easy to overwrite later if they change.
+	// Note that these values track interactive changes to the display window.
+	if (set_size)
+	{
+		qt_setSize   = true;
+		qt_setWidth  = qt_optionWidth;
+		qt_setHeight = qt_optionHeight;
+	}
+	termOptions += " size " + QString::number(qt_setWidth) + ", "
+				+ QString::number(qt_setHeight);
+	termOptions += " scale " + QString::number(qt_optionScale);
 
 	/// @bug change Utf8 to local encoding
 	strncpy(term_options, termOptions.toUtf8().data(), MAX_LINE_LEN);
