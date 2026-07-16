@@ -1248,7 +1248,7 @@ f_power(union argument *arg)
 	    } else if (b.v.int_val > 0) {
 		/* deal with overflow by empirical check */
 		intgr_t tprev, t;
-		intgr_t tmag = labs(a.v.int_val);
+		intgr_t tmag = (a.v.int_val < 0) ? -a.v.int_val : a.v.int_val;
 		tprev = t = 1;
 		for (i = 0; i < b.v.int_val; i++) {
 		    tprev = t;
