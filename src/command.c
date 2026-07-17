@@ -1208,7 +1208,7 @@ bind_command()
 	char *first = gp_input_line + token[c_token].start_index;
 	int size = strcspn(first, " \";");
 	lhs = gp_alloc(size + 1, "bind_command->lhs");
-	safe_strncpy(lhs, first, size);
+	safe_strncpy(lhs, first, size+1);
 	FPRINTF((stderr,"Got bind unquoted lhs = \"%s\"\n",lhs));
 	while (gp_input_line + token[c_token].start_index < first+size)
 	    c_token++;
