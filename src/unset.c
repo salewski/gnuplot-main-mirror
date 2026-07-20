@@ -676,13 +676,11 @@ unset_command()
 	break;
     case S_INVALID:
     default:
-#ifdef WITH_CHI_SHAPES
 	if (almost_equals(c_token, "chi$_shapes")) {
 	    c_token++;
 	    reset_hulls(TRUE);
 	    break;
 	}
-#endif
 	int_error(c_token, "Unrecognized option.  See 'help unset'.");
 	break;
     }
