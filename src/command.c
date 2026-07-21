@@ -2298,7 +2298,7 @@ void
 print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
 {
     if (print_out && print_out != stderr && print_out != stdout) {
-#ifdef PIPES
+#if defined(PIPES)
 	if (print_out_name[0] == '|') {
 	    if (0 > pclose(print_out))
 		perror(print_out_name);
@@ -2324,7 +2324,7 @@ print_set_output(char *name, TBOOLEAN datablock, TBOOLEAN append_p)
     }
 
     if (name[0] == '|') {
-#ifdef PIPES
+#if defined(PIPES)
 	restrict_popen();
 	print_out = popen(name + 1, "w");
 	if (!print_out)
@@ -2773,12 +2773,12 @@ save_command()
 	c_token++;
     }
     if (save_file[0]=='|') {
-#ifdef PIPES
+#if defined(PIPES)
 	restrict_popen();
 	fp = popen(save_file+1,"w");
 	ispipe = TRUE;
 #else
-	int_error(c_token-1, "this copy of gnuplot does not support piped output");
+	int_error(c_token-1, "This copy of gnuplot does not support piped output");
 #endif
     } else {
     gp_expand_tilde(&save_file);
@@ -2824,7 +2824,7 @@ save_command()
     }
 
     if (stdout != fp) {
-#ifdef PIPES
+#if defined(PIPES)
 	if (save_file[0] == '|')
 	    (void) pclose(fp);
 	else

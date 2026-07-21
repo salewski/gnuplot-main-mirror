@@ -1439,15 +1439,18 @@ df_open(const char *cmd_filename, int max_using, struct curve_points *plot)
 
     } else
 #endif /* HAVE_FDOPEN */
-#if defined(PIPES)
+
     if (*df_filename == '<') {
+#if defined(PIPES)
 	restrict_popen();
 	if ((data_fp = popen(df_filename + 1, "r")) == (FILE *) NULL)
 	    os_error(name_token, "cannot create pipe for data");
 	else
 	    df_pipe_open = TRUE;
-    } else
+#else
+	int_error(NO_CARET, "This copy of gnuplot does not support piped input");
 #endif /* PIPES */
+    } else
 
     /* Special filenames '-' '+' '++' '$DATABLOCK' */
     if (*df_filename == '-' && strlen(df_filename) == 1) {

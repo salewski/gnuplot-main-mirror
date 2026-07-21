@@ -1840,11 +1840,18 @@ unset_surface()
 static void
 unset_table()
 {
-    if (table_outfile)
-	fclose(table_outfile);
+    if (table_outfile) {
+#ifdef PIPES
+	if (table_pipe)
+	    pclose(table_outfile);
+	else
+#endif
+	    fclose(table_outfile);
+    }
     table_outfile = NULL;
     table_var = NULL;
     table_mode = FALSE;
+    table_pipe = FALSE;
 }
 
 

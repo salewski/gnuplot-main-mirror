@@ -376,7 +376,7 @@ term_set_output(char *dest)
 	} else {
 #else	/* no PIPES */
 	if (*dest == '|')
-	    int_error(c_token-1, "this copy of gnuplot does not support piped output");
+	    int_error(c_token-1, "This copy of gnuplot does not support piped output");
 #endif /* PIPES */
 
 #ifdef _WIN32
@@ -477,7 +477,7 @@ term_initialise()
 # endif
 	{
 #if defined(_WIN32) && !defined(WGP_CONSOLE)
-#ifdef PIPES
+#if defined(PIPES)
 	    if (!output_pipe_open)
 #endif
 		if (outstr == NULL && !(term->flags & TERM_NO_OUTPUTFILE))

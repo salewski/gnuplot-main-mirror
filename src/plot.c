@@ -1077,7 +1077,7 @@ void
 restrict_popen()
 {
 #ifndef HAVE_POPEN
-    int_error(c_token-1, "this copy of gnuplot does not support popen()");
+    int_error(c_token-1, "This copy of gnuplot does not support popen()");
 #endif
     if (!successful_initialization)
 	int_error(NO_CARET,"Pipes and shell commands not permitted during initialization");

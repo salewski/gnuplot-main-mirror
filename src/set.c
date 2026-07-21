@@ -4900,12 +4900,18 @@ set_surface()
 static void
 set_table()
 {
-    char *tablefile;
+    char *tablefile = NULL;
     int filename_token = ++c_token;
     TBOOLEAN append = FALSE;
 
     if (table_outfile) {
-	fclose(table_outfile);
+#if defined(PIPES)
+	if (table_pipe) {
+	    pclose(table_outfile);
+	    table_pipe = FALSE;
+	} else
+#endif
+	    fclose(table_outfile);
 	table_outfile = NULL;
     }
     table_var = NULL;
@@ -4928,14 +4934,27 @@ set_table()
     } else if ((tablefile = try_to_get_string())) {  /* file name */
 	/* 'set table "foo"' creates a new output file */
 	/* 'set table "foo" append' writes to the end of an existing output file */
-	gp_expand_tilde(&tablefile);
 	if (equals(c_token, "append")) {
 	    c_token++;
 	    append = TRUE;
 	}
-	if (!(table_outfile = fopen(tablefile, (append ? "a" : "w"))))
-	   os_error(filename_token, "cannot open table output file");
+	if (*tablefile == '|') {
+#if defined(PIPES)
+	    restrict_popen();
+	    table_outfile = popen(tablefile+1, (append ? "a" : "w"));
+	    table_pipe = TRUE;
+#else
+	    free(tablefile);
+	    int_error(c_token-1, "This copy of gnuplot does not support piped output");
+#endif
+	} else {
+	    gp_expand_tilde(&tablefile);
+	    table_outfile = fopen(tablefile, (append ? "a" : "w"));
+	    table_pipe = FALSE;
+	}
 	free(tablefile);
+	if (!table_outfile)
+	   os_error(filename_token, "cannot open table output file");
     }
 
     if (almost_equals(c_token, "sep$arator")) {
