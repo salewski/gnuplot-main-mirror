@@ -2068,6 +2068,7 @@ reset_command()
 	if (in_multiplot)
 	    multiplot_end();
 	init_constants();
+	initialisation_state = 0;
 	init_session();
 	reset_mouse();
 	return;
