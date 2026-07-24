@@ -109,6 +109,7 @@ TBOOLEAN reading_from_dash=FALSE;	/* True if processing "-" as an input file */
 TBOOLEAN skip_gnuplotrc = FALSE;	/* skip system gnuplotrc and ~/.gnuplot */
 TBOOLEAN persist_cl = FALSE; 		/* --persist command line option */
 TBOOLEAN slow_font_startup = FALSE;	/* --slow command line option */
+int initialisation_state = 0;
 
 /* user home directory */
 static const char *user_homedir = NULL;
@@ -549,7 +550,7 @@ main(int argc_orig, char **argv)
 	    successful_initialization = TRUE;
 	    fprintf(stderr, "WARNING: Error during initialization\n");
 	    fprintf(stderr, "         Check initialization files and environment variables (e.g. GNUTERM)\n");
-	    change_term("unknown", 7);
+	    interactive = isatty(fileno(stdin));
 	    goto FALLBACK_ONCE_FROM_INIT_FAILURE;
 	}
 	if (interactive == FALSE)
@@ -784,14 +785,24 @@ init_session()
 	/* Make sure all variables start in the same state 'reset'
 	 * would set them to.
 	 */
-	reset_command();	/* FIXME: this does c_token++ */
-	load_rcfile(0);		/* System-wide gnuplotrc if configured */
+	reset_command();	/* NB: this does c_token++ */
+
+	/* If load_rcfile exits via int_error, we will end up right back here.
+	 * Do not allow this to cause an indefinite loop.
+	 */
+	if (initialisation_state <= 0) {
+	    initialisation_state = 1;
+	    load_rcfile(0);		/* System-wide gnuplotrc if configured */
+	}
 
 	/* After this point we allow pipes and system commands */
 	successful_initialization = TRUE;
 
 	load_rcfile(2);		/* ~/.gnuplot */
 	load_rcfile(3);		/* ~/.config/gnuplot/gnuplotrc */
+
+	/* Could be tested to check for error exit from (2) or (3) */
+	initialisation_state = 3;
 
 #if !defined(WIN32) && !defined(OS2) && !defined(MSDOS)
 	/* Save initial state variables to a file so that later
@@ -825,15 +836,15 @@ load_rcfile(int where)
 
     if (where == 0) {
 #ifdef GNUPLOT_SHARE_DIR
-# if defined(_WIN32) || defined(MSDOS) || defined(OS2)
+    #if defined(_WIN32) || defined(MSDOS) || defined(OS2)
 	rcfile = RelativePathToGnuplot(GNUPLOT_SHARE_DIR "\\gnuplotrc");
-# else
+    #else
 	rcfile = (char *) gp_alloc(strlen(GNUPLOT_SHARE_DIR) + 1 + strlen("gnuplotrc") + 1, "rcfile");
 	strcpy(rcfile, GNUPLOT_SHARE_DIR);
 	PATH_CONCAT(rcfile, "gnuplotrc");
-# endif
+    #endif
 	plotrc = fopen(rcfile, "r");
-#endif
+#endif /* GNUPLOT_SHARE_DIR */
 
     } else if (where == 2 && user_homedir) {
 	/* length of homedir + directory separator + length of file name + \0 */
