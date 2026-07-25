@@ -297,14 +297,15 @@ void WEBP_text()
 }
 
 /*
- * The forced re-initialization is so that plots on a transparent
- * background replace each other rather than superimposing.
+ * The forced re-initialization is so that successive plots within an
+ * animation with a transparent background replace each other rather
+ * than superimposing.
  */
 TERM_PUBLIC void
 WEBP_layer(t_termlayer layer)
 {
     if (layer == TERM_LAYER_END_TEXT) {
-	if (!in_multiplot)
+	if (webp_params.animate && !in_multiplot)
 	    term_force_init = TRUE;
     }
 }
