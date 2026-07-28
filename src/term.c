@@ -281,7 +281,7 @@ static size_units parse_term_size(float *xsize, float *ysize, size_units def_uni
 #include <fcntl.h>
 #endif
 
-#if defined(__WATCOMC__) || defined(__MSC__)
+#if defined(__WATCOMC__) || defined(_MSC_VER)
 # include <io.h>	/* for setmode() */
 #endif
 
