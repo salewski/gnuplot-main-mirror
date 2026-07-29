@@ -237,10 +237,31 @@ void WEBP_text()
 	uint32_t* src = (uint32_t*) data;
 	uint32_t* dst = argb_output;
 
-	for (ix=0; ix < width; ix++, src++, dst++) {
-	    *dst = (format != CAIRO_FORMAT_ARGB32)
-		 ? (*src | 0xFF000000)
-		 : *src;
+	if (format == CAIRO_FORMAT_ARGB32) {
+	    for (ix=0; ix < width; ix++, src++, dst++) {
+		*dst = *src;
+		if (cairo_params->transparent)  {
+		    /* Cairo creates ARGB images with RGB premultiplied by Alpha
+		     * but webp wants pure Alpha + pure RGB.
+		     */
+		    if ((*src & 0xff000000) != 0 && (*src & 0xff000000) != 0xff000000) {
+			double aa = 255. / (double)((*src >> 24) & 0xff);
+			unsigned int red   = (*src >> 16) & 0xff;
+			unsigned int green = (*src >>  8) & 0xff;
+			unsigned int blue  = (*src      ) & 0xff;
+			unsigned int ured    = (double)red   * aa;
+			unsigned int ugreen  = (double)green * aa;
+			unsigned int ublue   = (double)blue  * aa;
+			*dst = (*src & 0xff000000)
+			     | (ured > 255 ? 255 : ured) << 16
+			     | (ugreen > 255 ? 255 : ugreen) << 8
+			     | (ublue > 255 ? 255 : ublue);
+		    }
+		}
+	    }
+	} else { /* format != CAIRO_FORMAT_ARGB32 */
+	    for (ix=0; ix < width; ix++, src++, dst++)
+		*dst = *src | 0xFF000000;
 	}
 
 	data += stride;
