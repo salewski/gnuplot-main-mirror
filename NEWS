@@ -36,6 +36,9 @@ Changes in 6.0.5
 	 in program execution.
 * FIX	 A bare "help" command should yield something useful		Bug 2866
 * FIX	 qt: Slow font initialization on Windows			Bug 2316 2476
+* FIX	 webp: possible corruption of single-frame multiplots		Bug 2876
+* FIX	 webp: incorrect alpha composited to transparent background 	Bug 2878
+* FIX	 preserve blank lines when processing via "plot with table"	Bug 2874
 
 
 Changes in 6.0.4
