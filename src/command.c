@@ -842,13 +842,15 @@ undefine_command()
     }
 }
 
-
+/*
+ * Support for multiplot replay
+ */
 static void
 command()
 {
-    /* Support for multiplot replay */
     /* The basic goal is to save the commands used to create a multiplot.
-     * - Simple commands can be saved one command at a time after execution.
+     * - Commands not in a multiplot are executed without saving.
+     * - Simple commands are saved one command at a time after execution.
      * - Complex commands (if/else/while/do for) are read in until the final }
      *   is encounted and then saved as a single line by step_through_line().
      *   In this case the flag suppress_multiplot_save has been set so that the
@@ -856,18 +858,16 @@ command()
      * - load/call commands are treated analogously to if/while/do, except that
      *   save is suppressed by the test (lf_head->depth < in_multiplot).
      */
-    char *one_command = NULL;
-    if (!suppress_multiplot_save)
-    if (!multiplot_playback && !evaluate_inside_functionblock) {
-	    char *command_start = &gp_input_line[token[c_token].start_index];
-	    size_t len = strlen(command_start);
-	    for (int semicolon = c_token; semicolon <= num_tokens; semicolon++) {
-		if (equals(semicolon, ";")) {
-		    len = &gp_input_line[token[semicolon].start_index] - command_start;
-		    break;
-		}
-	    }
-	    one_command = strndup(command_start, len);
+    TBOOLEAN save_command = FALSE;
+    int command_token = c_token;
+    int command_length = 0;
+
+    if (in_multiplot || (equals(c_token, "set") && almost_equals(c_token+1, "multi$plot"))) {
+	if (!multiplot_playback && !suppress_multiplot_save
+	&&  !evaluate_inside_functionblock) {
+	    save_command = TRUE;
+	    command_length = get_command_length(c_token);
+	}
     }
 
     for (int i = 0; i < MAX_NUM_VAR; i++)
@@ -885,11 +885,15 @@ command()
     /* Support for multiplot replay */
     if (in_multiplot && !multiplot_playback && !suppress_multiplot_save
     &&  !evaluate_inside_functionblock) {
-	/* NB: should we also allow (lf_head->name == NULL)? */
-	if (!lf_head || lf_head->depth < in_multiplot)
-	    append_multiplot_line(one_command); 
+	if (!lf_head || lf_head->depth < in_multiplot) {
+	    if (save_command) {
+		char *command_start = &gp_input_line[token[command_token].start_index];
+		char *one_command = strndup(command_start, command_length);
+		append_multiplot_line(one_command);
+		free(one_command);
+	    }
+	}
     }
-    free(one_command);
 
     return;
 }
