@@ -1001,7 +1001,11 @@ restore_panel_axis_mappings(int p)
 
 #else /* USE_MOUSE */
 
-void set_panel_flag(unsigned int) {}
+void
+set_panel_flag(unsigned int flag)
+{
+    (void)flag; /* unused */
+}
 void restore_panel_axis_mappings() {}
 
 #endif /* USE_MOUSE */
