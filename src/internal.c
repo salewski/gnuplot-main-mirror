@@ -1060,7 +1060,6 @@ void
 f_mult(union argument *arg)
 {
     struct value a, b, result;
-    double float_product;
     intgr_t int_product;
 
     (void) arg;			/* avoid -Wunused warning */
@@ -1071,24 +1070,18 @@ f_mult(union argument *arg)
     case INTGR:
 	switch (b.type) {
 	case INTGR:
-	    /* The test for overflow is complicated because (double)
-	     * does not have enough precision to simply compare against
-	     * 64-bit INTGR_MAX.
-	     */
-	    int_product = a.v.int_val * b.v.int_val;
-	    float_product = (double)a.v.int_val * (double)b.v.int_val;
-	    if ((fabs(float_product) > 2*LARGEST_GUARANTEED_NONOVERFLOW)
-		|| ((fabs(float_product) > LARGEST_GUARANTEED_NONOVERFLOW)
-		    && (sgn(float_product) != sgn(int_product)))) {
+	    /* Check for integer overflow */
+	    if (gp_ckd_mul_intgr(&int_product, a.v.int_val, b.v.int_val)) {
+		double float_product = (double)a.v.int_val * (double)b.v.int_val;
 		if (overflow_handling == INT64_OVERFLOW_UNDEFINED)
 		    undefined = TRUE;
 		if (overflow_handling == INT64_OVERFLOW_NAN)
 		    float_product = not_a_number();
 		(void) Gcomplex(&result, float_product, 0.0);
-		break;
-	    }
+	    } else {
 	    /* The simple case (no overflow) */
 	    (void) Ginteger(&result, int_product);
+	    }
 	    break;
 	case CMPLX:
 	    (void) Gcomplex(&result, a.v.int_val *
