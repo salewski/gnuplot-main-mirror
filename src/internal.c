@@ -46,6 +46,7 @@
 #include "encoding.h"	/* for advance_one_utf8_char */
 #include "parse.h"	/* for string_result_only */
 #include "datafile.h"	/* for evaluate_inside_using */
+#include "overflow.h"	/* for gp_ckd_{add,sub,mul}_intgr() */
 
 #include <math.h>
 
@@ -1266,13 +1267,10 @@ f_power(union argument *arg)
 	    Ginteger(&result, 1);
 	} else if (b.v.int_val > 0) {
 	    /* deal with overflow by empirical check */
-	    intgr_t tprev, t;
+	    intgr_t t = 1;
 	    intgr_t tmag = llabs(a.v.int_val);
-	    tprev = t = 1;
 	    for (i = 0; i < b.v.int_val; i++) {
-		tprev = t;
-		t *= tmag;
-		if (t < tprev)
+		if (gp_ckd_mul_intgr(&t, t, tmag))
 		    goto integer_power_overflow;
 	    }
 	    if (a.v.int_val < 0) {
