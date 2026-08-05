@@ -156,6 +156,7 @@ static int expand_1level_macros(void);
 static void timed_pause(double sleep_time);
 
 static void check_for_multiplot_save(TBOOLEAN *interlock);
+static int get_command_length(int start_token);
 
 struct lexical_unit *token;
 int token_table_size;
@@ -3229,65 +3230,43 @@ changedir(char *path)
 #endif /* MSDOS etc. */
 }
 
-/* used by replot_command() */
+/* helper routine for replotrequest */
+static int
+get_command_length(int start_token)
+{
+    char *command_start = &gp_input_line[token[start_token].start_index];
+    size_t len = strlen(command_start);
+    for (int semicolon = start_token; semicolon <= num_tokens; semicolon++) {
+       if (equals(semicolon, ";")) {
+           len = &gp_input_line[token[semicolon].start_index] - command_start;
+           break;
+       }
+    }
+    return (int)len;
+}
+
 void
 replotrequest()
 {
-    /* do not store directly into the replot_line string until the
-     * new plot line has been successfully plotted. This way,
-     * if user makes a typo in a replot line, they do not have
-     * to start from scratch. The replot_line will be committed
-     * after do_plot has returned, whence we know all is well
-     */
-    if (END_OF_COMMAND) {
-	char *rest_args = &gp_input_line[token[c_token].start_index];
-	size_t replot_len = strlen(replot_line);
-	size_t rest_len = strlen(rest_args);
+    /* On entry c_token is just past the "replot" */
+    size_t replot_len = strlen(replot_line);
+    size_t rest_len = (END_OF_COMMAND) ? 0 : get_command_length(c_token);
+    char *expanded_command = malloc( replot_len + rest_len + 3);
 
-	/* preserve commands following 'replot ;' */
-	/* move rest of input line to the start
-	 * necessary because of realloc() in extend_input_line() */
-	memmove(gp_input_line,rest_args,rest_len+1);
-	/* reallocs if necessary */
-	while (gp_input_line_len < replot_len+rest_len+1)
-	    extend_input_line();
-	/* move old rest args off begin of input line to
-	 * make space for replot_line */
-	memmove(gp_input_line+replot_len,gp_input_line,rest_len+1);
-	/* copy previous plot command to start of input line */
-	memcpy(gp_input_line, replot_line, replot_len);
-    } else {
-	char *replot_args = NULL;	/* else m_capture will free it */
-	int last_token = num_tokens - 1;
-
-	/* length = length of old part + length of new part + ", " + \0 */
-	size_t newlen = strlen(replot_line) + token[last_token].start_index
-		      + token[last_token].length - token[c_token].start_index + 3;
-
-	m_capture(&replot_args, c_token, last_token);	/* might be empty */
-	while (gp_input_line_len < newlen)
-	    extend_input_line();
-	strcpy(gp_input_line, replot_line);
-	strcat(gp_input_line, ", ");
-	strcat(gp_input_line, replot_args);
-	free(replot_args);
+    strcpy(expanded_command, replot_line);
+    if (rest_len > 0) {
+	strcat(expanded_command, ", ");
+	strncat(expanded_command, &gp_input_line[token[c_token].start_index], rest_len);
     }
-    plot_token = 0;		/* whole line to be saved as replot line */
-    SET_REFRESH_OK(E_REFRESH_NOT_OK, 0);		/* start of replot will destroy existing data */
 
+    /* start of replot will destroy existing data */
+    SET_REFRESH_OK(E_REFRESH_NOT_OK, 0);
     screen_ok = FALSE;
-    num_tokens = scanner(&gp_input_line, &gp_input_line_len);
-    c_token = 1;	/* Skip the "plot" token */
 
-    if (almost_equals(0,"test")) {
-	c_token = 0;
-	test_command();
-    } else if (almost_equals(0,"s$plot"))
-	plot3drequest();
-    else
-	plotrequest();
+    do_string_and_free(expanded_command);
+    while (!END_OF_COMMAND)
+	c_token++;
 }
-
 
 /* Support for input, shell, and help for various systems */
 
