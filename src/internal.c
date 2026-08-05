@@ -452,14 +452,15 @@ f_prod(union argument *arg)
 	if (!integer_terms)
 	    continue;
 
-	/* So long as the individual terms are integral */
-	/* keep an integer product as well.		*/
+	/* So long as the individual terms are integral,
+	 * keep an integer product as well.
+	 * Check for integer overflow
+	 */
+	if (overflow_handling == INT64_OVERFLOW_IGNORE) {
 	llprod *= f_i.v.int_val;
-
-	/* Check for integer overflow */
-	if (overflow_handling == INT64_OVERFLOW_IGNORE)
 	    continue;
-	if (sgn(result.v.cmplx_val.real) != sgn(llprod))  {
+	}
+	if (gp_ckd_mul_intgr(&llprod, llprod, f_i.v.int_val)) {
 	    integer_terms = FALSE;
 	    if (overflow_handling == INT64_OVERFLOW_TO_FLOAT)
 		continue;
