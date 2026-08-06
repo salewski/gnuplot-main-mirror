@@ -495,6 +495,7 @@ void GraphRedraw(LPGW lpgw);
 void GraphModifyPlots(LPGW lpgw, unsigned int operations, int plotno);
 void win_close_terminal_window(LPGW lpgw);
 TBOOLEAN GraphHasWindow(LPGW lpgw);
+void GraphGetCanvasSize(LPGW lpgw, unsigned * width, unsigned * height);
 LPTSTR GraphDefaultFont(void);
 
 #ifdef USE_MOUSE

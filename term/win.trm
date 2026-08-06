@@ -659,18 +659,23 @@ WIN_update_options()
 		sprintf(&(term_options[strlen(term_options)]),
 			" pointscale %.1f", graphwin->pointscale);
 
-	if (graphwin->scale != 1)
-		sprintf(&(term_options[strlen(term_options)]),
-			" scale %g", graphwin->scale);
-
+	/* Always report the current size and scale.
+	 * These may have been changed interactively by resizing the window.
+	 * Place them last so that they are easy to overwrite later if they change.
+	 */
 	if (!graphwin->bDocked) {
-		if (graphwin->Canvas.x != 0)
+		unsigned width, height;
+
+		GraphGetCanvasSize(graphwin, &width, &height);
+		if (width != 0)
 			sprintf(&(term_options[strlen(term_options)]),
-				" size %li,%li", graphwin->Canvas.x, graphwin->Canvas.y);
+				" size %u,%u", width, height);
 		else if (graphwin->Size.x != CW_USEDEFAULT)
 			sprintf(&(term_options[strlen(term_options)]),
 				" wsize %li,%li", graphwin->Size.x, graphwin->Size.y);
 	}
+	sprintf(&(term_options[strlen(term_options)]),
+		" scale %g", graphwin->scale);
 }
 
 
@@ -1256,7 +1261,8 @@ START_HELP(windows)
 " lines, the size of text, or the size of the point symbols.",
 " `scale` globally scales all graph elements (fonts, lines, points, tic marks",
 " and derived margins) by the given factor.  It can also be used to shrink",
-" elements (factor < 1).  See also the `Change scale on resize` graph menu entry.",
+" elements (factor < 1).  The scale value given here is the starting value",
+" used by the 'Change scale on resize' option in the windows graph menu.",
 " `title` changes the title of the graph window.",
 " `size` defines the width and height of the window's drawing area in pixels,",
 " `wsize` defines the actual size of the window itself and `position` defines",

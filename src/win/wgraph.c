@@ -866,6 +866,23 @@ GraphHasWindow(LPGW lpgw)
 }
 
 
+/* Current size of the plot area. Falls back to the requested canvas size
+ * as long as there is no window on screen. */
+void
+GraphGetCanvasSize(LPGW lpgw, unsigned * width, unsigned * height)
+{
+	RECT rect;
+
+	if (GraphHasWindow(lpgw) && GetPlotRect(lpgw, &rect)) {
+		*width = rect.right - rect.left;
+		*height = rect.bottom - rect.top;
+	} else {
+		*width = lpgw->Canvas.x;
+		*height = lpgw->Canvas.y;
+	}
+}
+
+
 /* ================================== */
 
 /* Helper functions for bookkeeping of pens, brushes and fonts */
@@ -4317,14 +4334,8 @@ WndGraphParentProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 						double ratio = sqrt(
 						    ((double) width  / (double) lpgw->Size.x)
 						  * ((double) height / (double) lpgw->Size.y));
-						if (ratio > 0.) {
+						if (ratio > 0.)
 							lpgw->scale *= ratio;
-							/* keep the cached term_options in sync so that
-							 * 'show terminal' and 'save' reflect the new scale */
-							if ((lpgw == graphwin) && (term != NULL)
-							&&  (strcmp(term->name, "windows") == 0))
-								WIN_update_options();
-						}
 					}
 					lpgw->Size.x = width;
 					lpgw->Size.y = height;
@@ -4350,6 +4361,12 @@ WndGraphParentProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				InvalidateRect(lpgw->hGraph, &rect, 1);
 				UpdateWindow(lpgw->hGraph);
+
+				/* Keep the cached term_options in sync so that 'show terminal'
+				 * and 'save' report the current window size and scale. */
+				if ((lpgw == graphwin) && (term != NULL)
+				&&  (strcmp(term->name, "windows") == 0))
+					WIN_update_options();
 			}
 			// update internal variables
 			if (lpgw->Size.x == CW_USEDEFAULT) {
