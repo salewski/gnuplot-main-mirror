@@ -375,14 +375,15 @@ f_sum(union argument *arg)
 	if (!integer_terms)
 	    continue;
 
-	/* So long as the individual terms are integral */
-	/* keep an integer sum as well.			*/
+	/* So long as the individual terms are integral,
+	 * keep an integer sum as well.
+	 * Check for integer overflow
+	 */
+	if (overflow_handling == INT64_OVERFLOW_IGNORE) {
 	llsum += f_i.v.int_val;
-
-	/* Check for integer overflow */
-	if (overflow_handling == INT64_OVERFLOW_IGNORE)
 	    continue;
-	if (sgn(result.v.cmplx_val.real) != sgn(llsum))  {
+	}
+	if (gp_ckd_add_intgr(&llsum, llsum, f_i.v.int_val)) {
 	    integer_terms = FALSE;
 	    if (overflow_handling == INT64_OVERFLOW_TO_FLOAT)
 		continue;
@@ -929,7 +930,7 @@ void
 f_plus(union argument *arg)
 {
     struct value a, b, result;
-    double temp;
+    intgr_t int_sum;
 
     (void) arg;			/* avoid -Wunused warning */
     (void) pop(&b);
@@ -938,17 +939,19 @@ f_plus(union argument *arg)
     case INTGR:
 	switch (b.type) {
 	case INTGR:
-	    (void) Ginteger(&result, a.v.int_val +
-			    b.v.int_val);
 	    /* Check for overflow */
-	    if (overflow_handling == INT64_OVERFLOW_IGNORE)
+	    if (overflow_handling == INT64_OVERFLOW_IGNORE) {
+		int_sum = a.v.int_val + b.v.int_val;
+		(void) Ginteger(&result, int_sum);
 		break;
-	    temp = (double)(a.v.int_val) + (double)(b.v.int_val);
-	    if (sgn(temp) != sgn(result.v.int_val))
+	    }
+	    if (gp_ckd_add_intgr(&int_sum, a.v.int_val, b.v.int_val)) {
 		switch (overflow_handling) {
-		    case INT64_OVERFLOW_TO_FLOAT:
-			    Gcomplex(&result, temp, 0.0);
+		    case INT64_OVERFLOW_TO_FLOAT: {
+			double float_sum = (double)(a.v.int_val) + (double)(b.v.int_val);
+			Gcomplex(&result, float_sum, 0.0);
 			break;
+		    }
 		    case INT64_OVERFLOW_UNDEFINED:
 			undefined = TRUE;
 		    case INT64_OVERFLOW_NAN:
@@ -957,6 +960,10 @@ f_plus(union argument *arg)
 		    default:
 			break;
 		}
+	    } else {
+		/* The simple case (no overflow) */
+		(void) Ginteger(&result, int_sum);
+	    }
 	    break;
 	case CMPLX:
 	    (void) Gcomplex(&result, a.v.int_val +
@@ -995,7 +1002,7 @@ void
 f_minus(union argument *arg)
 {
     struct value a, b, result;
-    double temp;
+    intgr_t int_diff;
 
     (void) arg;			/* avoid -Wunused warning */
     (void) pop(&b);
@@ -1004,17 +1011,19 @@ f_minus(union argument *arg)
     case INTGR:
 	switch (b.type) {
 	case INTGR:
-	    (void) Ginteger(&result, a.v.int_val -
-			    b.v.int_val);
 	    /* Check for overflow */
-	    if (overflow_handling == INT64_OVERFLOW_IGNORE)
+	    if (overflow_handling == INT64_OVERFLOW_IGNORE) {
+		int_diff = a.v.int_val - b.v.int_val;
+		(void) Ginteger(&result, int_diff);
 		break;
-	    temp = (double)(a.v.int_val) - (double)(b.v.int_val);
-	    if (sgn(temp) != sgn(result.v.int_val))
+	    }
+	    if (gp_ckd_sub_intgr(&int_diff, a.v.int_val, b.v.int_val)) {
 		switch (overflow_handling) {
-		    case INT64_OVERFLOW_TO_FLOAT:
-			    Gcomplex(&result, temp, 0.0);
+		    case INT64_OVERFLOW_TO_FLOAT: {
+			double float_diff = (double)(a.v.int_val) - (double)(b.v.int_val);
+			Gcomplex(&result, float_diff, 0.0);
 			break;
+		    }
 		    case INT64_OVERFLOW_UNDEFINED:
 			undefined = TRUE;
 		    case INT64_OVERFLOW_NAN:
@@ -1023,6 +1032,10 @@ f_minus(union argument *arg)
 		    default:
 			break;
 		}
+	    } else {
+		/* The simple case (no overflow) */
+		(void) Ginteger(&result, int_diff);
+	    }
 	    break;
 	case CMPLX:
 	    (void) Gcomplex(&result, a.v.int_val -
