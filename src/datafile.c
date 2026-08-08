@@ -1471,6 +1471,8 @@ df_open(const char *cmd_filename, int max_using, struct curve_points *plot)
     } else if (df_filename[0] == '$') {
 	df_datablock = TRUE;
 	df_datablock_line = get_datablock(df_filename)->data;
+	if (df_datablock_line == NULL)
+	    int_error(NO_CARET,"no data in %s",df_filename);
 	/* Better safe than sorry. Check for inblock != outblock */
 	if (plot && table_var && table_var->udv_value.v.blockdata->data == df_datablock_line)
 	    int_error(NO_CARET,"input and output datablock are the same");
