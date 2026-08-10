@@ -2003,22 +2003,29 @@ local_command()
     struct udvt_entry *udv = NULL;
 
     c_token++;
+
+    /* The "local" attribute does nothing if encountered at the top level */
+    if (!lf_head || lf_head->depth == 0) {
+	if (equals(c_token,"array"))
+	    array_command();
+	else
+	    define();
+	return;
+    }
+
     if (equals(c_token,"array"))
 	array_token = c_token++;
 
-    /* Has no effect if encountered at the top level */
-    if (lf_head && lf_head->depth > 0) {
-	/* Define a new variable with this name
-	 * and locality equal to the current depth
-	 */
-	udv = add_udv_local(c_token, NULL, lf_head->depth);
+    /* Define a new variable with this name
+     * and locality equal to the current depth
+     */
+    udv = add_udv_local(c_token, NULL, lf_head->depth);
 
-	/* flag that at least some local variables will go out of scope on lf_pop */
-	lf_head->local_variables = TRUE;
-    }
+    /* flag that at least some local variables will go out of scope on lf_pop */
+    lf_head->local_variables = TRUE;
 
-    /* Create new local variable with this name */
     if (array_token) {
+	/* Create a new local array with this name */
 	c_token = array_token;
 	local_array_command(lf_head->depth);
 	if (udv && udv->udv_value.type == ARRAY) {
@@ -2026,6 +2033,7 @@ local_command()
 	    udv->udv_value.v.value_array[0].v.array_header.parent = udv;
 	}
     } else {
+	/* Create new local variable with this name */
 	define();
     }
 }
