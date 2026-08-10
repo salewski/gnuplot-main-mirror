@@ -1079,10 +1079,10 @@ AC_ARG_ENABLE(function-blocks,dnl
    )
 
 dnl Enable parsing of deprecated syntax
-dnl AC_ARG_ENABLE(backwards-compatibility,dnl
-dnl [  --enable-backwards-compatibility       enable deprecated syntax ],
+dnl AC_ARG_ENABLE(backward-compatibility,dnl
+dnl [  --enable-backward-compatibility       enable deprecated syntax ],
 dnl   [if test "$enableval" = yes; then
-dnl     AC_DEFINE(BACKWARDS_COMPATIBLE,1,
+dnl     AC_DEFINE(BACKWARD_COMPATIBLE,1,
 dnl                [ Define to allow use of certain deprecated syntax. ])
 dnl   fi])
 

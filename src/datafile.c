@@ -1458,9 +1458,7 @@ df_open(const char *cmd_filename, int max_using, struct curve_points *plot)
 	    int_error(1, "cannot use pseudofile '-' inside a function block");
 	plotted_data_from_stdin = TRUE;
 	volatile_data = TRUE;
-	data_fp = lf_top();
-	if (!data_fp)
-	    data_fp = stdin;
+	data_fp = (lf_head != NULL) ? lf_head->fp : stdin;
 	mixed_data_fp = TRUE;   /* don't close command file */
     } else if (!strcmp(df_filename,"+")) {
 	    df_pseudodata = 1;

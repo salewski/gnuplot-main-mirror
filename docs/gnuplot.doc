@@ -11096,13 +11096,6 @@ Ffigure_smooth_path
 ?reread
  [DEPRECATED in version 5.4]
 
- This command is deprecated in favor of explicit iteration.
- See `iterate`.
- The `reread` command causes execution from the current `gnuplot` input file,
- as specified by a `load` command, to immediately restart from the beginning
- of the file.  This essentially implements an endless loop of commands from the
- beginning of the file to the `reread` command.
- `reread` has no effect when reading commands from stdin.
 2 reset
 ?commands reset
 ?reset

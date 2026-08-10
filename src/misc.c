@@ -622,15 +622,6 @@ lf_push(FILE *fp, char *name, char *cmdline)
     lf_head = lf;
 }
 
-/* used for reread  vsnyder@math.jpl.nasa.gov */
-FILE *
-lf_top()
-{
-    if (lf_head == (LFS *) NULL)
-	return ((FILE *) NULL);
-    return (lf_head->fp);
-}
-
 /* Guard against deleting or overwriting a script we are running from */
 TBOOLEAN
 called_from(const char *name)
