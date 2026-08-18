@@ -1465,6 +1465,8 @@ set_contourfill(void)
 	    contourfill.nslices = 0;
 	    while (!END_OF_COMMAND && (N < MAX_ZSLICES)) {
 		zslice *slice = &contourfill.slices[N];
+		if (equals(c_token, ","))
+		    c_token++;
 		if (!equals(c_token++,"["))
 		    int_error(NO_CARET, errmsg);
 		slice->zlow = parse_one_range_limit(
@@ -1473,8 +1475,6 @@ set_contourfill(void)
 		slice->color.type = TC_RGB;
 		slice->color.lt = parse_color_name();
 		N++;
-		if (!equals(c_token++,","))
-		    break;
 	    }
 	    contourfill.nslices = N;
 	} else
