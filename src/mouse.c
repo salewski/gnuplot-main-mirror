@@ -418,7 +418,7 @@ mouse_from_saved_mapping(int pos, axis_mapping *map)
 	return NAN;
 
     /* Logscale is possible, but not general nonlinear */
-    if (map->nonlinear)
+    if (map->nonlinear && !map->link_primary)
 	return NAN;
 
     frac = (double)(pos - map->term_lower)

@@ -470,9 +470,9 @@ D viridis 1
 #b Certain saved commands that would be problematic during replay
 ## are not reexecuted.  These include `reset`, `pause`, and the definition
 ## of new data blocks.
-#b The saved per-panel data is not sufficient to interpret non-linear
+#b The saved per-panel data is not sufficient to interpret linked or non-linear
 ## axis mappings. The plot should display correctly but mouse tracking
-## does not report coordinates.
+## is limited to the primary (linear) axis of the paired axes.
 #b Mouse interaction tracks a maximum of 16 panels in a single multiplot.
 ## If the multiplot contains more than 16 panels the additional panels will
 ## display correctly but are not mouseable.
