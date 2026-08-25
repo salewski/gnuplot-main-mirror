@@ -1765,12 +1765,14 @@ link_command()
 	else
 	    int_error(c_token,"not a valid nonlinear axis");
 	primary_axis = get_shadow_axis(secondary_axis);
-	/* Trap attempt to set an already-linked axis to nonlinear */
-	/* This catches the sequence "set link y; set nonlinear y2" */
-	if (secondary_axis->linked_to_primary && secondary_axis->linked_to_primary->index > 0)
-	    int_error(NO_CARET,"must unlink axis before setting it to nonlinear");
-	if (secondary_axis->linked_to_secondary && secondary_axis->linked_to_secondary->index > 0)
-	    int_error(NO_CARET,"must unlink axis before setting it to nonlinear");
+	if (!equals(command_token-1, "unset")) {
+	    /* Trap attempt to set an already-linked axis to nonlinear */
+	    /* This catches the sequence "set link y; set nonlinear y2" */
+	    if (secondary_axis->linked_to_primary && secondary_axis->linked_to_primary->index > 0)
+		int_error(NO_CARET,"must unlink axis before setting it to nonlinear");
+	    if (secondary_axis->linked_to_secondary && secondary_axis->linked_to_secondary->index > 0)
+		int_error(NO_CARET,"must unlink axis before setting it to nonlinear");
+	}
 	/* Clear previous log status */
 	secondary_axis->log = FALSE;
 	secondary_axis->ticdef.logscaling = FALSE;
