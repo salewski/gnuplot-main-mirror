@@ -587,4 +587,14 @@ unsigned int sleep(unsigned int);
 
 double not_a_number(void);
 
+/* Support for reproducible output (https://reproducible-builds.org/specs/source-date-epoch/).
+ * gp_source_date_epoch() reports whether $SOURCE_DATE_EPOCH holds a usable
+ * decimal timestamp, and if so returns it via *when.
+ * gp_now_tm() returns the broken-down time that generated output should be
+ * stamped with: $SOURCE_DATE_EPOCH in UTC if that is set, otherwise the
+ * current time in the local timezone.
+ */
+TBOOLEAN gp_source_date_epoch(time_t *);
+struct tm *gp_now_tm(void);
+
 #endif /* STDFN_H */

@@ -1248,6 +1248,15 @@ C  need @ in table, so end and restart the table !
  built-in copy of those files or a default hardcoded path. You can use this
  variable to have the postscript terminal use custom prologue files rather
  than the default prologue files. See `postscript prologue`.
+
+ SOURCE_DATE_EPOCH, if set to a decimal number of seconds since the epoch,
+ is used in place of the current time wherever gnuplot stamps a date into
+ the output it generates: the creation date written by the postscript,
+ pdfcairo, metapost and ConTeXt terminals, the label drawn by
+ `set timestamp`, and the header of the fit log.  The date is then reported
+ in UTC rather than in the local timezone.  This makes it possible to
+ reproduce the output of a plot byte for byte at a later time; see
+ https://reproducible-builds.org/specs/source-date-epoch/
 2 Expressions
 ?expressions
 ?division
