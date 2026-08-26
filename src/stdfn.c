@@ -396,6 +396,52 @@ ms_snprintf(char *str, size_t size, const char * format, ...)
 #endif
 
 
+/* Support for reproducible output.
+ * If the environment variable SOURCE_DATE_EPOCH is set to a decimal number of
+ * seconds since the epoch, code that stamps a creation date into generated
+ * output uses that instead of the current time.  See
+ *     https://reproducible-builds.org/specs/source-date-epoch/
+ */
+TBOOLEAN
+gp_source_date_epoch(time_t *when)
+{
+    const char *source_date_epoch = getenv("SOURCE_DATE_EPOCH");
+    char *endptr;
+    long long epoch;
+
+    if (source_date_epoch == NULL || *source_date_epoch == '\0')
+	return FALSE;
+    errno = 0;
+    epoch = strtoll(source_date_epoch, &endptr, 10);
+    if (errno != 0 || endptr == source_date_epoch || *endptr != '\0')
+	return FALSE;
+    if ((long long)(time_t) epoch != epoch)	/* not representable as time_t */
+	return FALSE;
+    if (when != NULL)
+	*when = (time_t) epoch;
+    return TRUE;
+}
+
+/* Broken-down time to stamp into generated output.
+ * If SOURCE_DATE_EPOCH is in effect it is reported in UTC, so that the result
+ * does not depend on the timezone of the machine either.
+ */
+struct tm *
+gp_now_tm(void)
+{
+    time_t now;
+    struct tm *tm = NULL;
+
+    if (gp_source_date_epoch(&now))
+	tm = gmtime(&now);
+    if (tm != NULL)
+	return tm;
+
+    time(&now);
+    return localtime(&now);
+}
+
+
 /* Implement portable generation of a NaN value. */
 
 double
