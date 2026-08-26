@@ -1040,7 +1040,7 @@ do_pointsize(double size)
 /*
  * general point routine
  */
-#if  defined(WITH_METAPOST) || defined(WITH_METAFONT) || defined(WITH_TEKTRONIX) || !defined(NO_BITMAP_SUPPORT)
+#if  defined(HAVE_METAPOST) || defined(HAVE_METAFONT) || defined(WITH_TEKTRONIX) || !defined(NO_BITMAP_SUPPORT)
 static void
 line_and_point(unsigned int x, unsigned int y, int number)
 {
