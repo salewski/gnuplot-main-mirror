@@ -1,78 +1,42 @@
-		Gnuplot Version 6.0.5 Release Notes
+		Gnuplot Version 6.0.6 Release Notes
 		===================================
 
-This is the fifth incremental release for gnuplot stable version 6.0.
-It contains more than the usual number of new features and improvements
-back-ported from the development version.  Notably, support for mousing,
-replotting, and save/restore of multiplots is now fully functional.
+The sixth incremental release for gnuplot stable version 6.0 contains fixes
+for several serious bugs.
 
-Changes in 6.0.5
-=================
+Bug fixes in 6.0.6
+------------------
+* wxt terminal did not function correctly when running under Wayland
+  - failed to update display between plots				#Bug# 2890
+  - failed to show zoom box						#Bug# 2891
+* Plotting an empty data block could trigger a segfault			#Bug# 2882
+* Declaring "local array A" at depth 0 could trigger a segfault		#Bug# 2885
+  - Now the "local" attribute is ignored at depth 0
+* Necessary tests for overflow were 'optimized' out (gcc15, clang21)	#Bug# 2883
+  - This broke handling of both floating point and signed integer overflow
+  - Overflow handling now instead uses compiler builtin checks if available
+  - Overflow handling in gnuplot can be tested by "load 'overflow_tests.gp'"
+* "set contourfill defined" produced misleading error messages		#Bug# 2886
+* ./configure --with-metafont failed to be include the mf terminal	#Bug# 2888
+* Mousing multiplots containing linked x1/x2 or y1/y2 axes now works	#Bug# 2887
+* An "if" filter may require a field not part of the "using" specifier	#Bug# 2895
 
-New features
-------------
+Changes in 6.0.6
+----------------
+* Environmental variable SOURCE_DATE_EPOCH, if set, is used for timestamps
+  - This allows reproducible builds of documentation and demo output
 
-* Full mousing support for multiplots
-  - all panels report mouse coordinates
-  - all panels respond to pan/zoom/rotate mouse movement and hotkeys
-  - "replot" reexecutes multiplot commands starting from current state
-  - "remultiplot" restores the original state before reexecuting multiplot
-  - interactive mousing remains active after ^C or "reset"
-
-* Unicode escape sequences \U+xxxx are accepted in more contexts
-  - escape sequences are expanded in "noenhanced" strings
-  - escape sequences are expanded during substring evaluation
-  - escape sequences are expanded in string functions strstrt() and strlen()
-
-* New built-in function prod [<var> = <start> : <end>] <expression>
-  - implements the sequential product operation
-	     prod [i=a:b] f(i)   =   f(a) * f(a+1) * ... * f(b)
-
-* Data files in EUC-JP encoding can be processed from other environments
-  - If running in a EUC-JP locale, use "set encoding locale"
-  - If running in a different locale, use "set encoding eucjp"
-  - In either case, this affects only input data.  It does not change
-    the encoding (usually UTF-8) written to plots on output.
-
-* New coloring option for contourfill
-  - Arbitrary discrete color ranges can be define without using a special palette
-	set contourfill defined [zmin1:zmax1] color1, [zmin2:zmax2] color2, ...
-
-* Allow "string"[i] as shorthand for "string"[i:i]
-
-Changed behaviour
------------------
-
-* Trailing whitespace on the command line is now ignored on input.
-  This means that the line-continuation character '\' is effective even
-  if it is followed by an unintentional blank.
-
-* Octal escape sequences must conform to the documented form \ooo
-  - E.g. \7 or \0106 or \456 or \0 are now rejected
-
-* "plot with labels" now accepts the "noenhanced" keyword
-
-Bug fixes
----------
-
-* qt: Slow font initialization on Windows			#Bug# 2316 2476
-* gd: Resolved long-standing font handling problems.		#Bug# 2819
-  - requires recent library versions (libgd 2.4.0 libraqm 0.10.3)
-* webp:
-  - possible corruption of single-frame multiplots		#Bug# 2876
-  - incorrect alpha compositing onto transparent background	#Bug# 2878
-* Better tic placement on logscale axis spanning two decades	#Bug# 2856
-* Always clear previous plot title before a new plot is started #Bug# 2865
-* Endpoint errors due to floating point precision		#Bug# 2768
-* Repaired axis range parsing in parametric mode broken by change in 6.0.4
-* Reworked logic for extending the command buffer incrementally on input.
-  Long input lines with backslash continuation could lead to corruption
-  of the command string if encountered early in program execution.
-* Preserve blank lines in output from  "plot with table"	#Bug# 2874
+* Any single line in a data block can be replaced with a new string
+  - $DATA[i] = "new string content"
 
 
 KNOWN ISSUES
 ------------
+
+- The wxt terminal may fail to update some display elements when running under
+  wayland (as opposed to x11).  This is mostly fixed in 6.0.6 but an alternative
+  work-around is to set environmental variable GDK_BACKEND to x11.
+	GDK_BACKEND=x11
 
 - Font handling by the cairo/pango libraries supporting some gnuplot terminals
   (pdf, png, wxt, ...) on both Windows and MacOS are sensitive to the
@@ -105,7 +69,29 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:  28 July 2026
+Release Notes date:   2 October 2026
+
+
+			Changes in 6.0.5
+			=================
+
+* NEW	 Full mousing support for multiplots
+* NEW	 Unicode escape sequences \U+xxxx are accepted in more contexts
+* NEW	 built-in function prod [<var> = <start> : <end>] <expression>
+* NEW	 Data files in EUC-JP encoding can be processed from other environments
+* NEW	 set contourfill defined [zmin1:zmax1] color1, [zmin2:zmax2] color2, ...
+* NEW	 Allow "string"[i] as shorthand for "string"[i:i]
+* CHANGE Trailing whitespace on the command line is now ignored on input.
+* CHANGE Octal escape sequences must conform to the documented form \ooo
+* CHANGE "plot with labels" now accepts the "noenhanced" keyword
+* FIX:	 qt: Slow font initialization on Windows                        Bug 2316 2476
+* FIX:	 gd: Resolved long-standing font handling problems.             Bug 2819
+* FIX:	 webp: possible corruption of single-frame multiplots           Bug 2876
+* FIX:	 webp: incorrect alpha compositing onto transparent background  Bug 2878
+* FIX:	 Better tic placement on logscale axis spanning two decades     Bug 2856
+* FIX:	 Always clear previous plot title before a new plot is started  Bug 2865
+* FIX:	 Range ndpoint errors due to floating point precision           Bug 2768
+* FIX:	 Preserve blank lines in output from  "plot with table"         Bug 2874
 
 
 			Changes in 6.0.4

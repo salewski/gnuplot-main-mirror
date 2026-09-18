@@ -1,6 +1,22 @@
 Changes in 6.0.6
 =================
 
+* NEW	 Honour environmental variable SOURCE_DATE_EPOCH for timestampd
+	 - Allows reproducible builds of documentation and demo output
+* NEW    Allow replacement of any single line in a data block
+* FIX	 rendering of missing character glyphs in cairo terminals
+* FIX	 Systematic handling of integer and floating point overflow	Bug #2883
+	 using compiler builtins if possible
+* FIX	 "unset nonlinear x" is valid whether or not x is nonlinear	Bug #2887
+	 This bug prevented all mousing of multiplots if any panel
+	 contained linked or nonlinear axes.
+* FIX	 prevent segfault on plotting an empty data block		Bug #2882
+* FIX	 "local array A" at depth 0 is no different from "array A"	Bug #2885
+* FIX	 misleading error messages for "set contourfill defined"	Bug #2886
+* FIX	 mf (metafont) terminal: configuration error			Bug #2888
+* FIX	 wxt terminal under wayland needs an explicit Refresh()		Bug #2890
+* FIX	 "if" filter may require scanning an input field not in "using"	Bug #2895
+
 
 Changes in 6.0.5
 =================
