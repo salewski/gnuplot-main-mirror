@@ -1133,6 +1133,15 @@ void wxtPanel::DrawToDC(wxDC &dc, wxRegion &region)
 		dc.SetLogicalFunction( wxCOPY );
 	}
 #endif /*USE_MOUSE*/
+
+#ifdef GDK_WINDOWING_WAYLAND
+	/* Refresh() is necessary with the gdk wayland backend (as opposed to x11).
+	 * It is not necessary if environmental variable GDK_BACKEND=x11
+	 * but in that case it causes small but measureable slowdown and possibly
+	 * could affect "flicker".
+	 */
+	Refresh();
+#endif
 }
 
 /* avoid flickering under win32 */
