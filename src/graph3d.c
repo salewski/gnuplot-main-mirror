@@ -3078,6 +3078,7 @@ draw_3d_graphbox(struct surface_points *plot, int plot_num, WHICHGRID whichgrid,
 	gen_tics(&axis_array[FIRST_Z_AXIS], ztick_callback);
     }
     if ((Y_AXIS.zeroaxis)
+	&& (whichgrid != FRONTGRID)
 	&& !X_AXIS.log
 	&& inrange(0, X_AXIS.min, X_AXIS.max)
 	) {
@@ -3089,6 +3090,7 @@ draw_3d_graphbox(struct surface_points *plot, int plot_num, WHICHGRID whichgrid,
 	draw3d_line(&v1, &v2, Y_AXIS.zeroaxis);
     }
     if ((Z_AXIS.zeroaxis)
+	&& (whichgrid != FRONTGRID)
 	&& !X_AXIS.log
 	&& inrange(0, X_AXIS.min, X_AXIS.max)
 	) {
@@ -3100,6 +3102,7 @@ draw_3d_graphbox(struct surface_points *plot, int plot_num, WHICHGRID whichgrid,
 	draw3d_line(&v1, &v2, Z_AXIS.zeroaxis);
     }
     if ((X_AXIS.zeroaxis)
+	&& (whichgrid != FRONTGRID)
 	&& !Y_AXIS.log
 	&& inrange(0, Y_AXIS.min, Y_AXIS.max)
 	) {
