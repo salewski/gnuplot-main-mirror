@@ -1010,6 +1010,14 @@ void wxtPanel::Draw()
 	wxBufferedDC buffered_dc(&dc, wxSize(plot.device_xmax, plot.device_ymax));
 	wxRegion region(0, 0, plot.device_xmax, plot.device_ymax);
 	DrawToDC(buffered_dc, region);
+#ifdef GDK_WINDOWING_WAYLAND
+	/* Refresh() is necessary with the gdk wayland backend (as opposed to x11).
+	 * Unfortunately this call is not sufficient to force drawing of temporary
+	 * elements such as the zoom box.
+	 */
+	if (wxGetDisplayInfo().type == wxDisplayWayland)
+		Refresh();
+#endif
 }
 
 /* copy the plot to the panel, draw zoombow and ruler needed */
@@ -1095,8 +1103,15 @@ void wxtPanel::DrawToDC(wxDC &dc, wxRegion &region)
 		dc.DrawText( zoom_string2.AfterFirst(wxT('\r')),
 			mouse_x, mouse_y);
 
-		/* if we have to redraw the zoombox, it is with another size,
-		 * so it will be issued later and we can disable it now */
+		/* If we have to redraw the zoombox, it is with another size,
+		 * so it will be issued later and we can disable it now.
+		 * This does not work under wayland, which requires a refresh every time.
+		 */
+#ifdef GDK_WINDOWING_WAYLAND
+		if (wxGetDisplayInfo().type == wxDisplayWayland) {
+			return;
+		} else
+#endif
 		wxt_zoombox = false;
 	}
 
@@ -1122,14 +1137,6 @@ void wxtPanel::DrawToDC(wxDC &dc, wxRegion &region)
 	}
 #endif /*USE_MOUSE*/
 
-#ifdef GDK_WINDOWING_WAYLAND
-	/* Refresh() is necessary with the gdk wayland backend (as opposed to x11).
-	 * It is not necessary if environmental variable GDK_BACKEND=x11
-	 * but in that case it causes small but measureable slowdown and possibly
-	 * could affect "flicker".
-	 */
-	Refresh();
-#endif
 }
 
 /* avoid flickering under win32 */
@@ -2711,9 +2718,7 @@ void wxt_set_cursor(int c, int x, int y)
 		wxt_current_panel->SetCursor(wxt_cursor_cross);
 		break;
 	}
-
 }
-
 
 /* Draw a ruler (crosshairs) centered at the
  * indicated screen coordinates.  If x<0, switch ruler off. */
