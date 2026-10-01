@@ -2041,7 +2041,6 @@ void gp_cairo_set_termvar(plot_struct *plot, unsigned int *v_char,
 	PangoRectangle ink_rect;
 	PangoRectangle logical_rect;
 	unsigned int tmp_v_char, tmp_h_char;
-	extern int debug;
 
 	/* Create a PangoLayout, set the font and text */
 	layout = gp_cairo_create_layout (plot->cr);
@@ -2068,9 +2067,11 @@ void gp_cairo_set_termvar(plot_struct *plot, unsigned int *v_char,
 	 * There have been reports of failure to obtain font metrics.
 	 * We don't know why (pango use of harfbuzz is a suspect).
 	 */
-	if (tmp_v_char <= 1 || tmp_h_char <= 1 || debug == 7) {
+	if (tmp_v_char <= 1 || tmp_h_char <= 1) {
 		tmp_h_char = 140 + (plot->fontsize - 10.) * 16.;
+		tmp_h_char *= 10.;
 		tmp_v_char = 300 * (plot->fontsize / 10.);
+		tmp_v_char *= 10.;
 		fprintf(stderr, "warning: problem determining pango font metrics\n");
 	}
 
