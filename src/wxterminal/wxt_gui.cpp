@@ -1048,7 +1048,6 @@ void wxtPanel::DrawToDC(wxDC &dc, wxRegion &region)
 		vW = upd.GetW();
 		vH = upd.GetH();
 
-		FPRINTF((stderr,"OnPaint %d,%d,%d,%d\n",vX,vY,vW,vH));
 		/* Repaint this rectangle */
 		if (gdkpixmap)
 			gdk_draw_drawable(dc.GetWindow(),
@@ -2102,9 +2101,6 @@ void wxt_graphics()
 
 	/* Clear the count of hypertext anchor points */
 	wxt_n_anchors = 0;
-
-	FPRINTF((stderr,"Graphics xmax %d ymax %d v_char %d h_char %d\n",
-		term->xmax, term->ymax, term->v_char, term->h_char));
 }
 
 void wxt_text()
@@ -3934,12 +3930,10 @@ void wxt_atexit()
 	/* declare the iterator */
 	std::vector<wxt_window_t>::iterator wxt_iter;
 
-	int i;
-	for(wxt_iter = wxt_window_list.begin(), i=0;
-			wxt_iter != wxt_window_list.end(); wxt_iter++, i++)
+	for (wxt_iter = wxt_window_list.begin();
+			wxt_iter != wxt_window_list.end(); wxt_iter++)
 	{
 		TBOOLEAN state = wxt_iter->frame->IsShown();
-		FPRINTF((stderr,"\tChecking window %d : %s shown\n", i, state?"":"not "));
 		if (state) {
 			openwindows++;
 			/* Disable any toolbar widgets that would require parental help */
