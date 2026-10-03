@@ -1083,9 +1083,17 @@ void wxtPanel::DrawToDC(wxDC &dc, wxRegion &region)
 		dc.DrawLine( mouse_x, zoom_y1, mouse_x, mouse_y );
 		dc.DrawLine( mouse_x, mouse_y, zoom_x1, mouse_y );
 		dc.DrawLine( zoom_x1, mouse_y, zoom_x1, zoom_y1 );
+
+#ifdef HAVE_GTK
+		/* GTK does not support wxAND */
+		dc.SetPen( *wxTRANSPARENT_PEN );
+		dc.SetBrush( wxBrush( wxT("LIGHT BLUE"), wxBRUSHSTYLE_CROSSDIAG_HATCH ) );
+#else
 		dc.SetPen( *wxTRANSPARENT_PEN );
 		dc.SetBrush( wxBrush( wxT("LIGHT BLUE"), wxBRUSHSTYLE_SOLID ) );
 		dc.SetLogicalFunction( wxAND );
+#endif /* HAVE_GTK */
+
 		dc.DrawRectangle( zoom_x1, zoom_y1, mouse_x -zoom_x1, mouse_y -zoom_y1);
 		dc.SetLogicalFunction( wxCOPY );
 
