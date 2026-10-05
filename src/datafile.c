@@ -749,8 +749,12 @@ df_tokenise(char *s)
 	    int dfncp1 = df_no_cols + 1;
 
 	    /* optimizations by Corey Satten, corey@cac.washington.edu */
-	    /* only scanf the field if it is mentioned in one of the using specs */
+	    /* Only scanf/strtod the field if it is mentioned in one of the using specs.
+	     * Exception: an "if" filter might access this column even if it is not
+	     *            mentioned in the using specs.
+	     */
 	    if ((fast_columns == 0)
+		|| (df_current_plot->if_filter_at != NULL)
 		|| (df_no_use_specs == 0)
 		|| ((df_no_use_specs > 0)
 		    && (use_spec[0].column == dfncp1
