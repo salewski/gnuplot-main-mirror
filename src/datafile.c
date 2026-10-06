@@ -754,7 +754,7 @@ df_tokenise(char *s)
 	     *            mentioned in the using specs.
 	     */
 	    if ((fast_columns == 0)
-		|| (df_current_plot->if_filter_at != NULL)
+		|| (df_current_plot && df_current_plot->if_filter_at != NULL)
 		|| (df_no_use_specs == 0)
 		|| ((df_no_use_specs > 0)
 		    && (use_spec[0].column == dfncp1
