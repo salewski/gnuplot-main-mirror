@@ -72,19 +72,6 @@ static int cached_hidden_lines = 0;
 /* Configuration section */
 /*************************/
 
-/* Original HIDDEN3D_QUADTREE comment
- * (prior "gridbox" method removed 20 years later Jan 2019)
- */
-/* HBB 19991204: new code started to finally implement a spatially
- * ordered data structure to store the polygons in. This is meant to
- * speed up the HLR process. Before, the hot spot of hidden3d was the
- * loop in in_front, where by far most of the polygons are rejected by
- * the first test, already. The idea is to _not_ to loop over all
- * those polygons far away from the edge under consideration, in the
- * first place. Instead, store the polygons in an xy grid of lists,
- * so we can select a sample of these lists to test a given edge
- * against. */
-
 /* If you don't want the color-distinction between the
  * 'top' and 'bottom' sides of the surface, like I do, then just compile
  * with -DBACKSIDE_LINETYPE_OFFSET = 0. */
