@@ -52,10 +52,8 @@
 #include "util.h"
 #include "util3d.h"
 
-#ifdef HIDDEN3D_CACHE
 /* Bookkeeping for line segments found during hidden3d_layer LAYER_BACK
  * processing but cached for drawing later.
- * Ethan A Merritt 2023
  */
 typedef struct  {
 	int x1; int y1; int x2; int y2;	/* terminal coordinates of line segment */
@@ -64,7 +62,6 @@ typedef struct  {
 } t_cached_line;
 static t_cached_line *hidden3d_cache = NULL;
 static int hidden3d_cache_size = 0;
-#endif
 static int cached_hidden_lines = 0;
 
 
@@ -278,10 +275,8 @@ static GP_INLINE double area2D(p_vertex v1, p_vertex v2, p_vertex v3);
 static void draw_vertex(p_vertex v);
 static GP_INLINE void draw_edge(p_edge e, p_vertex v1, p_vertex v2);
 static int in_front(long int edgenum, long int vnum1, long int vnum2, long int *firstpoly);
-#ifdef HIDDEN3D_CACHE
 static void cache_hidden_line(int x1, int y1, int x2, int y2,
 			      lp_style_type *lp, t_colorspec color);
-#endif
 
 
 /* Set the options for hidden3d. To be called from set.c, when the
@@ -451,12 +446,10 @@ term_hidden_line_removal()
     free_dynarray(&edges);
     free_dynarray(&vertices);
     free_dynarray(&qtree);
-#ifdef HIDDEN3D_CACHE
     free(hidden3d_cache);
     hidden3d_cache = NULL;
     hidden3d_cache_size = 0;
     cached_hidden_lines = 0;
-#endif
 }
 
 static long int
@@ -1778,7 +1771,6 @@ draw_edge(p_edge e, p_vertex v1, p_vertex v2)
 	}
     }
 
-#ifdef HIDDEN3D_CACHE
     /* In pm3d depthorder mode the pm3d surface would occlude
      * both hidden3d_layer "back" or "front".  So in this case
      * we cache the line segments to draw even later than "front".
@@ -1795,7 +1787,6 @@ draw_edge(p_edge e, p_vertex v1, p_vertex v2)
 	cache_hidden_line( x1, y1, x2, y2, e->lp, color );
 	return;
     }
-#endif
 
     /* This is the normal case (no strange interaction with pm3d */
     draw3d_line_unconditional(v1, v2, &lptemp, color);
@@ -2306,7 +2297,6 @@ reset_hidden3doptions()
     hidden3d_layer = LAYER_BACK;
 }
 
-#ifdef HIDDEN3D_CACHE
 static void
 cache_hidden_line( int x1, int y1, int x2, int y2,
 		   lp_style_type *lp, t_colorspec color )
@@ -2339,4 +2329,3 @@ flush_hidden3d_cache()
 	draw_clip_line(seg->x1, seg->y1, seg->x2, seg->y2);
     }
 }
-#endif

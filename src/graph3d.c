@@ -1087,10 +1087,8 @@ do_3dplot(
     if (!key_pass)
     if (hidden3d && draw_surface && (replot_mode != AXIS_ONLY_ROTATE)
     &&  (hidden3d_layer == LAYER_BACK || hidden3d_layer == LAYER_DEPTHORDER)) {
-#ifdef HIDDEN3D_CACHE
 	if (pm3d.direction == PM3D_DEPTH)
 	    hidden3d_layer = LAYER_DEPTHORDER;
-#endif
 	(term->layer)(TERM_LAYER_BEFORE_PLOT);
 	if (splot_map && draw_border && clip_area)
 	    (term->clip_state)(clip_area, 0);
@@ -1655,10 +1653,8 @@ do_3dplot(
 	/* draw pending depth-sorted pm3d plots */
 	if (pm3d_order_depth || track_pm3d_quadrangles)
 	    pm3d_depth_queue_flush();
-#ifdef HIDDEN3D_CACHE
 	if (hidden3d)
 	    flush_hidden3d_cache();
-#endif
     }
 
     if (!key_pass && (replot_mode != AXIS_ONLY_ROTATE)) {
@@ -1707,15 +1703,11 @@ do_3dplot(
 	;
 
     else if (hidden3d || grid_layer == LAYER_FRONT) {
-#ifdef HIDDEN3D_CACHE
 	int save_hidden3d_layer = hidden3d_layer;
 	if (hidden3d_layer == LAYER_DEPTHORDER)
 	    hidden3d_layer = LAYER_BACK;
 	draw_3d_graphbox(plots, pcount, ALLGRID, LAYER_FRONT);
 	hidden3d_layer = save_hidden3d_layer;
-#else
-	draw_3d_graphbox(plots, pcount, ALLGRID, LAYER_FRONT);
-#endif
     }
 
     else if (grid_layer == LAYER_BEHIND)
