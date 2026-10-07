@@ -1,5 +1,6 @@
 ## Process this file with automake to produce Makefile.in -*-Makefile-*-
 AUTOMAKE_OPTIONS = foreign
+AM_DISTCHECK_DVI_TARGET =
 
 SUBDIRS = config m4 term src docs man demo share
 
