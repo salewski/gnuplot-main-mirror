@@ -1857,10 +1857,6 @@ init_terminal()
 	term_name = "svga";
 #endif
 
-#ifdef GRASS
-	term_name = "grass";
-#endif
-
 #ifdef OS2
 /* amai: Note that we do some checks above and now overwrite any
    results. Perhaps we may disable checks above!? */
