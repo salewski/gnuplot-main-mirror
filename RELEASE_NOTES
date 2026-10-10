@@ -18,8 +18,8 @@ Bug fixes in 6.0.6
   - Overflow handling in gnuplot can be tested by "load 'overflow_tests.gp'"
 * "set contourfill defined" produced misleading error messages		#Bug# 2886
 * ./configure --with-metafont failed to be include the mf terminal	#Bug# 2888
-* Mousing multiplots containing linked x1/x2 or y1/y2 axes now works	#Bug# 2887
-* An "if" filter may require a field not part of the "using" specifier	#Bug# 2895
+* Mousing failed for multiplots containing linked x1/x2 or y1/y2 axes 	#Bug# 2887
+* "if" filter did not read a field not also in the "using" specifier	#Bug# 2895
 
 Changes in 6.0.6
 ----------------
@@ -69,7 +69,7 @@ after downloading:
     git log
 </pre>
 
-Release Notes date:   2 October 2026
+Release Notes date:  10 October 2026
 
 
 			Changes in 6.0.5
