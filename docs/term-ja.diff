@@ -2994,37 +2994,6 @@ diff -ru term/gpic.trm.ORG term/gpic.trm
 +#endif /* JAPANESE_DOC */
  END_HELP(gpic)
  #endif /* TERM_HELP */
-diff -ru term/grass.trm.ORG term/grass.trm
---- term/grass.trm	2026-08-26.ORG 13:48:46.000000000 +0900
-+++ term/grass.trm	2026-08-26 20:03:57.740277000 +0900
-@@ -601,6 +601,7 @@
- 
- #ifdef TERM_HELP
- START_HELP(grass)
-+#ifndef JAPANESE_DOC
- "1 grass",
- "?commands set terminal grass",
- "?set terminal grass",
-@@ -613,5 +614,19 @@
- " GRASS geographic information system.  Contact grassp-list@moon.cecer.army.mil",
- " for more information.  Pages are written to the current frame of the GRASS",
- " Graphics Window.  There are no options."
-+#else /* JAPANESE_DOC */
-+"1 grass",
-+"?commands set terminal grass",
-+"?set terminal grass",
-+"?set term grass",
-+"?terminal grass",
-+"?term grass",
-+"?grass",
-+" 注意: 古い (legacy) 出力形式です。",
-+" `grass` ドライバは GRASS 地理情報システムのユーザが `gnuplot` を利用す",
-+" ることを可能にします。詳しい情報については grassp-list@moon.cecer.army.mil",
-+" に連絡を取ってください。ページは GRASS グラフウィンドウの現在のフレー",
-+" ムに書かれます。オプションはありません。"
-+#endif /* JAPANESE_DOC */
- END_HELP(grass)
- #endif
 diff -ru term/hp26.trm.ORG term/hp26.trm
 --- term/hp26.trm	2026-08-26.ORG 13:48:46.000000000 +0900
 +++ term/hp26.trm	2026-08-26 20:03:57.740341000 +0900
