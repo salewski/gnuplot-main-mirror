@@ -1781,9 +1781,13 @@ plot_option_using(int max_using)
 		    if (spec->at->actions[i].index == DOLLARS)
 			spec->depends_on_column = (int)spec->at->actions[i].arg.v_arg.v.int_val;
 		    if ((spec->at->actions[i].index == COLUMN)
-		    &&  (spec->at->actions[i-1].index == PUSHC)
-		    &&  (spec->at->actions[i-1].arg.v_arg.type == INTGR))
-			spec->depends_on_column = (int)spec->at->actions[i-1].arg.v_arg.v.int_val;
+		    ||  (spec->at->actions[i].index == STRINGCOLUMN)
+		    ||  (spec->at->actions[i].index == STRCOL)) {
+			if ((spec->at->actions[i-1].index == PUSHC)
+			&&  (spec->at->actions[i-1].arg.v_arg.type == INTGR))
+			    spec->depends_on_column
+				= (int)spec->at->actions[i-1].arg.v_arg.v.int_val;
+		    }
 		}
 
 		/* Catch at least the simplest case of 'autotitle columnhead' using an expression */
@@ -2279,6 +2283,7 @@ df_readascii(double v[], int max)
 		    if (df_missing_data_in_expression) {
 			FPRINTF((stderr,
 			    "df_readascii: hit missing data value during evaluation\n"));
+			gpfree_string(&a);
 			v[output] = not_a_number();
 			return_value = DF_MISSING;
 			continue;
@@ -2790,7 +2795,9 @@ f_column(union argument *arg)
 	push(Gcomplex(&a, not_a_number(), (double)DF_MISSING));
 	df_missing_data_in_expression = TRUE;
     } else if (df_column[column-1].good != DF_GOOD) {
-	undefined = TRUE;
+	/* Setting undefined = TRUE here would cause a memory leak.
+	 * During data input, returning NaN will cause undefined to be set
+	 * later anyhow */
 	push(Gcomplex(&a, not_a_number(), 0.0));
     } else
 	push(Gcomplex(&a, df_column[column - 1].datum, 0.0));
@@ -2859,8 +2866,8 @@ f_stringcolumn(union argument *arg)
 	sprintf(temp_string, "%d", df_datum);
 	push(Gstring(&a, temp_string ));
     } else if (column < 1 || column > df_no_cols) {
-	undefined = TRUE;
-	push(&a);               /* any objection to this ? */
+	push(Gstring(&a, ""));
+	df_missing_data_in_expression = TRUE;
     } else {
 	char *temp_string = df_parse_string_field(df_column[column-1].position);
 	push(Gstring(&a, temp_string ));
