@@ -1778,9 +1778,13 @@ plot_option_using(int max_using)
 		    if (spec->at->actions[i].index == DOLLARS)
 			spec->depends_on_column = (int)spec->at->actions[i].arg.v_arg.v.int_val;
 		    if ((spec->at->actions[i].index == COLUMN)
-		    &&  (spec->at->actions[i-1].index == PUSHC)
-		    &&  (spec->at->actions[i-1].arg.v_arg.type == INTGR))
-			spec->depends_on_column = (int)spec->at->actions[i-1].arg.v_arg.v.int_val;
+		    ||  (spec->at->actions[i].index == STRINGCOLUMN)
+		    ||  (spec->at->actions[i].index == STRCOL)) {
+			if ((spec->at->actions[i-1].index == PUSHC)
+			&&  (spec->at->actions[i-1].arg.v_arg.type == INTGR))
+			    spec->depends_on_column
+				= (int)spec->at->actions[i-1].arg.v_arg.v.int_val;
+		    }
 		}
 
 		/* Catch at least the simplest case of 'autotitle columnhead' using an expression */
@@ -2851,7 +2855,7 @@ f_stringcolumn(union argument *arg)
 	push(Gstring(&a, temp_string ));
     } else if (column < 1 || column > df_no_cols) {
 	undefined = TRUE;
-	push(&a);               /* any objection to this ? */
+	push(Gstring(&a, NULL));
     } else {
 	char *temp_string = df_parse_string_field(df_column[column-1].position);
 	push(Gstring(&a, temp_string ));
