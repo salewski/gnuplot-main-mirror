@@ -1047,7 +1047,7 @@ f_rgbcolor(union argument *arg)
 	rgb = lookup_color_name(a.v.string_val);
 	if (rgb == -2)
 	    rgb = 0;
-	free(a.v.string_val);
+	gpfree_string(&a);
     } else {
 	rgb = 0;	
     }

@@ -1515,11 +1515,11 @@ f_strstrt(union argument *arg)
 
     /* Convert escape sequences in both needle and haystack */
     expanded_string = expand_unicode_escapes(needle.v.string_val, FALSE);
-    free(needle.v.string_val);
-    needle.v.string_val = expanded_string;
+    gpfree_string(&needle);
+    Gstring(&needle, expanded_string);
     expanded_string = expand_unicode_escapes(haystack.v.string_val, FALSE);
-    free(haystack.v.string_val);
-    haystack.v.string_val = expanded_string;
+    gpfree_string(&haystack);
+    Gstring(&haystack, expanded_string);
 
     start = strstr(haystack.v.string_val, needle.v.string_val);
     if (start == 0) {
