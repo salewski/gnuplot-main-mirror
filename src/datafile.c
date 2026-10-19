@@ -2855,7 +2855,7 @@ f_stringcolumn(union argument *arg)
 	push(Gstring(&a, temp_string ));
     } else if (column < 1 || column > df_no_cols) {
 	undefined = TRUE;
-	push(Gstring(&a, NULL));
+	push(Gstring(&a, ""));
     } else {
 	char *temp_string = df_parse_string_field(df_column[column-1].position);
 	push(Gstring(&a, temp_string ));
