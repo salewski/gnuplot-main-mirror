@@ -2276,6 +2276,7 @@ df_readascii(double v[], int max)
 		    if (df_missing_data_in_expression) {
 			FPRINTF((stderr,
 			    "df_readascii: hit missing data value during evaluation\n"));
+			gpfree_string(&a);
 			v[output] = not_a_number();
 			return_value = DF_MISSING;
 			continue;
@@ -2856,8 +2857,8 @@ f_stringcolumn(union argument *arg)
 	sprintf(temp_string, "%d", df_datum);
 	push(Gstring(&a, temp_string ));
     } else if (column < 1 || column > df_no_cols) {
-	undefined = TRUE;
 	push(Gstring(&a, ""));
+	df_missing_data_in_expression = TRUE;
     } else {
 	char *temp_string = df_parse_string_field(df_column[column-1].position);
 	push(Gstring(&a, temp_string ));
