@@ -2784,7 +2784,9 @@ f_column(union argument *arg)
 	push(Gcomplex(&a, not_a_number(), (double)DF_MISSING));
 	df_missing_data_in_expression = TRUE;
     } else if (df_column[column-1].good != DF_GOOD) {
-	undefined = TRUE;
+	/* Setting undefined = TRUE here would cause a memory leak.
+	 * During data input, returning NaN will cause undefined to be set
+	 * later anyhow */
 	push(Gcomplex(&a, not_a_number(), 0.0));
     } else
 	push(Gcomplex(&a, df_column[column - 1].datum, 0.0));
