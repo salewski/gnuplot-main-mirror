@@ -3820,6 +3820,7 @@ set_pm3d()
 	    case S_PM3D_TRANSPARENT: /* "tr$ansparent" */
 		if (interactive)
 		    int_warn(c_token, "Deprecated syntax --- ignored");
+		continue;
 	    case S_PM3D_IMPLICIT: /* "i$mplicit" */
 	    case S_PM3D_NOEXPLICIT: /* "noe$xplicit" */
 		pm3d.implicit = PM3D_IMPLICIT;
