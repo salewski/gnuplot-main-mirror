@@ -61,7 +61,7 @@
 #include "term_api.h"
 #include "util3d.h"
 #include "hidden3d.h"
-#include "multiplot.h"	/* EXPERIMENTAL */
+#include "multiplot.h"
 #include "plot.h"	/* for interactive */
 #include "internal.h"
 

@@ -472,8 +472,6 @@ D viridis 1
     set style fill transparent   # change just one setting
     load #GPVAL_LAST_MULTIPLOT   # re-execute the multiplot commands
 
- [EXPERIMENTAL] Details may change.  At this time several limitations apply.
-
 #start
 #b Certain saved commands that would be problematic during replay
 ## are not reexecuted.  These include `reset`, `pause`, and the definition
@@ -13048,7 +13046,7 @@ D heatmap_points 3
 ?gprintf complex
  gprintf offers two format specifiers, %C and %Ci, to print a complex value.
  Both apply format %g separately to the real and imaginary components using
- any optional field modifiers that were given. [EXPERIMENTAL]
+ any optional field modifiers that were given.
 
  Suppose complex Z = {1.2, -3.4}.
       gprintf("%C", Z) produces the string "{1.2, -3.4}"
